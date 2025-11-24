@@ -3,9 +3,63 @@ import { useEffect, useState } from "react";
 import { getRentals } from "../services/rentalService";
 import { ArrowLeft, Plus } from "lucide-react";
 
+interface Auto {
+    patente: string;
+    marca: string;
+    modelo: string;
+    anio: number;
+    color: string;
+    costo: number;
+    periodicidadMantenimineto: number;
+    imagen: string;
+    id_estado: number;
+    id_seguro: number;
+}
+
+interface Cliente {
+    nombre: string,
+    apellido: string,
+    direccion: string,
+    fechaNacimiento: string,
+    dni_cliente: number,
+    telefono: string,
+    email: string,
+}
+
+interface Empleado {
+    nombre: string,
+    apellido: string,
+    direccion: string,
+    fechaNacimiento: string,
+    dni: number,
+    telefono: string,
+    email: string,
+    legajo: string,
+    puesto: string,
+    salario: number,
+    fechaInicioActividad: string,
+}
+
+interface Rental {
+    id: number;
+    vehiculo: Auto;
+    fechaInicio: string;
+    fechaFin: string;
+    precio: number;
+    cliente: Cliente;
+    empleado: Empleado;
+    sanciones: Sancion[];
+}
+
+interface Sancion {
+    costo_base: number;
+    tipo_sancion: {descripcion: string};
+    fecha: string
+}
+
 export default function CarRentals() {
   const [locations, setLocations] = useLocation();
-  const [rentals, setRentals] = useState([]);
+  const [rentals, setRentals] = useState<Rental[]>([]);
   const [showInfoRental, setShowInfoRental] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -118,15 +172,15 @@ export default function CarRentals() {
           </div>
 
           <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-2xl p-6 text-white shadow-lg">
-            <h3 className="text-lg font-semibold mb-2">Alquileres Activos</h3>
+            <h3 className="text-lg font-semibold mb-2">Sin Sanciones</h3>
             <p className="text-3xl font-bold">
               {
                 rentals.filter(
-                  (rental: any) => !rental.sancion || rental.sancion === ""
+                  (rental: Rental) => !rental.sanciones || rental.sanciones.length === 0
                 ).length
               }
             </p>
-            <p className="text-green-100 text-sm">Sin sanciones</p>
+            <p className="text-green-100 text-sm">Activos</p>
           </div>
 
           <div className="bg-gradient-to-r from-red-400 to-red-500 rounded-2xl p-6 text-white shadow-lg">
@@ -134,7 +188,7 @@ export default function CarRentals() {
             <p className="text-3xl font-bold">
               {
                 rentals.filter(
-                  (rental: any) => rental.sancion && rental.sancion !== ""
+                  (rental: Rental) => rental.sanciones && rental.sanciones.length > 0
                 ).length
               }
             </p>
@@ -177,7 +231,7 @@ export default function CarRentals() {
                 </thead>
                 <tbody>
                   {rentals && rentals.length > 0 ? (
-                    rentals.map((rental: any, index: number) => (
+                    rentals.map((rental: Rental, index: number) => (
                       <tr
                         key={rental.id || index}
                         className="hover:bg-gray-50 transition-colors"
@@ -189,17 +243,17 @@ export default function CarRentals() {
                         </td>
                         <td>
                           <div className="font-semibold text-gray-800">
-                            {rental.cliente || "N/A"}
+                            {rental.cliente.apellido + " (" + rental.cliente.dni_cliente + ")" || "N/A"}
                           </div>
                         </td>
                         <td>
                           <div className="font-bold text-green-600">
-                            {formatCurrency(rental.costo)}
+                            {formatCurrency(rental.precio)}
                           </div>
                         </td>
                         <td>
                           <div className="font-medium text-gray-700">
-                            {rental.auto || "No especificado"}
+                            {rental.vehiculo.modelo + " (" + rental.vehiculo.patente + ")" || "No especificado"}
                           </div>
                         </td>
                         <td>
@@ -217,9 +271,8 @@ export default function CarRentals() {
                           </div>
                         </td>
                         <td className="text-center">
-                          {!rental.sancion ||
-                          rental.sancion === "" ||
-                          rental.sancion.toLowerCase() === "ninguna" ? (
+                          {!rental.sanciones ||
+                          rental.sanciones.length === 0 ? (
                             <span className="badge badge-success font-medium">
                               Sin sanciones
                             </span>
