@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, Plus, Trash2, Wrench } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Eye, Plus, Trash2, Wrench } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import type { OrdenMantenimiento, VehiculoBasico } from "../../types/mantenimiento";
@@ -9,6 +9,7 @@ import {
 import { getAutos } from "../../services/autosService";
 import { mockOrdenesMantenimiento, mockVehiculos } from "./mockData";
 import CreateOrderModal from "./CreateOrderModal";
+import ChangeMaintenanceDateModal from "./ChangeMaintenanceDateModal";
 
 type SortField = "id_orden" | "patente_vehiculo" | "fecha_inicio" | "precio_acumulado";
 type SortDirection = "asc" | "desc";
@@ -20,6 +21,7 @@ export default function MaintenanceOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedOrderForDateChange, setSelectedOrderForDateChange] = useState<OrdenMantenimiento | null>(null);
 
   // Filters
   const [filterPatente, setFilterPatente] = useState("");
@@ -357,6 +359,13 @@ export default function MaintenanceOrders() {
                           >
                             <Trash2 className="size-4" />
                           </button>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setSelectedOrderForDateChange(orden)}
+                            title="Cambiar fecha fin"
+                          >
+                            <CalendarPlus className="size-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -373,6 +382,18 @@ export default function MaintenanceOrders() {
           onClose={() => setShowCreateModal(false)}
           onSuccess={() => {
             setShowCreateModal(false);
+            loadData();
+          }}
+        />
+      )}
+
+      {selectedOrderForDateChange && (
+        <ChangeMaintenanceDateModal
+          ordenId={selectedOrderForDateChange.id_orden}
+          currentEndDate={selectedOrderForDateChange.fecha_fin}
+          onClose={() => setSelectedOrderForDateChange(null)}
+          onSuccess={() => {
+            setSelectedOrderForDateChange(null);
             loadData();
           }}
         />
