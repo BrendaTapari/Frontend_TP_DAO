@@ -1,7 +1,7 @@
-import { Car, Medal, ShoppingCart, TrendingUp } from "lucide-react";
+import { Car, Medal, ShoppingCart, TrendingUp, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export type ReportKey = "alquileres" | "vehiculos" | "periodos" | "facturacion";
+export type ReportKey = "alquileres" | "vehiculos" | "periodos" | "facturacion" | "mantenimiento";
 
 export const reportOptions: {
   key: ReportKey;
@@ -36,5 +36,12 @@ export const reportOptions: {
     label: "Estadística de facturación mensual",
     description:
       "Monitoreá ingresos totales, sanciones y facturación general para tomar decisiones financieras informadas.",
+  },
+  {
+    key: "mantenimiento",
+    icon: Wrench,
+    label: "Historial de mantenimiento por vehículo",
+    description:
+      "Consultá el historial completo de mantenimiento de cada vehículo, costos acumulados y próximos servicios programados.",
   },
 ];

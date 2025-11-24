@@ -1,53 +1,20 @@
-import { ArrowLeft, BarChart3, Printer, ShoppingCart, Users } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, BarChart3, Printer, ShoppingCart, Users, Wrench, Car, DollarSign, TrendingDown } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import AutosStadistics from "./AutosStadistics";
 import VentasStadistics from "./VentasStadistics";
 import MetricCard from "./components/MetricCard";
 import ReportFilters, { type Filters } from "./components/ReportFilters";
-
-import {
-  fetchAlquileresDetallados,
-  fetchAlquileresPorPeriodo,
-  fetchFacturacionMensual,
-  fetchVehiculosMasAlquilados,
-} from "../../services/reportService";
-
-import type {
-  AlquileresResponse,
-  AlquilerPeriodo,
-  FacturacionData,
-  VehiculoMasAlquilado,
-} from "../../types/reportes";
-
-import {
-  mockAlquileresPorPeriodo,
-  mockAlquileresResponse,
-  mockFacturacionData,
-  mockVehiculosMasAlquilados,
-} from "./mockData";
+import PeriodosReport from "./reports/PeriodosReport";
+import FacturacionReport from "./reports/FacturacionReport";
+import MantenimientoReport from "./reports/MantenimientoReport";
 
 import { reportOptions, type ReportKey } from "./constants/reportOptions";
-import {
-  clone,
-  extractErrorMessage,
-  formatCurrency,
-  formatDate,
-  formatNumber,
-  formatPeriodo,
-} from "./utils/formatters";
-import { exportToPDF, buildFileName, type ExportPayload } from "./utils/pdfExporter";
+import { formatCurrency, formatNumber } from "./utils/formatters";
+import { exportToPDF, buildFileName } from "./utils/pdfExporter";
+import { buildExportData } from "./utils/exportHelpers";
+import { useReportData } from "./hooks/useReportData";
 
 const defaultFilters: Filters = {
   dni: "",
@@ -57,183 +24,12 @@ const defaultFilters: Filters = {
   incluirSanciones: true,
 };
 
-const buildMockFacturacion = (includeSanciones: boolean): FacturacionData => ({
-  ...mockFacturacionData,
-  incluir_sanciones: includeSanciones,
-  acumulado: { ...mockFacturacionData.acumulado },
-  periodos: mockFacturacionData.periodos.map((periodo) => ({ ...periodo })),
-});
-
 export default function Stadistic() {
   const [, setLocation] = useLocation();
   const [selectedReport, setSelectedReport] = useState<ReportKey>("facturacion");
   const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Data states
-  const [ventasData, setVentasData] = useState<AlquileresResponse>(clone(mockAlquileresResponse));
-  const [vehiculosData, setVehiculosData] = useState<VehiculoMasAlquilado[]>(clone(mockVehiculosMasAlquilados));
-  const [facturacionData, setFacturacionData] = useState<FacturacionData>(buildMockFacturacion(true));
-  const [alquileresPeriodo, setAlquileresPeriodo] = useState<AlquilerPeriodo[]>(clone(mockAlquileresPorPeriodo));
-
-  // Loading states
-  const [ventasLoading, setVentasLoading] = useState(false);
-  const [autosLoading, setAutosLoading] = useState(false);
-  const [facturacionLoading, setFacturacionLoading] = useState(false);
-  const [periodoLoading, setPeriodoLoading] = useState(false);
-
-  // Error states
-  const [ventasError, setVentasError] = useState<string | null>(null);
-  const [autosError, setAutosError] = useState<string | null>(null);
-  const [facturacionError, setFacturacionError] = useState<string | null>(null);
-  const [periodoError, setPeriodoError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    const loadData = async () => {
-      setVentasLoading(true);
-      setAutosLoading(true);
-      setFacturacionLoading(true);
-      setPeriodoLoading(true);
-
-      setVentasError(null);
-      setAutosError(null);
-      setFacturacionError(null);
-      setPeriodoError(null);
-
-      const [alquileresResult, vehiculosResult, facturacionResult, periodoResult] =
-        await Promise.allSettled([
-          fetchAlquileresDetallados({
-            dni: filters.dni || undefined,
-            fechaDesde: filters.fechaDesde || undefined,
-            fechaHasta: filters.fechaHasta || undefined,
-          }),
-          fetchVehiculosMasAlquilados({
-            fechaDesde: filters.fechaDesde || undefined,
-            fechaHasta: filters.fechaHasta || undefined,
-            limit: 10,
-          }),
-          fetchFacturacionMensual({
-            fechaDesde: filters.fechaDesde || undefined,
-            fechaHasta: filters.fechaHasta || undefined,
-            incluirSanciones: filters.incluirSanciones,
-          }),
-          fetchAlquileresPorPeriodo({
-            periodicidad: filters.periodicidad,
-            fechaDesde: filters.fechaDesde || undefined,
-            fechaHasta: filters.fechaHasta || undefined,
-          }),
-        ]);
-
-      if (!active) return;
-
-      let refreshedAny = false;
-
-      // Handle alquileres
-      if (alquileresResult.status === "fulfilled") {
-        const value = alquileresResult.value;
-        const isEmptyResponse = !value?.alquileres?.length && !value?.resumen_clientes?.length;
-
-        if (isEmptyResponse) {
-          setVentasData(clone(mockAlquileresResponse));
-          setVentasError("Mostrando datos de referencia. No hay alquileres registrados para los filtros actuales.");
-        } else {
-          setVentasData(value);
-          refreshedAny = true;
-        }
-      } else {
-        setVentasData(clone(mockAlquileresResponse));
-        setVentasError(
-          "Mostrando datos de referencia. No se pudieron cargar los alquileres por cliente: " +
-            extractErrorMessage(alquileresResult.reason)
-        );
-      }
-      setVentasLoading(false);
-
-      // Handle vehiculos
-      if (vehiculosResult.status === "fulfilled") {
-        const value = vehiculosResult.value;
-        const isEmptyResponse = !value?.length;
-
-        if (isEmptyResponse) {
-          setVehiculosData(clone(mockVehiculosMasAlquilados));
-          setAutosError("Mostrando datos de referencia. No hay vehículos con alquileres en el período seleccionado.");
-        } else {
-          setVehiculosData(value);
-          refreshedAny = true;
-        }
-      } else {
-        setVehiculosData(clone(mockVehiculosMasAlquilados));
-        setAutosError(
-          "Mostrando datos de referencia. No se pudo obtener el ranking de vehículos: " +
-            extractErrorMessage(vehiculosResult.reason)
-        );
-      }
-      setAutosLoading(false);
-
-      // Handle facturacion
-      if (facturacionResult.status === "fulfilled") {
-        const value = facturacionResult.value;
-        const isEmptyResponse = !value?.periodos?.length;
-
-        if (isEmptyResponse) {
-          setFacturacionData(buildMockFacturacion(filters.incluirSanciones));
-          setFacturacionError("Mostrando datos de referencia. No hay movimientos de facturación para los filtros elegidos.");
-        } else {
-          setFacturacionData(value);
-          refreshedAny = true;
-        }
-      } else {
-        setFacturacionData(buildMockFacturacion(filters.incluirSanciones));
-        setFacturacionError(
-          "Mostrando datos de referencia. No se pudo obtener la facturación mensual: " +
-            extractErrorMessage(facturacionResult.reason)
-        );
-      }
-      setFacturacionLoading(false);
-
-      // Handle periodo
-      if (periodoResult.status === "fulfilled") {
-        const value = periodoResult.value;
-        const isEmptyResponse = !value?.length;
-
-        if (isEmptyResponse) {
-          setAlquileresPeriodo(clone(mockAlquileresPorPeriodo));
-          setPeriodoError("Mostrando datos de referencia. No hay agrupamientos disponibles para los filtros aplicados.");
-        } else {
-          setAlquileresPeriodo(value);
-          refreshedAny = true;
-        }
-      } else {
-        setAlquileresPeriodo(clone(mockAlquileresPorPeriodo));
-        setPeriodoError(
-          "Mostrando datos de referencia. No se pudo obtener el agrupamiento por período: " +
-            extractErrorMessage(periodoResult.reason)
-        );
-      }
-      setPeriodoLoading(false);
-
-      if (refreshedAny) {
-        setLastUpdate(new Date());
-      }
-    };
-
-    loadData();
-
-    return () => {
-      active = false;
-    };
-  }, [filters]);
-
-  const facturacionChartData = useMemo(() => {
-    return facturacionData.periodos.map((periodo) => ({
-      periodo: periodo.periodo,
-      alquileres: periodo.total_alquileres,
-      sanciones: periodo.total_sanciones,
-      total: periodo.total_general,
-    }));
-  }, [facturacionData]);
+  const { data, loading, errors, lastUpdate } = useReportData(filters);
 
   const handleFilterChange = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -245,144 +41,11 @@ export default function Stadistic() {
 
   const handleBackArrow = () => setLocation("/");
 
-  const buildExportData = (): ExportPayload => {
-    const filterParts: string[] = [];
-    if (filters.dni) {
-      filterParts.push(`DNI ${filters.dni}`);
-    }
-    if (filters.fechaDesde || filters.fechaHasta) {
-      const desde = filters.fechaDesde ? formatDate(filters.fechaDesde) : "Inicio";
-      const hasta = filters.fechaHasta ? formatDate(filters.fechaHasta) : "Actualidad";
-      filterParts.push(`${desde} → ${hasta}`);
-    }
-    filterParts.push(filters.incluirSanciones ? "Incluye sanciones" : "Sin sanciones");
-    const subtitle = filterParts.filter(Boolean).join(" • ") || "Sin filtros adicionales";
-
-    switch (selectedReport) {
-      case "alquileres": {
-        const title = "Listado detallado de alquileres por cliente";
-        const columns = [
-          "Cliente",
-          "DNI",
-          "Email",
-          "Vehículo",
-          "Patente",
-          "Fechas",
-          "ID",
-          "Precio base",
-          "Sanciones",
-          "Total",
-        ];
-
-        const rows = ventasData.alquileres.map((alquiler) => [
-          `${alquiler.cliente?.nombre ?? ""} ${alquiler.cliente?.apellido ?? ""}`.trim() || "-",
-          alquiler.cliente?.dni ?? "-",
-          alquiler.cliente?.email ?? "-",
-          `${alquiler.vehiculo?.marca ?? ""} ${alquiler.vehiculo?.modelo ?? ""}`.trim() || "-",
-          alquiler.vehiculo?.patente ?? "-",
-          `${alquiler.fecha_inicio} → ${alquiler.fecha_fin}`,
-          `#${alquiler.id_alquiler}`,
-          formatCurrency(alquiler.precio_base),
-          formatCurrency(alquiler.total_sanciones),
-          formatCurrency(alquiler.total_general),
-        ]);
-
-        return {
-          prefix: "alquileres-detallados",
-          title,
-          subtitle,
-          columns,
-          rows,
-        };
-      }
-      case "vehiculos": {
-        const title = "Vehículos más alquilados";
-        const columns = ["Patente", "Marca", "Modelo", "Año", "Cantidad de alquileres"];
-        const rows = vehiculosData.map((vehiculo) => [
-          vehiculo.patente,
-          vehiculo.marca,
-          vehiculo.modelo,
-          vehiculo.anio.toString(),
-          formatNumber(vehiculo.cantidad_alquileres),
-        ]);
-
-        return {
-          prefix: "vehiculos-mas-alquilados",
-          title,
-          subtitle,
-          columns,
-          rows,
-        };
-      }
-      case "periodos": {
-        const title = `Alquileres agrupados por ${filters.periodicidad === "mes" ? "mes" : "trimestre"}`;
-        const columns = ["Período", "Cantidad", "Total alquileres"];
-        const rows = alquileresPeriodo.map((registro) => [
-          formatPeriodo(registro.periodo),
-          formatNumber(registro.cantidad_alquileres),
-          formatCurrency(registro.total_alquileres),
-        ]);
-
-        if (rows.length) {
-          const totalCantidad = alquileresPeriodo.reduce(
-            (accumulator, registro) => accumulator + registro.cantidad_alquileres,
-            0
-          );
-          const totalMonto = alquileresPeriodo.reduce(
-            (accumulator, registro) => accumulator + registro.total_alquileres,
-            0
-          );
-          rows.push([
-            "Totales",
-            formatNumber(totalCantidad),
-            formatCurrency(totalMonto),
-          ]);
-        }
-
-        return {
-          prefix: `alquileres-por-${filters.periodicidad}`,
-          title,
-          subtitle,
-          columns,
-          rows,
-        };
-      }
-      case "facturacion":
-      default: {
-        const title = "Estadística de facturación mensual";
-        const columns = ["Período", "Alquileres", "Sanciones", "Total"];
-        const rows = facturacionData.periodos.map((periodo) => [
-          periodo.periodo,
-          formatCurrency(periodo.total_alquileres),
-          formatCurrency(periodo.total_sanciones),
-          formatCurrency(periodo.total_general),
-        ]);
-
-        if (rows.length) {
-          rows.push([
-            "Acumulado",
-            formatCurrency(facturacionData.acumulado.total_alquileres),
-            formatCurrency(facturacionData.acumulado.total_sanciones),
-            formatCurrency(facturacionData.acumulado.total_general),
-          ]);
-        }
-
-        return {
-          prefix: "facturacion-mensual",
-          title,
-          subtitle,
-          columns,
-          rows,
-        };
-      }
-    }
-  };
-
   const handleExportReport = () => {
-    const exportData = buildExportData();
+    const exportData = buildExportData(selectedReport, data, filters);
 
-    if (!exportData.rows.length) {
-      window.alert("No hay datos disponibles para exportar en este reporte.");
+    if (!exportData.rows.length && selectedReport !== "mantenimiento") {
+      globalThis.alert("No hay datos disponibles para exportar en este reporte.");
       return;
     }
 
@@ -390,14 +53,15 @@ export default function Stadistic() {
       const doc = exportToPDF({
         exportData,
         selectedReport,
-        facturacionData: selectedReport === "facturacion" ? facturacionData : undefined,
+        facturacionData: selectedReport === "facturacion" ? data.facturacionData : undefined,
+        mantenimientoData: selectedReport === "mantenimiento" ? data.mantenimientoData : undefined,
         formatCurrency,
       });
 
       doc.save(buildFileName(exportData.prefix, "pdf"));
     } catch (error) {
       console.error("Error exporting report:", error);
-      window.alert("Ocurrió un error al exportar el reporte.");
+      globalThis.alert("Ocurrió un error al exportar el reporte.");
     }
   };
 
@@ -414,25 +78,52 @@ export default function Stadistic() {
         {
           icon: BarChart3,
           title: "Facturación por alquileres",
-          value: formatCurrency(facturacionData.acumulado.total_alquileres),
+          value: formatCurrency(data.facturacionData.acumulado.total_alquileres),
           helper: "Subtotal sin sanciones",
         },
         {
           icon: ShoppingCart,
           title: "Ingresos por sanciones",
-          value: formatCurrency(facturacionData.acumulado.total_sanciones),
+          value: formatCurrency(data.facturacionData.acumulado.total_sanciones),
           helper: filters.incluirSanciones ? "Incluyendo sanciones" : "No incluidas",
         },
         {
           icon: Users,
           title: "Total general",
-          value: formatCurrency(facturacionData.acumulado.total_general),
+          value: formatCurrency(data.facturacionData.acumulado.total_general),
           helper: "Alquileres + sanciones",
+        },
+      ];
+    } else if (selectedReport === "mantenimiento" && data.mantenimientoData) {
+      return [
+        {
+          icon: Wrench,
+          title: "Total Órdenes",
+          value: formatNumber(data.mantenimientoData.total_ordenes),
+          helper: "Órdenes de mantenimiento",
+        },
+        {
+          icon: Car,
+          title: "Total Mantenimientos",
+          value: formatNumber(data.mantenimientoData.total_mantenimientos),
+          helper: "Servicios realizados",
+        },
+        {
+          icon: DollarSign,
+          title: "Costo Total",
+          value: formatCurrency(data.mantenimientoData.costo_total),
+          helper: "Inversión total",
+        },
+        {
+          icon: TrendingDown,
+          title: "Costo Promedio",
+          value: formatCurrency(data.mantenimientoData.costo_promedio),
+          helper: "Por mantenimiento",
         },
       ];
     }
     return [];
-  }, [selectedReport, facturacionData, filters.incluirSanciones]);
+  }, [selectedReport, data, filters.incluirSanciones]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 p-6">
@@ -548,116 +239,49 @@ export default function Stadistic() {
               <div className="space-y-6">
                 {selectedReport === "alquileres" && (
                   <VentasStadistics
-                    resumenClientes={ventasData.resumen_clientes}
-                    alquileres={ventasData.alquileres}
-                    isLoading={ventasLoading}
-                    error={ventasError}
+                    resumenClientes={data.ventasData.resumen_clientes}
+                    alquileres={data.ventasData.alquileres}
+                    isLoading={loading.ventasLoading}
+                    error={errors.ventasError}
                   />
                 )}
 
                 {selectedReport === "vehiculos" && (
                   <AutosStadistics
-                    vehiculos={vehiculosData}
-                    isLoading={autosLoading}
-                    error={autosError}
+                    vehiculos={data.vehiculosData}
+                    isLoading={loading.autosLoading}
+                    error={errors.autosError}
                   />
                 )}
 
                 {selectedReport === "periodos" && (
-                  <div className="rounded-3xl border border-base-200 bg-white p-6 shadow-lg">
-                    <header className="mb-6">
-                      <h3 className="text-xl font-semibold text-base-content">
-                        Alquileres por {filters.periodicidad}
-                      </h3>
-                    </header>
-
-                    {periodoError && (
-                      <div className="alert alert-warning text-sm mb-4">
-                        <span>{periodoError}</span>
-                      </div>
-                    )}
-
-                    {periodoLoading ? (
-                      <div className="flex h-64 items-center justify-center text-base-content/50">
-                        Cargando datos...
-                      </div>
-                    ) : alquileresPeriodo.length === 0 ? (
-                      <div className="flex h-64 items-center justify-center text-base-content/50">
-                        No hay datos para mostrar.
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="table">
-                          <thead>
-                            <tr>
-                              <th>Período</th>
-                              <th className="text-right">Cantidad</th>
-                              <th className="text-right">Total alquileres</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {alquileresPeriodo.map((item) => (
-                              <tr key={item.periodo}>
-                                <td className="font-mono text-sm">{formatPeriodo(item.periodo)}</td>
-                                <td className="text-right">{formatNumber(item.cantidad_alquileres)}</td>
-                                <td className="text-right">{formatCurrency(item.total_alquileres)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
+                  <PeriodosReport
+                    data={data.alquileresPeriodo}
+                    isLoading={loading.periodoLoading}
+                    error={errors.periodoError}
+                    periodicidad={filters.periodicidad}
+                  />
                 )}
 
                 {selectedReport === "facturacion" && (
-                  <div className="rounded-3xl border border-base-200 bg-white p-6 shadow-lg">
-                    <header className="mb-6 flex items-center justify-between">
-                      <h3 className="text-xl font-semibold text-base-content">
-                        Facturación mensual
-                      </h3>
-                    </header>
-
-                    {facturacionError && (
-                      <div className="alert alert-warning text-sm mb-4">
-                        <span>{facturacionError}</span>
-                      </div>
-                    )}
-
-                    <div className="mt-4 h-[320px]">
-                      {facturacionLoading ? (
-                        <div className="flex h-full items-center justify-center text-base-content/50">
-                          Cargando facturación...
-                        </div>
-                      ) : facturacionChartData.length === 0 ? (
-                        <div className="flex h-full items-center justify-center text-base-content/50">
-                          No hay datos para los filtros seleccionados.
-                        </div>
-                      ) : (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={facturacionChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="periodo" tickMargin={8} />
-                            <YAxis
-                              tickFormatter={(value) =>
-                                formatCurrency(value).replace("ARS", "").trim()
-                              }
-                            />
-                            <Tooltip formatter={(value: number) => formatCurrency(Number(value))} />
-                            <Legend />
-                            <Bar dataKey="alquileres" fill="#4338ca" name="Alquileres" radius={[6, 6, 0, 0]} />
-                            <Bar dataKey="sanciones" fill="#0ea5e9" name="Sanciones" radius={[6, 6, 0, 0]} />
-                            <Bar dataKey="total" fill="#22c55e" name="Total" radius={[6, 6, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      )}
-                    </div>
-                  </div>
+                  <FacturacionReport
+                    data={data.facturacionData}
+                    isLoading={loading.facturacionLoading}
+                    error={errors.facturacionError}
+                  />
                 )}
               </div>
             </section>
           </main>
         </div>
+
+        {selectedReport === "mantenimiento" && (
+          <MantenimientoReport
+            data={data.mantenimientoData}
+            isLoading={loading.mantenimientoLoading}
+            error={errors.mantenimientoError}
+          />
+        )}
       </div>
     </div>
   );

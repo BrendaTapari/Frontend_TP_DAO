@@ -1,19 +1,28 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { FacturacionData } from "../../../types/reportes";
+import type { MaintenanceStatistics } from "../../../types/mantenimiento";
+import type { ReportKey } from "../constants/reportOptions";
 
-export interface ExportPayload {
+export type PDFSection = {
+  title: string;
+  content: string[];
+};
+
+export type ExportPayload = {
   prefix: string;
   title: string;
   subtitle: string;
   columns: string[];
   rows: string[][];
-}
+  sections?: PDFSection[];
+};
 
-export interface PDFExportOptions {
+interface PDFExportOptions {
   exportData: ExportPayload;
-  selectedReport: string;
-  facturacionData?: FacturacionData;
+  selectedReport: ReportKey;
+  facturacionData?: FacturacionData | null;
+  mantenimientoData?: MaintenanceStatistics | null;
   formatCurrency: (value: number) => string;
 }
 
@@ -146,9 +155,9 @@ export function exportToPDF({
       `Total General: ${formatCurrency(facturacionData.acumulado.total_general)}`,
     ];
 
-    summary.forEach((line, index) => {
+    for (const [index, line] of summary.entries()) {
       doc.text(line, 55, summaryY + 45 + index * 15);
-    });
+    }
   }
 
   return doc;
