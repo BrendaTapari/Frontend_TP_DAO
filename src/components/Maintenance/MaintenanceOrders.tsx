@@ -45,11 +45,12 @@ export default function MaintenanceOrders() {
       ]);
 
       // Handle ordenes
-      if (ordenesResult.status === "fulfilled" && ordenesResult.value?.length > 0) {
+      if (ordenesResult.status === "fulfilled") {
         setOrdenes(ordenesResult.value);
       } else {
+        console.error("Error fetching ordenes:", ordenesResult.reason);
         setOrdenes(mockOrdenesMantenimiento);
-        setError("Mostrando datos de ejemplo. No hay órdenes de mantenimiento registradas.");
+        setError("Error al cargar órdenes. Mostrando datos de ejemplo.");
       }
 
       // Handle vehiculos

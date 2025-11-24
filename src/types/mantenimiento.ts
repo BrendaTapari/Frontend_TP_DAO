@@ -40,3 +40,15 @@ export interface UpdateMantenimientoData {
   descripcion?: string;
   precio?: number;
 }
+
+export interface MaintenanceStatistics {
+  total_ordenes: number;
+  total_mantenimientos: number;
+  costo_total: number;
+  costo_promedio: number;
+  top_vehiculos: {
+    patente: string;
+    costo_total: number;
+    cantidad_mantenimientos: number;
+  }[];
+}
