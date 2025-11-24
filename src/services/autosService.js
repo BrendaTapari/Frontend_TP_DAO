@@ -30,7 +30,7 @@ export const updateCar = async (id, autoData) => {
 };
 
 export const getAviableCars = async () => {
-    const response = await axios.get(`${API_URL}`)
+    const response = await axios.get(`${API_URL}/available`)
     return response.data
 }
 
