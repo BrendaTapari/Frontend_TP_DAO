@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { ArrowLeft, HandCoins } from "lucide-react";
 import AddSancion from "../Modals/AddSancion";
+import CreateSancionModal from "../Modals/CreateSancion";
 
 export default function AddSanc1ion() {
   const [locations, setLocations] = useLocation();
@@ -33,7 +34,8 @@ export default function AddSanc1ion() {
         <span>Sanciones</span>
       </div>
       <div className="p-2 flex gap-2">
-        <AddSancion />
+        {/* <AddSancion /> */}
+        <CreateSancionModal/>
         <button className="btn btn-accent"><HandCoins /> Pagar Sanción</button>
       </div>
       <div>
