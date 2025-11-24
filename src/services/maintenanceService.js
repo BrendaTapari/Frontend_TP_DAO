@@ -24,6 +24,11 @@ export const createOrdenMantenimiento = async (data) => {
   return response.data;
 };
 
+export const updateOrdenMantenimiento = async (id, fecha_fin) => {
+  const response = await api.put(`/ordenes/${id}/edit`, {fecha_fin: fecha_fin});
+  return response.data;
+};
+
 export const deleteOrdenMantenimiento = async (id) => {
   const response = await api.delete(`/ordenes/${id}`);
   return response.data;
