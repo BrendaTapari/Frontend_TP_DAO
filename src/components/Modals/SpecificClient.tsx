@@ -128,7 +128,7 @@ export default function SpecificClient({
                       <CreditCard className="text-primary" size={20} />
                       <div>
                         <p className="text-sm text-base-content/60">DNI</p>
-                        <p className="font-semibold">{client.dni}</p>
+                        <p className="font-semibold">{client.dni_cliente}</p>
                       </div>
                     </div>
                   </div>

@@ -130,7 +130,7 @@ export default function ClientsInfo() {
                   <th>{index + 1}</th>
                   <td>{client.nombre}</td>
                   <td>{client.apellido}</td>
-                  <td>{client.dni}</td>
+                  <td>{client.dni_cliente}</td>
                   <td>{client.email}</td>
                   <td>{client.telefono}</td>
                   <td>{client.fechaNacimiento}</td>

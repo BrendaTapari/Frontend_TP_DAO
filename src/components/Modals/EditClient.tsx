@@ -162,7 +162,7 @@ export default function EditClient({ client, onSuccess }: EditClientProps) {
                 <span className="label-text">DNI</span>
               </label>
               <p className="py-2 px-4 border rounded-md bg-gray-100 text-gray-700">
-                {client?.dni}
+                {client?.dni_cliente}
               </p>
             </div>
 
