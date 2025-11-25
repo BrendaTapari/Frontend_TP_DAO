@@ -6,7 +6,7 @@ import {
   MapPin,
   Phone,
   Search,
-  User
+  User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getEmployees } from "../../services/employeeService";
@@ -29,7 +29,7 @@ export default function EmployeeInfo() {
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
+  const [selectedEmployeeDni, setSelectedEmployeeDni] = useState<string | null>(
     null
   );
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
@@ -112,14 +112,14 @@ export default function EmployeeInfo() {
     return colors[puesto] || colors["default"];
   };
 
-  const handleViewEmployee = (employeeId: number) => {
-    setSelectedEmployeeId(employeeId);
+  const handleViewEmployee = (employeeDni: string) => {
+    setSelectedEmployeeDni(employeeDni);
     setShowEmployeeModal(true);
   };
 
   const handleCloseEmployeeModal = () => {
     setShowEmployeeModal(false);
-    setSelectedEmployeeId(null);
+    setSelectedEmployeeDni(null);
   };
 
   const handleEmployeeUpdated = () => {
@@ -198,7 +198,7 @@ export default function EmployeeInfo() {
                 <tr
                   key={employee.DNI}
                   className="hover:bg-base-200/50 cursor-pointer transition-colors"
-                  onDoubleClick={() => handleViewEmployee(employee.id)}
+                  onDoubleClick={() => handleViewEmployee(employee.DNI)}
                   title="Doble click para ver detalles"
                 >
                   <th className="text-center text-base-content/60">
@@ -311,7 +311,7 @@ export default function EmployeeInfo() {
       </div>
 
       <SpecificEmployee
-        employeeId={selectedEmployeeId}
+        employeeDni={selectedEmployeeDni}
         isOpen={showEmployeeModal}
         onClose={handleCloseEmployeeModal}
         onDelete={handleEmployeeUpdated}
