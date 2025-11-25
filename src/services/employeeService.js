@@ -12,8 +12,8 @@ export const createEmployee = async (employeeData) => {
     return response.data
 }
 
-export const updateemployee = async (employeeId, employeeData) => {
-    const response = await axios.put(`${API_URL}/${employeeId}`, employeeData)
+export const updateEmployee = async (employeeDni, employeeData) => {
+    const response = await axios.patch(`${API_URL}/${employeeDni}`, employeeData)
     return response.data
 }
 
