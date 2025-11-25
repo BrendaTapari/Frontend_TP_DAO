@@ -29,7 +29,6 @@ export default function CreateRental() {
     auto: "",
     fechaInicio: "",
     fechaFin: "",
-    sancion: 0,
     empleado: "",
   });
 
@@ -162,9 +161,9 @@ export default function CreateRental() {
             disabled={isLoading}
           >
             <option value="">Seleccione un cliente</option>
-            {client?.map((client: Client) => (
-                <option key={client.dni} value={client.dni}>
-                  {client.nombre} {client.apellido}
+            {client?.map((clientItem) => (
+                <option key={clientItem.dni} value={clientItem.dni_cliente}>
+                  {clientItem.nombre} {clientItem.apellido}
                 </option>
               ))}
             {client?.length === 0 && (
@@ -244,7 +243,7 @@ export default function CreateRental() {
           >
             <option value="">Seleccione un empleado</option>
             {employee?.map((employeeItem) => (
-                <option key={employeeItem.legajo} value={employeeItem.legajo}>
+                <option key={employeeItem.legajo} value={employeeItem.legajo_empleado}>
                   {employeeItem.legajo} {employeeItem.nombre} {employeeItem.apellido}
                 </option>
               ))}
