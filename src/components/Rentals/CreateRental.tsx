@@ -2,7 +2,7 @@ import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { getClients } from "../../services/clientService";
 import { getAviableCars } from "../../services/autosService";
 import { getEmployees } from "../../services/employeeService";
-import { createRental } from "../../services/rentalService";
+import { createRental, carAvailable } from "../../services/rentalService";
 import { useLocation } from "wouter";
 import { ArrowLeft, Car } from "lucide-react";
 import type { Client } from "../../services/clientService.d";
@@ -12,6 +12,7 @@ interface CarOption {
   marca: string;
   modelo: string;
   patente: string;
+  costo: number;
 }
 
 interface EmployeeOption {
@@ -57,6 +58,33 @@ export default function CreateRental() {
     fetchClients();
   }, []);
 
+  useEffect(() => {
+    const calculateCost = () => {
+      if (!formData.fechaInicio || !formData.fechaFin || !formData.auto) {
+        setFormData(prev => ({ ...prev, costo: 0 }));
+        return;
+      }
+
+      const start = new Date(formData.fechaInicio);
+      const end = new Date(formData.fechaFin);
+      
+      if (start >= end) {
+        setFormData(prev => ({ ...prev, costo: 0 }));
+        return;
+      }
+
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      const selectedCar = car.find(c => c.patente === formData.auto);
+      if (selectedCar) {
+        setFormData(prev => ({ ...prev, costo: diffDays * selectedCar.costo }));
+      }
+    };
+
+    calculateCost();
+  }, [formData.fechaInicio, formData.fechaFin, formData.auto, car]);
+
   const handleVolver = () => {
     setLocation("/car-rentals");
   };
@@ -92,6 +120,14 @@ export default function CreateRental() {
 
     try {
       setIsLoading(true);
+      
+      const availability = await carAvailable(formData.auto, formData.fechaInicio, formData.fechaFin);
+      if (!availability.available) {
+        setError("El vehículo no está disponible en las fechas seleccionadas. Por favor elija otro rango de fechas.");
+        setIsLoading(false);
+        return;
+      }
+
       await createRental(formData);
       setLocation("/car-rentals");
     } catch (error) {
@@ -162,7 +198,7 @@ export default function CreateRental() {
           >
             <option value="">Seleccione un cliente</option>
             {client?.map((clientItem) => (
-                <option key={clientItem.dni} value={clientItem.dni_cliente}>
+                <option key={clientItem.dni_cliente} value={clientItem.dni_cliente}>
                   {clientItem.nombre} {clientItem.apellido}
                 </option>
               ))}
@@ -172,42 +208,13 @@ export default function CreateRental() {
           </select>
         </label>
         <label htmlFor="">
-          Costo del alquiler $
+          Costo del alquiler (Calculado) $
           <input
             type="text"
-            inputMode="decimal"
-            pattern="^\d*\.?\d*$"
-            className="input input-bordered w-full max-w-xs ml-2"
-            value={formData.costo}
-            disabled={isLoading}
-            onKeyDown={(e) => {
-              const allowed = [
-                "Backspace",
-                "Delete",
-                "ArrowLeft",
-                "ArrowRight",
-                "Tab",
-                "Home",
-                "End",
-              ];
-              if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
-              if (e.key === ".") {
-                const value = (e.currentTarget as HTMLInputElement).value;
-                if (value.includes(".")) e.preventDefault();
-                return;
-              }
-              if (!/^\d$/.test(e.key)) e.preventDefault();
-            }}
-            onPaste={(e) => {
-              const text = e.clipboardData.getData("text");
-              if (!/^\d*\.?\d*$/.test(text)) e.preventDefault();
-            }}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                costo: Number(e.target.value.replace(/[^0-9.]/g, "")),
-              })
-            }
+            className="input input-bordered w-full max-w-xs ml-2 bg-gray-100"
+            value={formData.costo > 0 ? new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(formData.costo) : "$ 0"}
+            disabled
+            readOnly
           />
         </label>
 
@@ -223,7 +230,7 @@ export default function CreateRental() {
             <option value="">Seleccione un auto</option>
             {car?.map((carItem) => (
                 <option key={carItem.patente} value={carItem.patente}>
-                  {carItem.marca} {carItem.modelo} {carItem.patente}
+                  {carItem.marca} {carItem.modelo} {carItem.patente} - {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(carItem.costo)}/día
                 </option>
               ))}
             {car?.length === 0 && (
@@ -243,8 +250,8 @@ export default function CreateRental() {
           >
             <option value="">Seleccione un empleado</option>
             {employee?.map((employeeItem) => (
-                <option key={employeeItem.legajo} value={employeeItem.legajo_empleado}>
-                  {employeeItem.legajo} {employeeItem.nombre} {employeeItem.apellido}
+                <option key={employeeItem.legajo_empleado} value={employeeItem.legajo_empleado}>
+                  {employeeItem.legajo_empleado} {employeeItem.nombre} {employeeItem.apellido}
                 </option>
               ))}
             {employee?.length === 0 && (

@@ -7,8 +7,29 @@ export const getRentals = async () => {
   return response.data;
 };
 
+export const getSpecificRental = async (id) => {
+  const response = await axios.get(`${API_URL}/${id}`);
+  return response.data;
+}
+
 export const createRental = async (rentalData) => {
-  const response = await axios.post(API_URL, rentalData);
+  const response = await axios.post(`${API_URL}`, rentalData);
+  return response.data;
+}
+
+export const updateRental = async (id_alquiler, fecha_fin, costo_extra) => {
+  console.log(id_alquiler, fecha_fin, costo_extra);
+  const response = await axios.put(`${API_URL}${id_alquiler}`, { fecha_fin, costo_extra });
+  return response.data;
+}
+
+export const payRental = async (id_alquiler) => {
+  const response = await axios.put(`${API_URL}pay/${id_alquiler}`);
+  return response.data;
+}
+
+export const carAvailable = async (patente_vehiculo, fecha_inicio, fecha_fin) => {
+  const response = await axios.get(`${API_URL}carAvailable`, { params: { patente_vehiculo, fecha_inicio, fecha_fin } });
   return response.data;
 }
 
@@ -18,7 +39,7 @@ export const createRental = async (rentalData) => {
 // }
 
 export const getActiveRentals = async () => {
-  const response = await axios.get(`${API_URL}/active`);
+  const response = await axios.get(`${API_URL}active`);
   return response.data;
 }
 

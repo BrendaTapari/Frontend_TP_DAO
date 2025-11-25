@@ -1,7 +1,8 @@
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { getRentals } from "../services/rentalService";
+import { getActiveRentals, getRentals } from "../services/rentalService";
 import { ArrowLeft, Plus } from "lucide-react";
+import SpecificRental from "./Modals/SpecificRental";
 
 interface Auto {
     patente: string;
@@ -11,9 +12,8 @@ interface Auto {
     color: string;
     costo: number;
     periodicidadMantenimineto: number;
-    imagen: string;
-    id_estado: number;
-    id_seguro: number;
+    estado: {nombre: string};
+    seguro: Seguro;
 }
 
 interface Cliente {
@@ -34,7 +34,7 @@ interface Empleado {
     dni: number,
     telefono: string,
     email: string,
-    legajo: string,
+    legajo_empleado: string,
     puesto: string,
     salario: number,
     fechaInicioActividad: string,
@@ -52,9 +52,19 @@ interface Rental {
 }
 
 interface Sancion {
-    costo_base: number;
+    id_sancion: number;
+    costo_total: number;
     tipo_sancion: {descripcion: string};
     fecha: string
+    estado: {nombre: string}
+}
+
+interface Seguro {
+  poliza: number,
+  fechaVencimiento: string,
+  tipoPoliza: {descripcion: string},
+  compañia: string
+
 }
 
 export default function CarRentals() {
@@ -62,6 +72,8 @@ export default function CarRentals() {
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [showInfoRental, setShowInfoRental] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
+  const [isSpecificRentalOpen, setIsSpecificRentalOpen] = useState<boolean>(false);
 
   const handleBackButton = () => {
     setLocations("/");
@@ -107,20 +119,38 @@ export default function CarRentals() {
     return "badge-error";
   };
 
-  useEffect(() => {
-    const fetchRentals = async () => {
-      setIsLoading(true);
-      try {
-        const data = await getRentals();
-        setRentals(data);
-      } catch (error) {
-        console.error("Error fetching rentals:", error);
-      } finally {
-        setIsLoading(false);
+  const handleRowDoubleClick = (rental: Rental) => {
+    setSelectedRental(rental);
+    setIsSpecificRentalOpen(true);
+  };
+
+  const fetchRentals = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getActiveRentals();
+      setRentals(data);
+      
+      // If a rental is selected, update it with the new data
+      if (selectedRental) {
+        const updatedRental = data.find((r: Rental) => r.id === selectedRental.id);
+        if (updatedRental) {
+          setSelectedRental(updatedRental);
+        }
       }
-    };
+    } catch (error) {
+      console.error("Error fetching rentals:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchRentals();
   }, []);
+
+  const handleRentalUpdate = () => {
+    fetchRentals();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 p-6">
@@ -166,7 +196,7 @@ export default function CarRentals() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl p-6 text-white shadow-lg">
-            <h3 className="text-lg font-semibold mb-2">Total Alquileres</h3>
+            <h3 className="text-lg font-semibold mb-2">Total Alquileres Activos</h3>
             <p className="text-3xl font-bold">{rentals.length}</p>
             <p className="text-blue-100 text-sm">Registrados en el sistema</p>
           </div>
@@ -234,7 +264,8 @@ export default function CarRentals() {
                     rentals.map((rental: Rental, index: number) => (
                       <tr
                         key={rental.id || index}
-                        className="hover:bg-gray-50 transition-colors"
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onDoubleClick={() => handleRowDoubleClick(rental)}
                       >
                         <td className="text-center font-semibold text-gray-700">
                           <div className="badge badge-outline">
@@ -313,6 +344,12 @@ export default function CarRentals() {
           </div>
         )}
       </div>
+      <SpecificRental
+        rental={selectedRental}
+        isOpen={isSpecificRentalOpen}
+        onClose={() => setIsSpecificRentalOpen(false)}
+        onUpdate={handleRentalUpdate}
+      />
     </div>
   );
 }
