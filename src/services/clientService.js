@@ -17,8 +17,8 @@ export const updateClient = async (id, clientData) => {
   return response.data;
 };
 
-export const deleteClient = async (id) => {
-  const response = await axios.delete(`${API_URL}/${id}`);
+export const deleteClient = async (dniCliente) => {
+  const response = await axios.delete(`${API_URL}/${dniCliente}`);
   return response.data;
 };
 

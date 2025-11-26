@@ -2,6 +2,7 @@ import { Plus, Save, Upload, X } from "lucide-react";
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { createAuto } from "../../services/autosService";
+import { getInsurances } from "../../services/insuranceService";
 
 interface CreateCarProps {
   onSuccess?: () => void;
@@ -16,8 +17,10 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
     costo: "",
     patente: "",
     periodicidadMantenimineto: "",
+    id_seguro: "",
   });
 
+  const [insurances, setInsurances] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +83,16 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
     }
   };
 
+  const fetchInsurancesData = async () => {
+    try {
+      const data = await getInsurances();
+      console.log(data);
+      setInsurances(data);
+    } catch (error) {
+      console.error("Error fetching insurances:", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -106,6 +119,10 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
         "periodicidadMantenimineto",
         formData.periodicidadMantenimineto
       );
+
+      if (formData.id_seguro) {
+        formDataToSend.append("id_seguro", formData.id_seguro);
+      }
 
       if (selectedImage) {
         formDataToSend.append("imagen", selectedImage);
@@ -136,6 +153,7 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
           costo: "",
           patente: "",
           periodicidadMantenimineto: "",
+          id_seguro: "",
         });
 
         // Limpiar imagen
@@ -205,6 +223,7 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
       costo: "",
       patente: "",
       periodicidadMantenimineto: "",
+      id_seguro: "",
     });
 
     setSelectedImage(null);
@@ -213,11 +232,15 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
     setError("");
     setDragError("");
 
+    fetchInsurancesData();
+
     const modal = document.getElementById("modal_auto") as HTMLDialogElement;
     if (modal) {
       modal.showModal();
     }
   };
+
+  // console.log(formData)
 
   return (
     <>
@@ -383,6 +406,26 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
                 <option value="120">120 días (cuatrimestral)</option>
                 <option value="180">180 días (semestral)</option>
                 <option value="365">365 días (anual)</option>
+              </select>
+            </div>
+
+            {/* Seguro */}
+            <div className="form-control w-full mt-4">
+              <label className="label">
+                <span className="label-text font-medium">Seguro</span>
+              </label>
+              <select
+                name="id_seguro"
+                value={formData.id_seguro}
+                onChange={handleChange}
+                className="select select-bordered w-full"
+              >
+                <option value="">Seleccionar seguro</option>
+                {insurances.map((insurance) => (
+                  <option key={insurance.id || insurance.id_seguro} value={insurance.poliza_seguro}>
+                    {insurance.compañia} - {insurance.descripcion} ({insurance.poliza})
+                  </option>
+                ))}
               </select>
             </div>
 

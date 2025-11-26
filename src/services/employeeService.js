@@ -17,12 +17,12 @@ export const updateEmployee = async (employeeDni, employeeData) => {
     return response.data
 }
 
-export const deleteEmployee = async (employeeId) => {
-    const response = await axios.delete(`${API_URL}/${employeeId}`)
+export const deleteEmployee = async (legajoEmpleado) => {
+    const response = await axios.delete(`${API_URL}/${legajoEmpleado}`)
     return response.data
 }
 
-export const getEmployeeById = async (employeeId) => {
-    const response = await axios.get(`${API_URL}/${employeeId}`)
+export const getEmployeeById = async (legajoEmpleado) => {
+    const response = await axios.get(`${API_URL}/${legajoEmpleado}`)
     return response.data
 }

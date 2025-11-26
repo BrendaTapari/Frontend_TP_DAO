@@ -19,6 +19,11 @@ export const fetchOrdenById = async (id) => {
   return response.data;
 };
 
+export const fetchOrdenesByAuto = async (patente) => {
+  const response = await api.get(`/ordenes/${patente}`);
+  return response.data;
+};
+
 export const createOrdenMantenimiento = async (data) => {
   const response = await api.post("/ordenes", data);
   return response.data;

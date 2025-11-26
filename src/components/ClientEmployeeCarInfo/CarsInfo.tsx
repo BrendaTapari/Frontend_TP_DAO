@@ -143,6 +143,7 @@ const CarsInfo = forwardRef<CarsInfoRef>((_props, ref) => {
               <th>Modelo</th>
               <th>Año</th>
               <th>Color</th>
+              <th>Estado</th>
               <th>Precio</th>
             </tr>
           </thead>
@@ -163,6 +164,21 @@ const CarsInfo = forwardRef<CarsInfoRef>((_props, ref) => {
                   <td>
                     <span className="badge badge-outline badge-sm">
                       {auto.color}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`badge badge-sm ${
+                        auto.estado?.toLowerCase() === "disponible"
+                          ? "badge-success"
+                          : auto.estado?.toLowerCase() === "alquilado"
+                          ? "badge-warning"
+                          : auto.estado?.toLowerCase() === "mantenimiento"
+                          ? "badge-error"
+                          : "badge-neutral"
+                      }`}
+                    >
+                      {auto.estado || "N/A"}
                     </span>
                   </td>
                   <td className="font-semibold">
@@ -190,6 +206,7 @@ const CarsInfo = forwardRef<CarsInfoRef>((_props, ref) => {
         carId={selectedCarPatente}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onUpdate={fetchAutos}
       />
     </>
   );
