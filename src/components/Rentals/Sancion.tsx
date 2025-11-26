@@ -12,6 +12,9 @@ export default function AddSanc1ion() {
   useEffect(() => {
     const fetchRentals = async () => {
       const activeRentals = await getActiveRentals();
+
+      console.log(activeRentals);
+
       setRentals(activeRentals);
     };
 
@@ -57,8 +60,8 @@ export default function AddSanc1ion() {
             {rentals.map((rental) => (
               <tr key={rental.id}>
                 <td>{rental.id}</td>
-                <td>{rental.cliente}</td>
-                <td>{rental.auto}</td>
+                <td>{rental.cliente.dni_cliente}</td>
+                <td>{rental.vehiculo.patente}</td>
                 <td>{rental.fechaInicio}</td>
                 <td>{rental.fechaFin}</td>
                 <td>
