@@ -7,6 +7,11 @@ export const getAutos = async () => {
   return response.data;
 };
 
+export const getStates = async () => {
+  const response = await axios.get(`http://localhost:3000/api/car/states`);
+  return response.data;
+}
+
 export const createAuto = async (autoData) => {
   const isFormData = autoData instanceof FormData;
 
@@ -20,18 +25,20 @@ export const createAuto = async (autoData) => {
     config.headers["Content-Type"] = "application/json";
   }
 
+  
+
   const response = await axios.post(API_URL, autoData, config);
   return response.data;
 };
 
-export const updateCar = async (id, autoData) => {
-  const response = await axios.put(`${API_URL}/${id}`, autoData);
+export const updateCar = async (patente, estado, costo, periodicidad_mantenimiento) => {
+  const response = await axios.put(`${API_URL}/${patente}`, { estado, costo, periodicidad_mantenimiento });
   return response.data;
 };
 
 export const getAviableCars = async () => {
-    const response = await axios.get(`${API_URL}/available`)
-    return response.data
+  const response = await axios.get(`${API_URL}/available`)
+  return response.data
 }
 
 export const getRentedCars = async () => {
@@ -39,8 +46,8 @@ export const getRentedCars = async () => {
   return response.data;
 };
 
-export const deleteCar = async (id) => {
-  const response = await axios.delete(`${API_URL}/${id}`);
+export const deleteCar = async (patente) => {
+  const response = await axios.delete(`${API_URL}/${patente}`);
   return response.data;
 };
 
