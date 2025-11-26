@@ -5,66 +5,66 @@ import { ArrowLeft, Plus } from "lucide-react";
 import SpecificRental from "./Modals/SpecificRental";
 
 interface Auto {
-    patente: string;
-    marca: string;
-    modelo: string;
-    anio: number;
-    color: string;
-    costo: number;
-    periodicidadMantenimineto: number;
-    estado: {nombre: string};
-    seguro: Seguro;
+  patente: string;
+  marca: string;
+  modelo: string;
+  anio: number;
+  color: string;
+  costo: number;
+  periodicidadMantenimineto: number;
+  estado: { nombre: string };
+  seguro: Seguro;
 }
 
 interface Cliente {
-    nombre: string,
-    apellido: string,
-    direccion: string,
-    fechaNacimiento: string,
-    dni_cliente: number,
-    telefono: string,
-    email: string,
+  nombre: string;
+  apellido: string;
+  direccion: string;
+  fechaNacimiento: string;
+  dni_cliente: number;
+  telefono: string;
+  email: string;
 }
 
 interface Empleado {
-    nombre: string,
-    apellido: string,
-    direccion: string,
-    fechaNacimiento: string,
-    dni: number,
-    telefono: string,
-    email: string,
-    legajo_empleado: string,
-    puesto: string,
-    salario: number,
-    fechaInicioActividad: string,
+  nombre: string;
+  apellido: string;
+  direccion: string;
+  fechaNacimiento: string;
+  dni: number;
+  telefono: string;
+  email: string;
+  legajo_empleado: string;
+  puesto: string;
+  salario: number;
+  fechaInicioActividad: string;
 }
 
 interface Rental {
-    id: number;
-    vehiculo: Auto;
-    fechaInicio: string;
-    fechaFin: string;
-    precio: number;
-    cliente: Cliente;
-    empleado: Empleado;
-    sanciones: Sancion[];
+  id: number;
+  vehiculo: Auto;
+  fechaInicio: string;
+  fechaFin: string;
+  precio: number;
+  cliente: Cliente;
+  empleado: Empleado;
+  sanciones: Sancion[];
+  estado: string;
 }
 
 interface Sancion {
-    id_sancion: number;
-    costo_total: number;
-    tipo_sancion: {descripcion: string};
-    fecha: string
-    estado: {nombre: string}
+  id_sancion: number;
+  costo_total: number;
+  tipo_sancion: { descripcion: string };
+  fecha: string;
+  estado: { nombre: string };
 }
 
 interface Seguro {
-  poliza: number,
-  fechaVencimiento: string,
-  tipoPoliza: {descripcion: string},
-  compañia: string
-
+  poliza: number;
+  fechaVencimiento: string;
+  tipoPoliza: { descripcion: string };
+  compañia: string;
 }
 
 export default function CarRentals() {
@@ -72,8 +72,10 @@ export default function CarRentals() {
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [showInfoRental, setShowInfoRental] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [allRentals, setAllRentals] = useState<boolean>(false);
   const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
-  const [isSpecificRentalOpen, setIsSpecificRentalOpen] = useState<boolean>(false);
+  const [isSpecificRentalOpen, setIsSpecificRentalOpen] =
+    useState<boolean>(false);
 
   const handleBackButton = () => {
     setLocations("/");
@@ -129,10 +131,11 @@ export default function CarRentals() {
     try {
       const data = await getActiveRentals();
       setRentals(data);
-      
-      // If a rental is selected, update it with the new data
+
       if (selectedRental) {
-        const updatedRental = data.find((r: Rental) => r.id === selectedRental.id);
+        const updatedRental = data.find(
+          (r: Rental) => r.id === selectedRental.id
+        );
         if (updatedRental) {
           setSelectedRental(updatedRental);
         }
@@ -151,6 +154,20 @@ export default function CarRentals() {
   const handleRentalUpdate = () => {
     fetchRentals();
   };
+
+  const handleSeeAllRentals = async () => {
+    setIsLoading(true);
+    setAllRentals(!allRentals);
+    if (allRentals) {
+      try {
+        const data = await getRentals();
+        setRentals(data);
+      } catch (error) {
+        console.error("Error fetching all rentals:", error);
+      }
+      console.log("Mostrando todos los alquileres: ", allRentals);
+    
+    }}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 p-6">
@@ -196,7 +213,9 @@ export default function CarRentals() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl p-6 text-white shadow-lg">
-            <h3 className="text-lg font-semibold mb-2">Total Alquileres Activos</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Total Alquileres Activos
+            </h3>
             <p className="text-3xl font-bold">{rentals.length}</p>
             <p className="text-blue-100 text-sm">Registrados en el sistema</p>
           </div>
@@ -206,7 +225,8 @@ export default function CarRentals() {
             <p className="text-3xl font-bold">
               {
                 rentals.filter(
-                  (rental: Rental) => !rental.sanciones || rental.sanciones.length === 0
+                  (rental: Rental) =>
+                    !rental.sanciones || rental.sanciones.length === 0
                 ).length
               }
             </p>
@@ -218,7 +238,8 @@ export default function CarRentals() {
             <p className="text-3xl font-bold">
               {
                 rentals.filter(
-                  (rental: Rental) => rental.sanciones && rental.sanciones.length > 0
+                  (rental: Rental) =>
+                    rental.sanciones && rental.sanciones.length > 0
                 ).length
               }
             </p>
@@ -274,7 +295,10 @@ export default function CarRentals() {
                         </td>
                         <td>
                           <div className="font-semibold text-gray-800">
-                            {rental.cliente.apellido + " (" + rental.cliente.dni_cliente + ")" || "N/A"}
+                            {rental.cliente.apellido +
+                              " (" +
+                              rental.cliente.dni_cliente +
+                              ")" || "N/A"}
                           </div>
                         </td>
                         <td>
@@ -284,7 +308,10 @@ export default function CarRentals() {
                         </td>
                         <td>
                           <div className="font-medium text-gray-700">
-                            {rental.vehiculo.modelo + " (" + rental.vehiculo.patente + ")" || "No especificado"}
+                            {rental.vehiculo.modelo +
+                              " (" +
+                              rental.vehiculo.patente +
+                              ")" || "No especificado"}
                           </div>
                         </td>
                         <td>
@@ -343,13 +370,120 @@ export default function CarRentals() {
             </div>
           </div>
         )}
-      </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 mt-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Lista de Alquileres
+            </h2>
+            <button
+              className={`btn ${
+                allRentals ? "btn-warning" : "btn-success"
+              } rounded-lg font-medium transition-all`}
+              onClick={handleSeeAllRentals}
+            >
+              {allRentals ? "Ocultar Tabla" : "Mostrar Tabla"}
+            </button>
+          </div>
+        </div>
+
+      {allRentals ? (
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead>
+                <tr className="bg-gradient-to-r from-gray-800 to-gray-900 text-white">  
+                  <th className="text-center font-bold text-sm">ID</th>
+                  <th className="font-bold text-sm">Cliente</th>
+                  <th className="font-bold text-sm">Costo</th>
+                  <th className="font-bold text-sm">Vehículo</th>
+                  <th className="font-bold text-sm">Fecha Inicio</th>
+                  <th className="font-bold text-sm">Fecha Fin</th>
+                  <th className="text-center font-bold text-sm">Estado</th>
+                </tr>
+              </thead>  
+              <tbody>
+                  {rentals && rentals.length > 0 ? (
+                    rentals.map((rental: Rental, index: number) => (
+                      <tr
+                        key={rental.id || index}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onDoubleClick={() => handleRowDoubleClick(rental)}
+                      >
+                        <td className="text-center font-semibold text-gray-700">
+                          <div className="badge badge-outline">
+                            {rental.id || `#${index + 1}`}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="font-semibold text-gray-800">
+                            {rental.cliente.apellido + " " + rental.cliente.nombre}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="font-bold text-green-600">
+                            {formatCurrency(rental.precio)}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="font-medium text-gray-700">
+                            {rental.vehiculo.modelo + " " + rental.vehiculo.marca}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="text-sm">
+                            <div className="font-medium text-gray-700">
+                              {formatDate(rental.fechaInicio)}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="text-sm">
+                            <div className="font-medium text-gray-700">
+                              {formatDate(rental.fechaFin)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="text-center">
+                          <div
+                            className={`badge ${
+                              rental.estado === "Activo"
+                                ? "badge-success"
+                                : rental.estado === "Pendiente"
+                                ? "badge-warning"
+                                : "badge-error"
+                            }`}
+                          >
+                            {rental.estado}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="text-center py-4">
+                        No hay alquileres disponibles.
+                      </td>
+                    </tr>
+                  )}
+              </tbody>
+            </table>
+            </div>
+          </div>
+        ) : (
+        <div></div>
+      )   }
+    
+      
+      
+    </div>
       <SpecificRental
         rental={selectedRental}
         isOpen={isSpecificRentalOpen}
         onClose={() => setIsSpecificRentalOpen(false)}
         onUpdate={handleRentalUpdate}
-      />
+        />
+
     </div>
   );
 }

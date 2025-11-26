@@ -437,7 +437,6 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
               </label>
 
               {imagePreview ? (
-                // Preview de imagen seleccionada
                 <div className="relative">
                   <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
                     <img
@@ -462,7 +461,6 @@ export default function CreateCar({ onSuccess }: CreateCarProps) {
                   </div>
                 </div>
               ) : (
-                // Dropzone
                 <div
                   {...getRootProps()}
                   className={`

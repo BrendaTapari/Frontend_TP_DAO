@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { getCarByPatente, updateCar, getStates, deleteCar } from "../../services/autosService";
 import { fetchOrdenesByAuto } from "../../services/maintenanceService";
-import CoveredCarImage from "../../images/CoveredCar.png";
+import CoveredCarImage from "../../images/CoveredCar.jpg";
 
 interface SpecificCarProps {
   carId: string | null;
