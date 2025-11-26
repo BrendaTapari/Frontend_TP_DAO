@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { deleteClient } from "../../services/clientService";
 import EditClient from "./EditClient";
 import {
-  Edit,
   Trash2,
   User,
   Mail,
@@ -37,38 +36,41 @@ export default function SpecificClient({
   onDelete,
   onEdit,
 }: SpecificClientProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDependencyError, setShowDependencyError] = useState(false);
 
-  const handleDelete = async () => {
-    if (!client?.id) return;
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
 
-    const confirmDelete = window.confirm(
-      `¿Está seguro que desea eliminar al cliente ${client.nombre} ${client.apellido}?`,
-    );
-
-    if (!confirmDelete) return;
+  const confirmDelete = async () => {
+    if (!(client as any)?.dni_cliente) return;
 
     setIsDeleting(true);
     try {
-      await deleteClient(client.id);
+      const clientId = (client as any).dni_cliente;
+      await deleteClient(clientId);
 
       onClose();
       if (onDelete) {
         onDelete();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting client:", error);
-      setError("Error al eliminar el cliente");
+      if (error.response && error.response.status === 400) {
+        setShowDependencyError(true);
+      } else {
+        setError("Error al eliminar el cliente");
+      }
     } finally {
       setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
   const handleEditSuccess = () => {
-    setShowEditModal(false);
     if (onEdit) {
       onEdit();
     }
@@ -96,11 +98,7 @@ export default function SpecificClient({
             </div>
           )}
 
-          {isLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          ) : client ? (
+          {client ? (
             <div className="space-y-6">
               {/* Client Header */}
               <div className="card bg-base-200">
@@ -128,7 +126,7 @@ export default function SpecificClient({
                       <CreditCard className="text-primary" size={20} />
                       <div>
                         <p className="text-sm text-base-content/60">DNI</p>
-                        <p className="font-semibold">{client.dni_cliente}</p>
+                        <p className="font-semibold">{(client as any).dni_cliente || client.dni}</p>
                       </div>
                     </div>
                   </div>
@@ -203,6 +201,54 @@ export default function SpecificClient({
         </form>
       </dialog>
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && client && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-error">Confirmar Eliminación</h3>
+            <p className="py-4">
+              ¿Está seguro que desea eliminar al cliente con DNI <strong>{(client as any).dni_cliente || client.dni}</strong>?
+            </p>
+            <div className="modal-action">
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-error" 
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? <span className="loading loading-spinner loading-xs"></span> : null}
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dependency Error Modal */}
+      {showDependencyError && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-warning">No se puede eliminar</h3>
+            <p className="py-4">
+              Este cliente tiene alquileres asociados y no puede ser eliminado.
+            </p>
+            <div className="modal-action">
+              <button 
+                className="btn" 
+                onClick={() => setShowDependencyError(false)}
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

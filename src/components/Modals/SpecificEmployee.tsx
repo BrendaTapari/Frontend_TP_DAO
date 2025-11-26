@@ -102,29 +102,37 @@ export default function SpecificEmployee({
     }
   }, [employeeDni, isOpen, fetchEmployee]);
 
-  const handleDelete = async () => {
-    if (!employee?.id) return;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDependencyError, setShowDependencyError] = useState(false);
 
-    const confirmDelete = window.confirm(
-      `¿Está seguro que desea eliminar al empleado ${employee.nombre} ${employee.apellido}?`
-    );
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
 
-    if (!confirmDelete) return;
+  const confirmDelete = async () => {
+    if (!employee?.legajo_empleado) return;
 
     setIsDeleting(true);
     try {
-      await deleteEmployee(employee.id);
+      // Use legajo for deletion as requested
+      const employeeId = employee.legajo_empleado;
+      await deleteEmployee(employeeId);
 
       // Close modal and notify parent
       onClose();
       if (onDelete) {
         onDelete();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting employee:", error);
-      setError("Error al eliminar el empleado");
+      if (error.response && error.response.status === 400) {
+        setShowDependencyError(true);
+      } else {
+        setError("Error al eliminar el empleado");
+      }
     } finally {
       setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -290,13 +298,13 @@ export default function SpecificEmployee({
                         <p className="text-sm text-base-content/60">DNI</p>
                         <p className="font-semibold">{employee.dni}</p>
                       </div>
-                      {employee.tipoDocumento && (
+                      {employee.legajo_empleado && (
                         <div>
                           <p className="text-sm text-base-content/60">
-                            Tipo de Documento
+                            Legajo
                           </p>
                           <p className="font-semibold">
-                            {employee.tipoDocumento}
+                            {employee.legajo_empleado}
                           </p>
                         </div>
                       )}
@@ -516,6 +524,55 @@ export default function SpecificEmployee({
           <button onClick={onClose}>close</button>
         </form>
       </dialog>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && employee && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-error">Confirmar Eliminación</h3>
+            <p className="py-4">
+              ¿Está seguro que desea eliminar al empleado con Legajo <strong>{employee.legajo_empleado}</strong>?
+            </p>
+            <div className="modal-action">
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-error" 
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? <span className="loading loading-spinner loading-xs"></span> : null}
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dependency Error Modal */}
+      {showDependencyError && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-warning">No se puede eliminar</h3>
+            <p className="py-4">
+              Este empleado tiene alquileres asociados y no puede ser eliminado.
+            </p>
+            <div className="modal-action">
+              <button 
+                className="btn" 
+                onClick={() => setShowDependencyError(false)}
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
