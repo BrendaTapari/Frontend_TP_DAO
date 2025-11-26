@@ -88,7 +88,7 @@ export default function CarRentals() {
   };
 
   const handleAddSancion = () => {
-    setLocations("/add-sancion");
+    setLocations("/sanciones");
   };
 
   const formatCurrency = (amount: string | number) => {

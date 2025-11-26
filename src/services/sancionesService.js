@@ -11,6 +11,11 @@ export const getTipoSanciones = async () => {
   return response.data;
 }
 
+export const getSancionesNuevas = async () => {
+  const response = await api.get("/nuevas");
+  return response.data;
+}
+
 export const createSancion = async (id_tipo_sancion, costo_base, descripcion, id_alquiler, daños) => {
   const response = await api.post("/create", {id_tipo_sancion, costo_base, descripcion, id_alquiler});
   return response.data;

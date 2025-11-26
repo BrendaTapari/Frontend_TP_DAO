@@ -1,7 +1,7 @@
 import { getActiveRentals } from "../../services/rentalService";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { ArrowLeft, HandCoins } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import AddSancion from "../Modals/AddSancion";
 import CreateSancionModal from "../Modals/CreateSancion";
 
@@ -37,9 +37,13 @@ export default function AddSanc1ion() {
         <span>Sanciones</span>
       </div>
       <div className="p-2 flex gap-2">
-        {/* <AddSancion /> */}
         <CreateSancionModal/>
-        <button className="btn btn-accent"><HandCoins /> Pagar Sanción</button>
+        <button 
+          className="btn btn-secondary"
+          onClick={() => setLocations("/tipos-danos")}
+        >
+          Administrar Tipos de Daños
+        </button>
       </div>
       <div>
       </div>
@@ -65,13 +69,20 @@ export default function AddSanc1ion() {
                 <td>{rental.fechaInicio}</td>
                 <td>{rental.fechaFin}</td>
                 <td>
-                  <button
-                    onClick={() => {
-                      setLocations(`/sanciones/${rental.id}`);
-                    }}
-                  >
-                    Agregar Sanción
-                  </button>
+                  <div className="dropdown dropdown-end">
+                    <label tabIndex={0} className="btn btn-ghost btn-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01"></path>
+                      </svg>
+                    </label>
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                      <li>
+                        <a onClick={() => setLocations(`/sanciones/${rental.id}`)}>
+                          Ver Detalle
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
                 </td>
               </tr>
             ))}

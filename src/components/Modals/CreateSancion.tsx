@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getTipoSanciones, createSancion } from "../../services/sancionesService";
 import { createDaño } from "../../services/dañosService";
+import { getActiveRentals } from "../../services/rentalService";
 import CreateDanoModal from "./CreateDano";
 
 interface TipoSancion {
@@ -27,24 +28,25 @@ export default function CreateSancionModal() {
   const [tipoSanciones, setTipoSanciones] = useState<TipoSancion[]>([]);
   const [daños, setDaños] = useState<Dano[]>([]);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [alquileres, setAlquileres] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchTipoSanciones = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getTipoSanciones();
-        setTipoSanciones(data);
+        const [sancionesData, rentalsData] = await Promise.all([
+          getTipoSanciones(),
+          getActiveRentals(),
+        ]);
+        setTipoSanciones(sancionesData);
+        setAlquileres(rentalsData);
       } catch (error) {
-        console.error("Error fetching tipo sanciones:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchTipoSanciones();
+    fetchData();
   }, []);
 
-  const alquileresDummy = [
-    { id: "1", label: "Alquiler #1 - Toyota Corolla" },
-    { id: "2", label: "Alquiler #2 - Ford Fiesta" },
-    { id: "3", label: "Alquiler #3 - Chevrolet Onix" },
-  ];
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -286,9 +288,9 @@ export default function CreateSancionModal() {
                 className={`select select-bordered w-full ${errors.idAlquiler ? "select-error" : ""}`}
               >
                 <option value="" disabled>Seleccione un alquiler</option>
-                {alquileresDummy.map((alquiler) => (
+                {alquileres.map((alquiler) => (
                   <option key={alquiler.id} value={alquiler.id}>
-                    {alquiler.label}
+                    Alquiler #{alquiler.id} - {alquiler.vehiculo.patente} ({alquiler.cliente.dni_cliente})
                   </option>
                 ))}
               </select>
