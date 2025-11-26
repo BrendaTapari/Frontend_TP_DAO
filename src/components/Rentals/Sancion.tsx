@@ -1,7 +1,7 @@
-import { getActiveRentals } from "../../services/rentalService";
+import { getActiveRentals, getBadRentals } from "../../services/rentalService";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import AddSancion from "../Modals/AddSancion";
 import CreateSancionModal from "../Modals/CreateSancion";
 
@@ -11,9 +11,7 @@ export default function AddSanc1ion() {
 
   useEffect(() => {
     const fetchRentals = async () => {
-      const activeRentals = await getActiveRentals();
-
-      console.log(activeRentals);
+      const activeRentals = await getBadRentals();
 
       setRentals(activeRentals);
     };
@@ -55,6 +53,7 @@ export default function AddSanc1ion() {
               <th>ID Alquiler</th>
               <th>Cliente</th>
               <th>Auto</th>
+              <th>Estado</th>
               <th>Fecha Inicio</th>
               <th>Fecha Fin</th>
               <th>Acción</th>
@@ -69,20 +68,12 @@ export default function AddSanc1ion() {
                 <td>{rental.fechaInicio}</td>
                 <td>{rental.fechaFin}</td>
                 <td>
-                  <div className="dropdown dropdown-end">
-                    <label tabIndex={0} className="btn btn-ghost btn-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01"></path>
-                      </svg>
-                    </label>
-                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                      <li>
-                        <a onClick={() => setLocations(`/sanciones/${rental.id}`)}>
-                          Ver Detalle
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={() => setLocations(`/sanciones/${rental.id}`)}
+                  >
+                    <Search/>
+                  </button>
                 </td>
               </tr>
             ))}

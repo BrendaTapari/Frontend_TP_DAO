@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useRoute } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import SancionPaymentModal from "../Modals/SancionPaymentModal";
 
 interface Dano {
   id_daño: number;
@@ -38,53 +39,57 @@ export default function SancionDetail() {
   const [sanciones, setSanciones] = useState<Sancion[]>([]);
   const [danosMap, setDanosMap] = useState<Record<number, Dano[]>>({});
   const [loading, setLoading] = useState(true);
+  
+  // Payment Modal State
+  const [selectedSancionId, setSelectedSancionId] = useState<number | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!params?.id) {
-        console.log("No params.id found");
+  const fetchSanciones = useCallback(async () => {
+    if (!params?.id) {
+      console.log("No params.id found");
+      setLoading(false);
+      return;
+    }
+    
+    console.log("Fetching sanciones for alquiler:", params.id);
+    
+    try {
+      // Fetch sanciones
+      const sancionesResponse = await fetch(`http://localhost:3000/api/sanciones/alquiler/${params.id}`);
+      
+      if (!sancionesResponse.ok) {
+        console.error("Error fetching sanciones:", sancionesResponse.status);
         setLoading(false);
         return;
       }
       
-      console.log("Fetching sanciones for alquiler:", params.id);
-      
-      try {
-        // Fetch sanciones
-        const sancionesResponse = await fetch(`http://localhost:3000/api/sanciones/alquiler/${params.id}`);
-        
-        if (!sancionesResponse.ok) {
-          console.error("Error fetching sanciones:", sancionesResponse.status);
-          setLoading(false);
-          return;
-        }
-        
-        const sancionesData = await sancionesResponse.json();
-        console.log("Sanciones data:", sancionesData);
-        setSanciones(sancionesData);
+      const sancionesData = await sancionesResponse.json();
+      console.log("Sanciones data:", sancionesData);
+      setSanciones(sancionesData);
 
-        // Fetch daños for each sancion
-        const danosPromises = sancionesData.map(async (sancion: Sancion) => {
-          const danosResponse = await fetch(`http://localhost:3000/api/danos/sancion/${sancion.id_sancion}`);
-          const danosData = await danosResponse.json();
-          return { id_sancion: sancion.id_sancion, danos: danosData };
-        });
+      // Fetch daños for each sancion
+      const danosPromises = sancionesData.map(async (sancion: Sancion) => {
+        const danosResponse = await fetch(`http://localhost:3000/api/danos/sancion/${sancion.id_sancion}`);
+        const danosData = await danosResponse.json();
+        return { id_sancion: sancion.id_sancion, danos: danosData };
+      });
 
-        const danosResults = await Promise.all(danosPromises);
-        const danosMapData: Record<number, Dano[]> = {};
-        danosResults.forEach(result => {
-          danosMapData[result.id_sancion] = result.danos;
-        });
-        setDanosMap(danosMapData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      const danosResults = await Promise.all(danosPromises);
+      const danosMapData: Record<number, Dano[]> = {};
+      danosResults.forEach(result => {
+        danosMapData[result.id_sancion] = result.danos;
+      });
+      setDanosMap(danosMapData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [params?.id]);
+
+  useEffect(() => {
+    fetchSanciones();
+  }, [fetchSanciones]);
 
   const handleVolver = () => {
     setLocation("/sanciones");
@@ -92,6 +97,15 @@ export default function SancionDetail() {
 
   const calcularCostoDano = (dano: Dano) => {
     return dano.tipoDaño.costoBase * dano.gravedad;
+  };
+
+  const handlePayClick = (sancionId: number) => {
+    setSelectedSancionId(sancionId);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    fetchSanciones();
   };
 
   if (loading) {
@@ -199,7 +213,10 @@ export default function SancionDetail() {
 
                   <div className="card-actions justify-end mt-4">
                     {sancion.estado.nombre !== 'Pagada' && (
-                      <button className="btn btn-primary">
+                      <button 
+                        className="btn btn-primary" 
+                        onClick={() => handlePayClick(sancion.id_sancion)}
+                      >
                         Pagar Sanción
                       </button>
                     )}
@@ -210,6 +227,13 @@ export default function SancionDetail() {
           })}
         </div>
       )}
+
+      <SancionPaymentModal 
+        sancionId={selectedSancionId}
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+      />
     </>
   );
 }
