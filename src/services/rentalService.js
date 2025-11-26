@@ -43,6 +43,11 @@ export const getActiveRentals = async () => {
   return response.data;
 }
 
+export const getBadRentals = async () => {
+  const response = await axios.get(`${API_URL}bad`);
+  return response.data;
+}
+
 export const getSanciones = async () => {
   const response = await axios.get(`${API_URL}/sanciones`);
   return response.data;

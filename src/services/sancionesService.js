@@ -20,3 +20,8 @@ export const createSancion = async (id_tipo_sancion, costo_base, descripcion, id
   const response = await api.post("/create", {id_tipo_sancion, costo_base, descripcion, id_alquiler});
   return response.data;
 }
+
+export const paySancion = async (id_sancion) => {
+  const response = await api.put(`/pay/${id_sancion}`);
+  return response.data;
+}
