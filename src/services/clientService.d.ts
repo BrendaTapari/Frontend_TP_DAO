@@ -22,12 +22,8 @@ export interface CreateClientPayload {
 }
 
 export interface UpdateClientPayload {
-  nombre: string;
-  apellido: string;
-  dni: string;
   email: string;
-  telefono: string;
-  fechaNacimiento: string;
+  telefono: number;
   direccion?: string;
 }
 
