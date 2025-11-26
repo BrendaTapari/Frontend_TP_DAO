@@ -122,7 +122,7 @@ export default function CreateInsurance() {
     e.preventDefault();
 
     // Validamos antes de enviar
-    if (!validatdfdsfsdfeForm()) {
+    if (!validateForm()) {
       console.warn("Formulario inválido", errors);
       return;
     }
