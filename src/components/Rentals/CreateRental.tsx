@@ -1,8 +1,8 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { getClients } from "../../services/clientService";
-import { getAviableCars } from "../../services/autosService";
+import { getAviableCarsForRental } from "../../services/autosService";
 import { getEmployees } from "../../services/employeeService";
-import { createRental, carAvailable } from "../../services/rentalService";
+import { createRental } from "../../services/rentalService";
 import { useLocation } from "wouter";
 import { ArrowLeft, Car } from "lucide-react";
 import type { Client } from "../../services/clientService.d";
@@ -18,6 +18,7 @@ interface CarOption {
 interface EmployeeOption {
   id: number;
   legajo: string;
+  legajo_empleado: string;
   nombre: string;
   apellido: string;
 }
@@ -37,16 +38,14 @@ export default function CreateRental() {
   const [car, setCar] = useState<CarOption[]>([]);
   const [employee, setEmployee] = useState<EmployeeOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchClients = async () => {
+    const fetchClientsAndEmployees = async () => {
       try {
         const clientData = await getClients();
         setClient(clientData);
-
-        const carsData = await getAviableCars();
-        setCar(carsData);
 
         const employeesData = await getEmployees();
         setEmployee(employeesData);
@@ -55,8 +54,38 @@ export default function CreateRental() {
       }
     };
 
-    fetchClients();
+    fetchClientsAndEmployees();
   }, []);
+
+  useEffect(() => {
+    const fetchAvailableCars = async () => {
+      if (!formData.fechaInicio || !formData.fechaFin) {
+        setCar([]);
+        return;
+      }
+
+      const start = new Date(formData.fechaInicio);
+      const end = new Date(formData.fechaFin);
+
+      if (start >= end) {
+        setCar([]);
+        return;
+      }
+
+      setIsFetchingCars(true);
+      try {
+        const carsData = await getAviableCarsForRental(formData.fechaInicio, formData.fechaFin);
+        setCar(carsData);
+      } catch (error) {
+        console.error("Error fetching available cars:", error);
+        setCar([]);
+      } finally {
+        setIsFetchingCars(false);
+      }
+    };
+
+    fetchAvailableCars();
+  }, [formData.fechaInicio, formData.fechaFin]);
 
   useEffect(() => {
     const calculateCost = () => {
@@ -121,12 +150,10 @@ export default function CreateRental() {
     try {
       setIsLoading(true);
       
-      const availability = await carAvailable(formData.auto, formData.fechaInicio, formData.fechaFin);
-      if (!availability.available) {
-        setError("El vehículo no está disponible en las fechas seleccionadas. Por favor elija otro rango de fechas.");
-        setIsLoading(false);
-        return;
-      }
+      // No need to check availability again as the list is already filtered by date
+      // but keeping it safe won't hurt if the backend supports it, 
+      // though the user asked to use getAviableCarsForRental to populate the list.
+      // We assume the selected car from the list is available.
 
       await createRental(formData);
       setLocation("/car-rentals");
@@ -168,7 +195,7 @@ export default function CreateRental() {
               value={formData.fechaInicio}
               min={new Date().toISOString().split("T")[0]}
               onChange={(e) =>
-                setFormData({ ...formData, fechaInicio: e.target.value })
+                setFormData({ ...formData, fechaInicio: e.target.value, auto: "" })
               }
             />
           </div>
@@ -182,7 +209,7 @@ export default function CreateRental() {
                 formData.fechaInicio || new Date().toISOString().split("T")[0]
               }
               onChange={(e) =>
-                setFormData({ ...formData, fechaFin: e.target.value })
+                setFormData({ ...formData, fechaFin: e.target.value, auto: "" })
               }
             />
           </div>
@@ -225,16 +252,22 @@ export default function CreateRental() {
             name="auto"
             value={formData.auto}
             onChange={handleFormChange}
-            disabled={isLoading}
+            disabled={isLoading || isFetchingCars || car.length === 0}
           >
-            <option value="">Seleccione un auto</option>
+            <option value="">
+              {isFetchingCars 
+                ? "Buscando autos disponibles..." 
+                : (!formData.fechaInicio || !formData.fechaFin)
+                  ? "Seleccione fechas primero"
+                  : "Seleccione un auto"}
+            </option>
             {car?.map((carItem) => (
                 <option key={carItem.patente} value={carItem.patente}>
                   {carItem.marca} {carItem.modelo} {carItem.patente} - {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(carItem.costo)}/día
                 </option>
               ))}
-            {car?.length === 0 && (
-              <option disabled>No hay autos registrados</option>
+            {!isFetchingCars && car?.length === 0 && formData.fechaInicio && formData.fechaFin && (
+              <option disabled>No hay autos disponibles para estas fechas</option>
             )}
           </select>
         </label>

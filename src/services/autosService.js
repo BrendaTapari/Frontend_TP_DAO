@@ -41,6 +41,11 @@ export const getAviableCars = async () => {
   return response.data
 }
 
+export const getAviableCarsForRental = async (fechaInicio, fechaFin) => {
+  const response = await axios.get(`${API_URL}/availableForRental`, {params: {fechaInicio, fechaFin}})
+  return response.data
+}
+
 export const getRentedCars = async () => {
   const response = await axios.get(`${API_URL}/rented`);
   return response.data;
