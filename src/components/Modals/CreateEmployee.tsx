@@ -137,23 +137,47 @@ export default function CreateEmployeeModal() {
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (!validateForm()) {
       return;
     }
     
-    formData.fechaInicioActividad = new Date().toISOString().split("T")[0];
+    const dataToSend = {
+        ...formData,
+        fechaInicioActividad: new Date().toISOString().split("T")[0]
+    };
 
     try {
-      createEmployee(formData);
+      await createEmployee(dataToSend);
       const modal = document.getElementById(
         "modal_employee"
       ) as HTMLDialogElement;
       modal?.close();
-    } catch (error) {
+      // Reset form on success
+      setFormData({
+        nombre: "",
+        apellido: "",
+        fechaNacimiento: "",
+        DNI: "",
+        email: "",
+        telefono: "",
+        direccion: "",
+        puesto: "",
+        salario: "",
+        fechaInicioActividad: "",
+      });
+    } catch (error: any) {
       console.error("Error creating employee:", error);
+      if (error.response && error.response.status === 400) {
+        setError("Existe un empleado con este DNI");
+      } else {
+        setError("Ocurrió un error al crear el empleado. Por favor intente nuevamente.");
+      }
     }
   };
 
@@ -170,6 +194,13 @@ export default function CreateEmployeeModal() {
       <dialog id="modal_employee" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Agregar Empleado</h3>
+          
+          {error && (
+            <div className="alert alert-error mt-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>{error}</span>
+            </div>
+          )}
 
           <form className="py-4">
             <div className="form-control w-full mb-4">

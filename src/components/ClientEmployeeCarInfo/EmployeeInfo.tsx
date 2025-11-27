@@ -24,12 +24,13 @@ interface Employee {
   puesto: string;
   salario: string;
   fechaInicioActividad: string;
+  legajo_empleado: string;
 }
 export default function EmployeeInfo() {
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEmployeeDni, setSelectedEmployeeDni] = useState<string | null>(
+  const [selectedEmployeeLegajo, setSelectedEmployeeLegajo] = useState<string | null>(
     null
   );
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
@@ -112,14 +113,14 @@ export default function EmployeeInfo() {
     return colors[puesto] || colors["default"];
   };
 
-  const handleViewEmployee = (employeeDni: string) => {
-    setSelectedEmployeeDni(employeeDni);
+  const handleViewEmployee = (employeeLegajo: string) => {
+    setSelectedEmployeeLegajo(employeeLegajo);
     setShowEmployeeModal(true);
   };
 
   const handleCloseEmployeeModal = () => {
     setShowEmployeeModal(false);
-    setSelectedEmployeeDni(null);
+    setSelectedEmployeeLegajo(null);
   };
 
   const handleEmployeeUpdated = () => {
@@ -198,7 +199,7 @@ export default function EmployeeInfo() {
                 <tr
                   key={employee.DNI}
                   className="hover:bg-base-200/50 cursor-pointer transition-colors"
-                  onDoubleClick={() => handleViewEmployee(employee.DNI)}
+                  onDoubleClick={() => handleViewEmployee(employee.legajo_empleado)}
                   title="Doble click para ver detalles"
                 >
                   <th className="text-center text-base-content/60">
@@ -311,7 +312,7 @@ export default function EmployeeInfo() {
       </div>
 
       <SpecificEmployee
-        employeeDni={selectedEmployeeDni}
+        employeeLegajo={selectedEmployeeLegajo}
         isOpen={showEmployeeModal}
         onClose={handleCloseEmployeeModal}
         onDelete={handleEmployeeUpdated}

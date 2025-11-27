@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil, Trash } from "lucide-react";
 import { getTiposDaños, deleteTipoDaño } from "../../services/dañosService";
 import CreateTipoDanoModal from "../Modals/CreateTipoDanoModal";
 
@@ -79,24 +79,13 @@ export default function TiposDanos() {
                 <td>{tipo.nombre}</td>
                 <td>${tipo.costoBase.toFixed(2)}</td>
                 <td>
-                  <div className="dropdown dropdown-end">
-                    <label tabIndex={0} className="btn btn-ghost btn-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01"></path>
-                      </svg>
-                    </label>
-                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                      <li>
-                        <a onClick={() => handleEdit(tipo)}>
-                          Editar
-                        </a>
-                      </li>
-                      <li>
-                        <a className="text-error" onClick={() => handleDelete(tipo.id_tipo_daño)}>
-                          Eliminar
-                        </a>
-                      </li>
-                    </ul>
+                  <div className="flex gap-2">
+                    <button className="btn btn-sm btn-info" onClick={() => handleEdit(tipo)}>
+                      <Pencil/>
+                    </button>
+                    <button className="btn btn-sm btn-error" onClick={() => handleDelete(tipo.id_tipo_daño)}>
+                      <Trash/>
+                    </button>
                   </div>
                 </td>
               </tr>

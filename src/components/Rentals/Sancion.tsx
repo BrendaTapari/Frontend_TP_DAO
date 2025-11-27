@@ -45,7 +45,7 @@ export default function AddSanc1ion() {
       </div>
       <div>
       </div>
-      <p className="ml-2 mt-2">Vehículos con sanciones.</p>
+      <p className="ml-2 mt-2">Alquileres con sanciones.</p>
       <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
         <table className="table">
           <thead>
@@ -65,6 +65,7 @@ export default function AddSanc1ion() {
                 <td>{rental.id}</td>
                 <td>{rental.cliente.dni_cliente}</td>
                 <td>{rental.vehiculo.patente}</td>
+                <td>{rental.estado.nombre}</td>
                 <td>{rental.fechaInicio}</td>
                 <td>{rental.fechaFin}</td>
                 <td>

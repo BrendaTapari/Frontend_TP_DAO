@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 interface SpecificEmployeeProps {
-  employeeDni: string | null;
+  employeeLegajo: string | null;
   isOpen: boolean;
   onClose: () => void;
   onDelete?: () => void;
@@ -39,6 +39,7 @@ interface Employee {
   fechaNacimiento: string;
   fechaInicioActividad: string;
   legajo?: string;
+  legajo_empleado?: string;
   direccion?: string;
   puesto?: string;
   salario?: string;
@@ -53,7 +54,7 @@ interface EditFormData {
 }
 
 export default function SpecificEmployee({
-  employeeDni,
+  employeeLegajo,
   isOpen,
   onClose,
   onDelete,
@@ -74,24 +75,24 @@ export default function SpecificEmployee({
   });
 
   const fetchEmployee = useCallback(async () => {
-    if (!employeeDni) return;
+    if (!employeeLegajo) return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      const employeeData = await getEmployeeById(employeeDni);
-      setEmployee({ ...employeeData, dni: employeeDni });
+      const employeeData = await getEmployeeById(employeeLegajo);
+      setEmployee(employeeData);
     } catch (error) {
       console.error("Error fetching employee:", error);
       setError("Error al cargar la información del empleado");
     } finally {
       setIsLoading(false);
     }
-  }, [employeeDni]);
+  }, [employeeLegajo]);
 
   useEffect(() => {
-    if (employeeDni && isOpen) {
+    if (employeeLegajo && isOpen) {
       fetchEmployee();
     }
     // Reset state when modal closes
@@ -100,7 +101,7 @@ export default function SpecificEmployee({
       setIsEditing(false);
       setError("");
     }
-  }, [employeeDni, isOpen, fetchEmployee]);
+  }, [employeeLegajo, isOpen, fetchEmployee]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDependencyError, setShowDependencyError] = useState(false);
