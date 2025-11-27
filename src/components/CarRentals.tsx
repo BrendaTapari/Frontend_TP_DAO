@@ -70,6 +70,7 @@ interface Seguro {
 export default function CarRentals() {
   const [locations, setLocations] = useLocation();
   const [rentals, setRentals] = useState<Rental[]>([]);
+  const [rentalsHistory, setRentalsHistory] = useState<Rental[]>([]);
   const [showInfoRental, setShowInfoRental] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [allRentals, setAllRentals] = useState<boolean>(false);
@@ -132,6 +133,9 @@ export default function CarRentals() {
       const data = await getActiveRentals();
       setRentals(data);
 
+      const dataHistory = await getRentals();
+      setRentalsHistory(dataHistory);
+
       if (selectedRental) {
         const updatedRental = data.find(
           (r: Rental) => r.id === selectedRental.id
@@ -158,16 +162,7 @@ export default function CarRentals() {
   const handleSeeAllRentals = async () => {
     setIsLoading(true);
     setAllRentals(!allRentals);
-    if (allRentals) {
-      try {
-        const data = await getRentals();
-        setRentals(data);
-      } catch (error) {
-        console.error("Error fetching all rentals:", error);
-      }
-      console.log("Mostrando todos los alquileres: ", allRentals);
-    
-    }}
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 p-6">
@@ -214,14 +209,14 @@ export default function CarRentals() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl p-6 text-white shadow-lg">
             <h3 className="text-lg font-semibold mb-2">
-              Total Alquileres Activos
+              Total Alquileres
             </h3>
-            <p className="text-3xl font-bold">{rentals.length}</p>
+            <p className="text-3xl font-bold">{rentalsHistory.length}</p>
             <p className="text-blue-100 text-sm">Registrados en el sistema</p>
           </div>
 
           <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-2xl p-6 text-white shadow-lg">
-            <h3 className="text-lg font-semibold mb-2">Sin Sanciones</h3>
+            <h3 className="text-lg font-semibold mb-2">Alquileres Sin Sanciones</h3>
             <p className="text-3xl font-bold">
               {
                 rentals.filter(
@@ -234,7 +229,7 @@ export default function CarRentals() {
           </div>
 
           <div className="bg-gradient-to-r from-red-400 to-red-500 rounded-2xl p-6 text-white shadow-lg">
-            <h3 className="text-lg font-semibold mb-2">Con Sanciones</h3>
+            <h3 className="text-lg font-semibold mb-2">Alquileres Con Sanciones</h3>
             <p className="text-3xl font-bold">
               {
                 rentals.filter(
@@ -243,7 +238,7 @@ export default function CarRentals() {
                 ).length
               }
             </p>
-            <p className="text-red-100 text-sm">Requieren atención</p>
+            <p className="text-red-100 text-sm">Activos</p>
           </div>
         </div>
 
@@ -251,7 +246,7 @@ export default function CarRentals() {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-800">
-              Lista de Alquileres
+              Lista de Alquileres Activos
             </h2>
             <button
               className={`btn ${
@@ -277,6 +272,7 @@ export default function CarRentals() {
                     <th className="font-bold text-sm">Vehículo</th>
                     <th className="font-bold text-sm">Fecha Inicio</th>
                     <th className="font-bold text-sm">Fecha Fin</th>
+                    <th className="text-center font-bold text-sm">Sanciones</th>
                     <th className="text-center font-bold text-sm">Estado</th>
                   </tr>
                 </thead>
@@ -340,6 +336,19 @@ export default function CarRentals() {
                             </span>
                           )}
                         </td>
+                                                <td className="text-center">
+                          <div
+                            className={`badge ${
+                              rental.estado.nombre === "En curso"
+                                ? "badge-success"
+                                : rental.estado.nombre === "Reservado"
+                                ? "badge-warning"
+                                : "badge-error"
+                            }`}
+                          >
+                            {rental.estado.nombre}
+                          </div>
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -374,7 +383,7 @@ export default function CarRentals() {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 mt-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-800">
-              Lista de Alquileres
+              Historico de Alquileres 
             </h2>
             <button
               className={`btn ${
@@ -403,8 +412,8 @@ export default function CarRentals() {
                 </tr>
               </thead>  
               <tbody>
-                  {rentals && rentals.length > 0 ? (
-                    rentals.map((rental: Rental, index: number) => (
+                  {rentalsHistory && rentalsHistory.length > 0 ? (
+                    rentalsHistory.map((rental: Rental, index: number) => (
                       <tr
                         key={rental.id || index}
                         className="hover:bg-gray-50 transition-colors cursor-pointer"
@@ -447,14 +456,14 @@ export default function CarRentals() {
                         <td className="text-center">
                           <div
                             className={`badge ${
-                              rental.estado === "Activo"
+                              rental.estado.nombre === "En curso"
                                 ? "badge-success"
-                                : rental.estado === "Pendiente"
+                                : rental.estado.nombre === "Reservado"
                                 ? "badge-warning"
                                 : "badge-error"
                             }`}
                           >
-                            {rental.estado}
+                            {rental.estado.nombre}
                           </div>
                         </td>
                       </tr>
