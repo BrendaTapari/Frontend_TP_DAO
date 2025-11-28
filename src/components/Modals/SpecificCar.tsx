@@ -170,8 +170,6 @@ export default function SpecificCar({
       const states = await getStates();
       setAvailableStates(states);
 
-      // Try to find the current state ID
-      // If car.estado has an ID, use it. Otherwise try to match by name.
       let currentEstadoId = car.estado?.id_estado || 0;
       
       if (!currentEstadoId && car.estado?.nombre) {
@@ -192,7 +190,6 @@ export default function SpecificCar({
     } catch (error) {
       console.error("Error fetching states:", error);
       setError("Error al cargar los estados disponibles");
-      // Fallback initialization
       setEditForm({
         estadoId: car.estado?.id_estado || 0,
         costo: car.costo,

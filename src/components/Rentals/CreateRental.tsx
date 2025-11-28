@@ -1,11 +1,19 @@
-import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { getClients } from "../../services/clientService";
-import { getAviableCars } from "../../services/autosService";
+import { getAviableCarsForRental } from "../../services/autosService";
 import { getEmployees } from "../../services/employeeService";
-import { createRental, carAvailable } from "../../services/rentalService";
+import { createRental } from "../../services/rentalService";
 import { useLocation } from "wouter";
 import { ArrowLeft, Car, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Client } from "../../services/clientService.d";
+import CoveredCarImage from "../../images/CoveredCar.jpg";
 
 interface CarOption {
   id: number;
@@ -41,16 +49,32 @@ export default function CreateRental() {
   const [car, setCar] = useState<CarOption[]>([]);
   const [employee, setEmployee] = useState<EmployeeOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [error, setError] = useState("");
 
+  const dateCalculations = useMemo(() => {
+    if (!formData.fechaInicio || !formData.fechaFin) {
+      return { isValid: false, days: 0 };
+    }
+
+    const start = new Date(formData.fechaInicio);
+    const end = new Date(formData.fechaFin);
+
+    if (start >= end) {
+      return { isValid: false, days: 0 };
+    }
+
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return { isValid: true, days };
+  }, [formData.fechaInicio, formData.fechaFin]);
+
   useEffect(() => {
-    const fetchClients = async () => {
+    const fetchClientsAndEmployees = async () => {
       try {
         const clientData = await getClients();
         setClient(clientData);
-
-        const carsData = await getAviableCars();
-        setCar(carsData);
 
         const employeesData = await getEmployees();
         setEmployee(employeesData);
@@ -59,52 +83,88 @@ export default function CreateRental() {
       }
     };
 
-    fetchClients();
+    fetchClientsAndEmployees();
   }, []);
 
   useEffect(() => {
+    const fetchAvailableCars = async () => {
+      if (!dateCalculations.isValid) {
+        setCar([]);
+        return;
+      }
+
+      setIsFetchingCars(true);
+      try {
+        const carsData = await getAviableCarsForRental(
+          formData.fechaInicio,
+          formData.fechaFin
+        );
+        setCar(carsData);
+      } catch (error) {
+        console.error("Error fetching available cars:", error);
+        setCar([]);
+      } finally {
+        setIsFetchingCars(false);
+      }
+    };
+
+    fetchAvailableCars();
+  }, [formData.fechaInicio, formData.fechaFin, dateCalculations.isValid]);
+
+  const getImageUrl = (imagen?: string) => {
+    if (imagen) {
+      return `data:image/jpeg;base64,${imagen}`;
+    }
+
+    return CoveredCarImage;
+  };
+
+  useEffect(() => {
     const calculateCost = () => {
-      if (!formData.fechaInicio || !formData.fechaFin || !formData.auto) {
+      if (!dateCalculations.isValid || !formData.auto) {
         setFormData((prev) => ({ ...prev, costo: 0 }));
         return;
       }
-
-      const start = new Date(formData.fechaInicio);
-      const end = new Date(formData.fechaFin);
-
-      if (start >= end) {
-        setFormData((prev) => ({ ...prev, costo: 0 }));
-        return;
-      }
-
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
       const selectedCar = car.find((c) => c.patente === formData.auto);
       if (selectedCar) {
         setFormData((prev) => ({
           ...prev,
-          costo: diffDays * selectedCar.costo,
+          costo: dateCalculations.days * selectedCar.costo,
         }));
       }
     };
 
     calculateCost();
-  }, [formData.fechaInicio, formData.fechaFin, formData.auto, car]);
+  }, [dateCalculations.isValid, dateCalculations.days, formData.auto]);
 
-  const handleVolver = () => {
+  // Efecto separado para recalcular cuando cambia la lista de autos (solo si ya hay un auto seleccionado)
+  useEffect(() => {
+    if (formData.auto && dateCalculations.isValid && car.length > 0) {
+      const selectedCar = car.find((c) => c.patente === formData.auto);
+      if (selectedCar) {
+        setFormData((prev) => ({
+          ...prev,
+          costo: dateCalculations.days * selectedCar.costo,
+        }));
+      }
+    }
+  }, [car, formData.auto, dateCalculations.isValid, dateCalculations.days]);
+
+  const handleVolver = useCallback(() => {
     setLocation("/car-rentals");
-  };
+  }, [setLocation]);
 
-  const handleFormChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleFormChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    },
+    []
+  );
 
-  const handleCarSelection = (patente: string) => {
-    setFormData({ ...formData, auto: patente });
-  };
+  const handleCarSelection = useCallback((patente: string) => {
+    setFormData((prev) => ({ ...prev, auto: patente }));
+  }, []);
 
   const handleDateValidation = async () => {
     if (!formData.fechaInicio || !formData.fechaFin) {
@@ -146,12 +206,12 @@ export default function CreateRental() {
     }
   };
 
-  const handlePrevStep = () => {
+  const handlePrevStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
       setError("");
     }
-  };
+  }, [currentStep]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -164,20 +224,6 @@ export default function CreateRental() {
     try {
       setIsLoading(true);
 
-      const availability = await carAvailable(
-        formData.auto,
-        formData.fechaInicio,
-        formData.fechaFin
-      );
-      if (!availability.available) {
-        setError(
-          "El vehículo no está disponible en las fechas seleccionadas. Por favor elija otro rango de fechas."
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // Encontrar los IDs reales para enviar al backend
       const selectedClient = client.find(
         (c) => `${c.nombre} ${c.apellido}` === formData.cliente
       );
@@ -185,12 +231,11 @@ export default function CreateRental() {
         (e) => `${e.nombre} ${e.apellido}` === formData.empleado
       );
 
-      // Preparar datos para el backend con los identificadores correctos
       const rentalData = {
         ...formData,
-        cliente: selectedClient?.dni || selectedClient?.id || formData.cliente,
+        cliente: selectedClient?.dni_cliente || selectedClient?.id || formData.cliente,
         empleado:
-          selectedEmployee?.legajo || selectedEmployee?.id || formData.empleado,
+          selectedEmployee?.legajo_empleado || selectedEmployee?.id || formData.empleado,
       };
 
       await createRental(rentalData);
@@ -222,7 +267,11 @@ export default function CreateRental() {
                   value={formData.fechaInicio}
                   min={new Date().toISOString().split("T")[0]}
                   onChange={(e) =>
-                    setFormData({ ...formData, fechaInicio: e.target.value })
+                    setFormData({
+                      ...formData,
+                      fechaInicio: e.target.value,
+                      auto: "",
+                    })
                   }
                 />
               </div>
@@ -239,7 +288,11 @@ export default function CreateRental() {
                     new Date().toISOString().split("T")[0]
                   }
                   onChange={(e) =>
-                    setFormData({ ...formData, fechaFin: e.target.value })
+                    setFormData({
+                      ...formData,
+                      fechaFin: e.target.value,
+                      auto: "",
+                    })
                   }
                 />
               </div>
@@ -249,12 +302,7 @@ export default function CreateRental() {
                 <div className="stat bg-base-200 rounded-lg inline-block">
                   <div className="stat-title">Duración del alquiler</div>
                   <div className="stat-value text-primary">
-                    {Math.ceil(
-                      (new Date(formData.fechaFin).getTime() -
-                        new Date(formData.fechaInicio).getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )}{" "}
-                    días
+                    {dateCalculations.days} días
                   </div>
                 </div>
               </div>
@@ -269,10 +317,17 @@ export default function CreateRental() {
               Selecciona el auto
             </h2>
 
-            {car?.length === 0 ? (
+            {isFetchingCars ? (
+              <div className="text-center">
+                <div className="loading loading-spinner loading-lg"></div>
+                <p className="text-lg text-gray-500 mt-2">
+                  Buscando autos disponibles...
+                </p>
+              </div>
+            ) : car?.length === 0 ? (
               <div className="text-center">
                 <p className="text-lg text-gray-500">
-                  No hay autos disponibles
+                  No hay autos disponibles para estas fechas
                 </p>
               </div>
             ) : (
@@ -290,7 +345,7 @@ export default function CreateRental() {
                     <figure className="h-48 bg-gray-100 overflow-hidden">
                       {carItem.imagen ? (
                         <img
-                          src={carItem.imagen}
+                          src={getImageUrl(carItem.imagen)}
                           alt={`${carItem.marca} ${carItem.modelo}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -366,12 +421,7 @@ export default function CreateRental() {
                     }).format(formData.costo)}
                   </div>
                   <div className="stat-desc">
-                    {Math.ceil(
-                      (new Date(formData.fechaFin).getTime() -
-                        new Date(formData.fechaInicio).getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )}{" "}
-                    días de alquiler
+                    {dateCalculations.days} días de alquiler
                   </div>
                 </div>
               </div>
@@ -443,19 +493,18 @@ export default function CreateRental() {
 
       case 4:
         const selectedCar = car.find((c) => c.patente === formData.auto);
-
-        // Buscar cliente por nombre completo
         const selectedClient = client.find(
           (c) => `${c.nombre} ${c.apellido}` === formData.cliente
         );
-
-        // Buscar empleado por nombre completo
         const selectedEmployee = employee.find(
           (e) => `${e.nombre} ${e.apellido}` === formData.empleado
         );
 
         return (
-          <div className="space-y-6">        
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-center mb-6">
+              Confirma los detalles
+            </h2>
 
             <div className="card bg-base-200 shadow-xl max-w-2xl mx-auto">
               <div className="card-body">
@@ -487,6 +536,7 @@ export default function CreateRental() {
                           ? `${selectedClient.nombre} ${selectedClient.apellido}`
                           : "No encontrado"}
                       </p>
+
                     </div>
                     <div>
                       <p className="font-semibold">Empleado:</p>
@@ -495,6 +545,7 @@ export default function CreateRental() {
                           ? `${selectedEmployee.nombre} ${selectedEmployee.apellido}`
                           : "No encontrado"}
                       </p>
+
                     </div>
                   </div>
                   <div className="divider"></div>
