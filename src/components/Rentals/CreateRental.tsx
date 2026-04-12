@@ -138,7 +138,6 @@ export default function CreateRental() {
     calculateCost();
   }, [dateCalculations.isValid, dateCalculations.days, formData.auto]);
 
-  // Efecto separado para recalcular cuando cambia la lista de autos (solo si ya hay un auto seleccionado)
   useEffect(() => {
     if (formData.auto && dateCalculations.isValid && car.length > 0) {
       const selectedCar = car.find((c) => c.patente === formData.auto);

@@ -6,6 +6,7 @@ import CarAnimation from "./components/AnimandoAndo/CarAnimation";
 import ParticleBackground from "./components/ParticleBackground";
 import logo from "./images/logo.png";
 import { KeySquare } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -33,7 +34,7 @@ function App() {
           scale: 1,
           duration: 1.2,
           ease: "power3.out",
-        }
+        },
       );
     }
 
@@ -52,14 +53,14 @@ function App() {
           duration: 0.8,
           stagger: 0.2,
           ease: "back.out(1.7)",
-        }
+        },
       );
     }
 
     const welcomeTimer = setTimeout(() => {
       setShowWelcome(false);
       sessionStorage.setItem("hasShownWelcome", "true");
-    }, 2000);
+    }, 5000);
 
     return () => clearTimeout(welcomeTimer);
   }, []);
@@ -83,32 +84,23 @@ function App() {
   return (
     <>
       {showWelcome && (
-        <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 z-50 flex items-center justify-center">
-          <div className="text-center space-y-6 animate-pulse">
-            <div className="relative">
-              <img
-                src={logo}
-                alt="Polymorph-Rides Logo"
-                className="w-32 h-32 mx-auto object-contain filter drop-shadow-2xl animate-spin-slow"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full animate-ping"></div>
-            </div>
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
+        <div className="fixed inset-0 bg-gradient-to-br from-base-300 via-secondary to-base-100 z-50 flex items-center justify-center">
+          <div className="text-center space-y-6">
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary mt-4 bg-clip-text text-transparent">
               Polymorph-Rides
             </h1>
             <p className="text-xl text-gray-300 animate-fade-in">
               Cargando experiencia de movilidad...
             </p>
             <div className="flex justify-center space-x-1">
-              <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce"></div>
-              <div
-                className="w-3 h-3 bg-purple-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.1s" }}
-              ></div>
-              <div
-                className="w-3 h-3 bg-pink-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
+              <div className="w-3 h-3 rounded-full animate-bounce"></div>
+              <div className="w-full">
+                <DotLottieReact
+                  src="https://lottie.host/acfe4ef8-1b28-480f-acd5-d4aad64a05e5/16Stl4t9eF.lottie"
+                  loop
+                  autoplay
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -116,9 +108,9 @@ function App() {
 
       <ParticleBackground />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 relative z-10">
+      <div className="min-h-screen bg-gradient-to-br from-bg-base-100 via-bg-base-300 to-gray-900 relative z-10">
         <div ref={heroRef} className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-700/10 to-gray-700/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-base-100 to-bg-base-200"></div>
 
           <div className="relative z-10 flex flex-col items-center justify-center pt-8 pb-4">
             <div className="flex items-center space-x-4 mb-6">
@@ -126,6 +118,11 @@ function App() {
                 <h2 className="text-3xl font-semibold font-serif text-white mt-2">
                   "El mismo auto, para muchos propósitos"
                 </h2>
+                <div className="flex gap-2 mt-2">
+                  <button className="btn btn-primary"> Primary</button>
+                  <button className="btn btn-secondary"> Secondary</button>
+                  <button className="btn btn-accent"> Accent</button>
+                </div>
               </div>
             </div>
 
