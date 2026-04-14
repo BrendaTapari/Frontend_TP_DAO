@@ -59,7 +59,7 @@ function App() {
     const welcomeTimer = setTimeout(() => {
       setShowWelcome(false);
       sessionStorage.setItem("hasShownWelcome", "true");
-    }, 2000);
+    }, 9000);
 
     return () => clearTimeout(welcomeTimer);
   }, []);
