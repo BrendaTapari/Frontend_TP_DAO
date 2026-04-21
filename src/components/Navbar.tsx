@@ -1,32 +1,42 @@
-import logo from "../images/logo.png";
+import { useLocation } from "wouter";
+
 
 export default function Navbar() {
+  const [, setLocation] = useLocation()
+
+  const handleBackHome = () => {
+    setLocation("/")
+  } 
+  
   return (
     <>
-      <div className="navbar bg-gradient-to-r from-bg-base-300 via-primary to-primary/60 shadow-2xl border-b border-gray-700">
-        <div className="flex-1">
+      <div className="navbar absolute top-0 w-full z-50 bg-gradient-to-b from-black/90 via-black/50 to-transparent justify-center pt-4 pb-8">
+        <div className="flex justify-center items-center">
           <a className="flex items-center space-x-3 hover:scale-105 transition-transform duration-300">
             <div className="relative">
-              <img
-                src={logo}
-                alt="Polymorph-Rides Logo"
-                className="w-12 h-12 object-contain filter drop-shadow-lg hover:drop-shadow-xl transition-all duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-fullrea"></div>
+              <div className="absolute inset-0 bg-gradient-to-r rounded-fullrea"></div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl text-gray-50 font-bold bg-gradient-to-r text- bg-clip-text animate-pulse">
-                Polymorph-Rides
-              </span>
-              <span className="text-xs text-gray-300/80 -mt-1">
-              Transformando la movilidad
-              </span>
+            <div className="flex flex-col items-center">
+              <div className="flex justify-center">
+                <span
+                  className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-white to-zinc-400 hover:cursor-pointer transition-all duration-700 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "2.2rem",
+                    fontWeight: 300,
+                    letterSpacing: "0.25em",
+                    marginLeft: "0.25em" 
+                  }}
+                  onClick={() => handleBackHome()}
+                >
+                  LuxDrive
+                </span>
+              </div>
             </div>
           </a>
         </div>
         <div className="flex-none">
-          <div className="hidden md:flex items-center space-x-1">
-          </div>
+          <div className="hidden md:flex items-center space-x-1"></div>
         </div>
       </div>
     </>

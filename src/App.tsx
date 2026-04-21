@@ -68,20 +68,8 @@ function App() {
 
   return (
     <>
-      <video
-        autoPlay
-        muted
-        loop
-        className="fixed inset-0 w-full h-full object-cover -z-10"
-      >
-        <source
-          src="/video/output.webm"
-          type="video/webm"
-        />
-      </video>
-
       {showWelcome && (
-        <div className="fixed inset-0 bg-gradient-to-br from-base-300 via-secondary to-base-100 z-50 items-center justify-center">
+        <div className="fixed inset-0 bg-gradient-to-br from-base-300 via-secondary to-base-100 z-50 flex flex-col items-center justify-center">
           <div className="text-center">
             <div className="w-3 h-3 rounded-full animate-bounce"></div>
             <div className="w-full h-72 mx-auto mt-14">
@@ -98,44 +86,60 @@ function App() {
               Cargando experiencia de movilidad...
             </p>
           </div>
-          <div className="flex justify-center space-x-1"></div>
         </div>
       )}
 
-      <ParticleBackground />
+      {/* HERO SECTION */}
+      <div className="relative min-h-screen w-full flex flex-col overflow-hidden">
+        {/* Fondo de video absoluto solo para esta sección */}
+        <video
+          autoPlay
+          muted
+          loop
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src="/video/output.webm" type="video/webm" />
+        </video>
 
-      <div className="min-h-screen bg-gradient-to-br from-bg-base-100 via-bg-base-300 to-gray-900 relative z-10">
-        <div ref={heroRef} className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-bg-base-100 to-bg-base-200"></div>
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <ParticleBackground />
+        </div>
 
-          <div className="relative z-10 ml-40 flex flex-col justify-start pt-[55vh] pb-12 w-fit">
-            
-            <div className="mb-6">
-              <div 
-                style={{ 
-                  fontFamily: "'Playfair Display', serif", 
-                  fontSize: "4rem", /* Lo subí un pelín para que tenga más impacto */
-                  lineHeight: "1.2"
-                }}
-              > 
-                <h2 className="text-white drop-shadow-md">Un auto,</h2> 
-                <h2 className="text-white drop-shadow-md">muchos propósitos</h2> 
-              </div> 
-            </div> 
+        {/* Gradiente sutil para facilitar la transición hacia la sección de abajo */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-base-100 z-0 pointer-events-none"></div>
 
-            <button 
-              className="outlineButton px-6 py-2 rounded-xl font-semibold w-max" 
+        <div ref={heroRef} className="relative z-10 ml-40 flex flex-col justify-start pt-[55vh] pb-12 w-fit">
+          <div className="mb-6">
+            <div 
               style={{ 
                 fontFamily: "'Playfair Display', serif", 
-                fontSize: "1.4rem", 
-                letterSpacing: "2px" /* Le da ese toque de lujo extra */
-              }} 
-              onClick={() => handleAlquilaYaButton()} 
+                fontSize: "4rem",
+                lineHeight: "1.2"
+              }}
             > 
-              ALQUILA YA! 
-            </button> 
+              <h2 className="text-white drop-shadow-md">Un auto,</h2> 
+              <h2 className="text-white drop-shadow-md">muchos propósitos</h2> 
+            </div> 
           </div> 
+
+          <button 
+            className="outlineButton px-6 py-2 rounded-xl font-semibold w-max bg-black/20" 
+            style={{ 
+              fontFamily: "'Playfair Display', serif", 
+              fontSize: "1.4rem", 
+              letterSpacing: "2px" 
+            }} 
+            onClick={() => handleAlquilaYaButton()} 
+          > 
+            ALQUILA YA! 
+          </button> 
         </div>
+      </div>
+
+      {/* SECCIÓN FLOTA DE AUTOS */}
+      <div className="w-full bg-base-100 py-32 flex flex-col items-center justify-start relative z-10 min-h-screen">
+        <h3 className="text-4xl font-bold text-white">Nuestra flota de autos</h3>
+        <p className="text-xl text-gray-300 mt-4">Descubre nuestra amplia gama de vehículos disponibles para alquilar</p>
       </div>
     </>
   );

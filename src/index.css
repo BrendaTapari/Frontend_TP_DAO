@@ -6,15 +6,15 @@
   prefersdark: false; /* set as default dark mode (prefers-color-scheme:dark) */
   color-scheme: light; /* color of browser-provided UI */
 
-  --color-base-100: oklch(18.22% 0.000 0.00);
+  --color-base-100: oklch(18.22% 0 0);
   --color-base-200: oklch(22.5% 0 0);
-  --color-base-300: oklch(27.0% 0 0);
-  --color-base-content: oklch(20% 0.05 240);
+  --color-base-300: oklch(27% 0 0);
+  --color-base-content: oklch(96% 0.01 240);
   --color-primary: oklch(66.08% 0.134 87.47);
   --color-primary-content: oklch(20% 0.006 0.13);
   --color-secondary: oklch(48.06% 0.144 0.07);
   --color-secondary-content: oklch(98% 0.01 0.07);
-  --color-accent: oklch(60.66% 0.000 89.88);
+  --color-accent: oklch(60.66% 0 89.88);
   --color-accent-content: oklch(15% 0 0);
   --color-neutral: oklch(50% 0.05 240);
   --color-neutral-content: oklch(98% 0.01 240);
@@ -43,10 +43,49 @@
   --depth: 1;
   --noise: 0;
 
-  --text: oklab(94.61% 0.000 0.00);
+  --text: oklab(94.61% 0 89.88);
 }
 
+/* Global readable text on base surfaces without per-component text-white */
+:where(.bg-base-100, .bg-base-200, .bg-base-300) {
+  color: var(--color-base-content);
+}
 
+body {
+  color: var(--color-base-content);
+}
+
+.outlineButton {
+  background: transparent;
+  border: 2px solid var(--color-primary); 
+  color: var(--color-primary);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px; /* O tu var(--radius-box) */
+  cursor: pointer;
+  font-family: 'Playfair Display', serif; /* Aplicando tu fuente de lujo */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  /* La transición debe incluir el backdrop-filter */
+  transition: all 0.4s ease;
+}
+
+.outlineButton:hover {
+  /* Fondo primary semi-transparente para poder notar el desenfoque del fondo (blur) */
+  background: color-mix(in oklch, var(--color-primary) 5%, transparent); 
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px); /* Soporte para Safari */
+  
+  /* El borde acompaña al mismo color */
+  border-color: var(--color-primary);
+  
+  /* Para mantener legibilidad dependiendo del fondo */
+  color: var(--color-primary); 
+  
+  /* Sombra sutil para elevación */
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
 /* Animaciones personalizadas para Polymorph-Rides */
 @keyframes fadeIn {
   from {

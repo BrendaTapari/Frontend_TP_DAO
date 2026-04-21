@@ -97,7 +97,7 @@ export default function CreateRental() {
       try {
         const carsData = await getAviableCarsForRental(
           formData.fechaInicio,
-          formData.fechaFin
+          formData.fechaFin,
         );
         setCar(carsData);
       } catch (error) {
@@ -158,7 +158,7 @@ export default function CreateRental() {
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     },
-    []
+    [],
   );
 
   const handleCarSelection = useCallback((patente: string) => {
@@ -224,17 +224,20 @@ export default function CreateRental() {
       setIsLoading(true);
 
       const selectedClient = client.find(
-        (c) => `${c.nombre} ${c.apellido}` === formData.cliente
+        (c) => `${c.nombre} ${c.apellido}` === formData.cliente,
       );
       const selectedEmployee = employee.find(
-        (e) => `${e.nombre} ${e.apellido}` === formData.empleado
+        (e) => `${e.nombre} ${e.apellido}` === formData.empleado,
       );
 
       const rentalData = {
         ...formData,
-        cliente: selectedClient?.dni_cliente || selectedClient?.id || formData.cliente,
+        cliente:
+          selectedClient?.dni_cliente || selectedClient?.id || formData.cliente,
         empleado:
-          selectedEmployee?.legajo_empleado || selectedEmployee?.id || formData.empleado,
+          selectedEmployee?.legajo_empleado ||
+          selectedEmployee?.id ||
+          formData.empleado,
       };
 
       await createRental(rentalData);
@@ -298,7 +301,7 @@ export default function CreateRental() {
             </div>
             {formData.fechaInicio && formData.fechaFin && (
               <div className="text-center">
-                <div className="stat bg-base-200 rounded-lg inline-block">
+                <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
                   <div className="stat-title">Duración del alquiler</div>
                   <div className="stat-value text-primary">
                     {dateCalculations.days} días
@@ -319,13 +322,13 @@ export default function CreateRental() {
             {isFetchingCars ? (
               <div className="text-center">
                 <div className="loading loading-spinner loading-lg"></div>
-                <p className="text-lg text-gray-500 mt-2">
+                <p className="text-lg text-gray-200 mt-2">
                   Buscando autos disponibles...
                 </p>
               </div>
             ) : car?.length === 0 ? (
               <div className="text-center">
-                <p className="text-lg text-gray-500">
+                <p className="text-lg text-gray-200">
                   No hay autos disponibles para estas fechas
                 </p>
               </div>
@@ -334,7 +337,7 @@ export default function CreateRental() {
                 {car?.map((carItem) => (
                   <div
                     key={carItem.patente}
-                    className={`card bg-base-100 w-full shadow-sm cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                    className={`card bg-base-100 text-gray-100 w-full shadow-sm cursor-pointer transition-all duration-200 hover:shadow-lg ${
                       formData.auto === carItem.patente
                         ? "ring-2 ring-primary shadow-lg"
                         : "hover:scale-105"
@@ -411,7 +414,7 @@ export default function CreateRental() {
 
             {formData.auto && formData.fechaInicio && formData.fechaFin && (
               <div className="text-center mt-8">
-                <div className="stat bg-base-200 rounded-lg inline-block">
+                <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
                   <div className="stat-title">Costo total estimado</div>
                   <div className="stat-value text-success">
                     {new Intl.NumberFormat("es-AR", {
@@ -493,10 +496,10 @@ export default function CreateRental() {
       case 4:
         const selectedCar = car.find((c) => c.patente === formData.auto);
         const selectedClient = client.find(
-          (c) => `${c.nombre} ${c.apellido}` === formData.cliente
+          (c) => `${c.nombre} ${c.apellido}` === formData.cliente,
         );
         const selectedEmployee = employee.find(
-          (e) => `${e.nombre} ${e.apellido}` === formData.empleado
+          (e) => `${e.nombre} ${e.apellido}` === formData.empleado,
         );
 
         return (
@@ -505,7 +508,7 @@ export default function CreateRental() {
               Confirma los detalles
             </h2>
 
-            <div className="card bg-base-200 shadow-xl max-w-2xl mx-auto">
+            <div className="card bg-base-200 text-gray-100 shadow-xl max-w-2xl mx-auto">
               <div className="card-body">
                 <h3 className="card-title">Resumen del alquiler</h3>
                 <div className="space-y-4">
@@ -535,7 +538,6 @@ export default function CreateRental() {
                           ? `${selectedClient.nombre} ${selectedClient.apellido}`
                           : "No encontrado"}
                       </p>
-
                     </div>
                     <div>
                       <p className="font-semibold">Empleado:</p>
@@ -544,7 +546,6 @@ export default function CreateRental() {
                           ? `${selectedEmployee.nombre} ${selectedEmployee.apellido}`
                           : "No encontrado"}
                       </p>
-
                     </div>
                   </div>
                   <div className="divider"></div>
@@ -569,7 +570,7 @@ export default function CreateRental() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 p-6">
+    <div className="min-h-screen bg-base-100 text-gray-100 p-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <button
@@ -579,7 +580,9 @@ export default function CreateRental() {
         >
           <ArrowLeft />
         </button>
-        <h1 className="font-semibold text-3xl">Registrar Alquiler</h1>
+        <h1 className="font-semibold text-3xl text-white">
+          Registrar Alquiler
+        </h1>
       </div>
 
       {/* Steps Progress */}
@@ -608,7 +611,7 @@ export default function CreateRental() {
       )}
 
       {/* Step Content */}
-      <div className="card bg-base-100 shadow-xl max-w-4xl mx-auto">
+      <div className="card bg-base-100 text-gray-100 shadow-xl max-w-4xl mx-auto">
         <div className="card-body">{renderStepContent()}</div>
       </div>
 
