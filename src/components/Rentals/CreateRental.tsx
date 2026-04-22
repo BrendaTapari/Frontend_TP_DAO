@@ -12,6 +12,8 @@ import { getEmployees } from "../../services/employeeService";
 import { createRental } from "../../services/rentalService";
 import { useLocation } from "wouter";
 import { ArrowLeft, Car, ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 import type { Client } from "../../services/clientService.d";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
 
@@ -151,7 +153,7 @@ export default function CreateRental() {
   }, [car, formData.auto, dateCalculations.isValid, dateCalculations.days]);
 
   const handleVolver = useCallback(() => {
-    setLocation("/car-rentals");
+    setLocation("/");
   }, [setLocation]);
 
   const handleFormChange = useCallback(
@@ -255,48 +257,76 @@ export default function CreateRental() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-center mb-6">
+            <h2 className="text-3xl font-semibold text-center mb-6">
               Selecciona las fechas
             </h2>
-            <div className="flex gap-4 justify-center">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Fecha desde:</span>
+            <div className="flex justify-center w-full">
+              <div className="form-control w-full max-w-xl">
+                <label className="label justify-center pb-4">
+                  <span className="label-text font-medium text-xl text-white">Seleccione el período de alquiler</span>
                 </label>
-                <input
-                  type="date"
-                  className="input input-bordered w-full max-w-xs"
-                  value={formData.fechaInicio}
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      fechaInicio: e.target.value,
-                      auto: "",
-                    })
-                  }
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Fecha hasta:</span>
-                </label>
-                <input
-                  type="date"
-                  className="input input-bordered w-full max-w-xs"
-                  value={formData.fechaFin}
-                  min={
-                    formData.fechaInicio ||
-                    new Date().toISOString().split("T")[0]
-                  }
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      fechaFin: e.target.value,
-                      auto: "",
-                    })
-                  }
-                />
+                <div className="relative inline-block w-full text-center">
+                  <button 
+                    type="button"
+                    popoverTarget="rdp-popover-range" 
+                    className="input input-bordered w-full h-16 text-center text-gray-200 flex items-center justify-center bg-base-200/50 hover:bg-base-200 transition-colors text-lg tracking-wide border-white/20" 
+                    style={{ anchorName: "--rdp-range" } as React.CSSProperties}
+                  >
+                    {formData.fechaInicio ? (
+                      formData.fechaFin ? (
+                        `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()}   —   ${new Date(formData.fechaFin + "T12:00:00").toLocaleDateString()}`
+                      ) : (
+                        `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()}   —   Seleccione fin`
+                      )
+                    ) : (
+                      "Fechas de check-in y check-out"
+                    )}
+                  </button>
+                  <div 
+                    popover="auto" 
+                    id="rdp-popover-range" 
+                    className="dropdown bg-base-200 border border-white/10 rounded-2xl p-2  m-2 text-gray-200 shadow-xl" 
+                    style={{ positionAnchor: "--rdp-range" } as React.CSSProperties}
+                  >
+                    <DayPicker 
+                      className="react-day-picker" 
+                      mode="range" 
+                      selected={{
+                        from: formData.fechaInicio ? new Date(formData.fechaInicio + "T12:00:00") : undefined,
+                        to: formData.fechaFin ? new Date(formData.fechaFin + "T12:00:00") : undefined,
+                      }} 
+                      disabled={{ before: new Date() }}
+                      onSelect={(range) => {
+                        let inicio = "";
+                        let fin = "";
+                        
+                        if (range?.from) {
+                            inicio = `${range.from.getFullYear()}-${String(range.from.getMonth() + 1).padStart(2, "0")}-${String(range.from.getDate()).padStart(2, "0")}`;
+                        }
+                        if (range?.to) {
+                            fin = `${range.to.getFullYear()}-${String(range.to.getMonth() + 1).padStart(2, "0")}-${String(range.to.getDate()).padStart(2, "0")}`;
+                        }
+                        
+                        setFormData({ ...formData, fechaInicio: inicio, fechaFin: fin, auto: "" });
+                      }} 
+                    />
+                    <div className="flex gap-2 w-full px-4 pb-4 mt-2">
+                      <button
+                        className="btn btn-outline btn-error btn-sm flex-1 font-light"
+                        onClick={() => setFormData({ ...formData, fechaInicio: "", fechaFin: "", auto: "" })}
+                        disabled={!formData.fechaInicio && !formData.fechaFin}
+                      >
+                        Limpiar
+                      </button>
+                      <button
+                        className="btn btn-primary btn-sm flex-1 font-medium text-black"
+                        onClick={() => document.getElementById("rdp-popover-range")?.hidePopover?.()}
+                      >
+                        Aceptar
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             {formData.fechaInicio && formData.fechaFin && (
@@ -572,22 +602,22 @@ export default function CreateRental() {
   return (
     <div className="min-h-screen bg-base-100 text-gray-100 p-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-4 mb-8 mt-16">
         <button
-          className="btn btn-circle btn-neutral tooltip"
+          className="btn btn-primary btn-outline btn-circle tooltip"
           data-tip="Volver"
-          onClick={handleVolver}
+          onClick={() => handleVolver()}
         >
-          <ArrowLeft />
+          <ChevronLeft/>
         </button>
         <h1 className="font-semibold text-3xl text-white">
-          Registrar Alquiler
+          Registro de alquiler
         </h1>
       </div>
 
       {/* Steps Progress */}
       <div className="flex justify-center mb-8">
-        <ul className="steps steps-vertical lg:steps-horizontal">
+        <ul className="steps steps-vertical lg:steps-horizontal bg-base-200 rounded-box p-4 ">
           <li className={`step ${currentStep >= 1 ? "step-primary" : ""}`}>
             Elegir fecha
           </li>

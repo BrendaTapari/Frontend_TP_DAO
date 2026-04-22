@@ -4,11 +4,15 @@ import gsap from "gsap";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import ParticleBackground from "./components/ParticleBackground";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import CarCarousel from "./components/CarCarousel";
+import PremiumFeatures from "./components/PremiumFeatures";
+import { ChevronDown } from "lucide-react";
 
 gsap.registerPlugin(MotionPathPlugin);
 
 function App() {
   const [, setLocation] = useLocation();
+  const [showIconSroll, setShowIconScroll] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => {
     const hasShownWelcome = sessionStorage.getItem("hasShownWelcome");
     return !hasShownWelcome;
@@ -62,9 +66,32 @@ function App() {
     return () => clearTimeout(welcomeTimer);
   }, []);
 
+  useEffect(() => {
+    const scrollTimer = setTimeout(() => {
+      if (window.scrollY < 50) {
+        setShowIconScroll(true);
+      }
+    }, 5000);
+
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setShowIconScroll(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const handleAlquilaYaButton = () => {
     setLocation("/add-rental");
   };
+
+
 
   return (
     <>
@@ -98,7 +125,7 @@ function App() {
           loop
           className="absolute inset-0 w-full h-full object-cover z-0"
         >
-          <source src="/video/output.webm" type="video/webm" />
+          <source src="/Videos/output.webm" type="video/webm" />
         </video>
 
         <div className="absolute inset-0 z-0 pointer-events-none">
@@ -134,13 +161,31 @@ function App() {
             ALQUILA YA! 
           </button> 
         </div>
+        {showIconSroll && (
+          <div 
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer animate-bounce"
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: "smooth" })}
+          >
+            <div className="flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity">
+              <span className="text-white mb-2 font-light tracking-wide uppercase text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Bajar
+              </span>
+              <ChevronDown className="w-10 h-10 text-white" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* SECCIÓN FLOTA DE AUTOS */}
-      <div className="w-full bg-base-100 py-32 flex flex-col items-center justify-start relative z-10 min-h-screen">
-        <h3 className="text-4xl font-bold text-white">Nuestra flota de autos</h3>
-        <p className="text-xl text-gray-300 mt-4">Descubre nuestra amplia gama de vehículos disponibles para alquilar</p>
+      <div className="w-full bg-base-100 py-24 flex flex-col items-center justify-start relative z-10 min-h-screen">
+        <h3 className="text-4xl font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif", letterSpacing: "1px" }}>Nuestra flota de autos</h3>
+        <p className="text-xl text-gray-300 mb-10 font-light">Descubre nuestra amplia gama de vehículos disponibles para alquilar</p>
+        
+        {/* Car Carousel Integration */}
+        <CarCarousel />
       </div>
+
+      <PremiumFeatures />
     </>
   );
 }
