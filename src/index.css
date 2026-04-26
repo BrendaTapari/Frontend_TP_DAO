@@ -208,102 +208,39 @@ html {
 
 /* --- React Day Picker V9 Luxury Dark Theme Overrides --- */
 
-/* Contenedor del popover con Glassmorphism oscuro */
-#rdp-popover-inicio, 
-#rdp-popover-fin {
-  background: rgba(15, 15, 15, 0.75) !important; /* Fondo ultra oscuro casi transparente */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 16px;
-  padding: 0.5rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
-  color: white;
+.rdp-root {
+  /* Colors */
+  --rdp-accent-color: var(--color-primary) !important;
+  --rdp-accent-background-color: color-mix(in oklch, var(--color-primary) 15%, transparent) !important;
+  --rdp-today-color: var(--color-primary) !important;
+  --rdp-range_middle-background-color: color-mix(in oklch, var(--color-primary) 25%, transparent) !important;
+  --rdp-range_middle-color: #f3f4f6 !important;
+  --rdp-weekday-opacity: 1 !important;
+  --rdp-weekday-padding: 15px !important;
+  --rdp-weekday-text-align: center !important;
+  color: #f6f3f3;
 }
 
-/* Raíz del calendario */
-.react-day-picker {
-  --rdp-accent-color: var(--color-primary);
-  --rdp-background-color: transparent;
-  --rdp-accent-background-color: rgba(255, 255, 255, 0.1);
-  --rdp-selected-border: 2px solid var(--color-primary);
-  /* Espaciado del calendario */
-  margin: 0.5rem;
+/* meses y años */
+.rdp-caption_label {
+  font-size: 1.50rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
+  color: var(--color-primary) !important;
 }
 
-/* Mes actual: fuente elegante */
-.react-day-picker .rdp-caption_label {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.25rem !important;
-  font-weight: 500;
-  letter-spacing: 1px;
-}
-
-/* Días de la semana en el encabezado */
-.react-day-picker .rdp-head_cell {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 600;
-  padding-bottom: 0.5rem;
-}
-
-/* Estilo individual de cada celda/día */
-.react-day-picker .rdp-day {
-  border-radius: 8px !important; /* Cuadrados suavemente redondeados */
-  transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-/* Hover en un día no seleccionado */
-.react-day-picker .rdp-day:hover:not(.rdp-root[data-selected="true"]):not([disabled]) {
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: scale(1.1);
-}
-
-/* Día seleccionado */
-.react-day-picker .rdp-selected,
-.react-day-picker .rdp-selected:hover {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  font-weight: 600;
-  transform: scale(1.05);
-}
-
-/* Día actual (Hoy) */
-.react-day-picker .rdp-today {
-  color: #ffffff;
-  font-weight: 600;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Día seleccionado en un rango (Check-in / Check-out) */
-.react-day-picker .rdp-range_start,
-.react-day-picker .rdp-range_end {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  font-weight: 600;
-}
-
-/* Días intermedios del rango */
-.react-day-picker .rdp-range_middle {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 0 !important;
+/* Dias de la semana (Lunes, Martes, etc.) */
+.rdp-head_cell {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
   color: #e5e7eb !important;
 }
 
-/* Botones de navegación (mes anterior/siguiente) */
-.react-day-picker .rdp-nav_button {
-  border-radius: 50%;
-  transition: background-color 0.2s;
-}
-
-.react-day-picker .rdp-nav_button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Días deshabilitados */
-.react-day-picker .rdp-disabled {
-  opacity: 0.2;
+/* Dias */
+.rdp-day {
+  font-size: 1.25rem !important;
+  font-weight: 500 !important;
 }

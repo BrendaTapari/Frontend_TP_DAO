@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Car, ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { es } from "date-fns/locale";
 import type { Client } from "../../services/clientService.d";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
 
@@ -289,8 +290,10 @@ export default function CreateRental() {
                     style={{ positionAnchor: "--rdp-range" } as React.CSSProperties}
                   >
                     <DayPicker 
+                      locale={es}
                       className="react-day-picker" 
                       mode="range" 
+                      numberOfMonths={2}  
                       selected={{
                         from: formData.fechaInicio ? new Date(formData.fechaInicio + "T12:00:00") : undefined,
                         to: formData.fechaFin ? new Date(formData.fechaFin + "T12:00:00") : undefined,
