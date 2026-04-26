@@ -146,6 +146,7 @@ body {
 /* Mejoras para el scrolling suave */
 html {
   scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
 }
 
 /* Efectos de glassmorphism */

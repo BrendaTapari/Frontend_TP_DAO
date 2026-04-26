@@ -261,6 +261,16 @@ export default function CreateRental() {
             <h2 className="text-3xl font-semibold text-center mb-6">
               Selecciona las fechas
             </h2>
+            {formData.fechaInicio && formData.fechaFin && (
+              <div className="text-center">
+                <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
+                  <div className="stat-title">Duración del alquiler</div>
+                  <div className="stat-value text-primary">
+                    {dateCalculations.days} días
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex justify-center w-full">
               <div className="form-control w-full max-w-xl">
                 <label className="label justify-center pb-4">
@@ -332,16 +342,7 @@ export default function CreateRental() {
                 </div>
               </div>
             </div>
-            {formData.fechaInicio && formData.fechaFin && (
-              <div className="text-center">
-                <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
-                  <div className="stat-title">Duración del alquiler</div>
-                  <div className="stat-value text-primary">
-                    {dateCalculations.days} días
-                  </div>
-                </div>
-              </div>
-            )}
+            
           </div>
         );
 

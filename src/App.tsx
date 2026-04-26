@@ -117,7 +117,7 @@ function App() {
       )}
 
       {/* HERO SECTION */}
-      <div className="relative min-h-screen w-full flex flex-col overflow-hidden">
+      <div className="relative min-h-screen w-full flex flex-col overflow-hidden snap-center">
         {/* Fondo de video absoluto solo para esta sección */}
         <video
           autoPlay
@@ -177,15 +177,53 @@ function App() {
       </div>
 
       {/* SECCIÓN FLOTA DE AUTOS */}
-      <div className="w-full bg-base-100 py-24 flex flex-col items-center justify-start relative z-10 min-h-screen">
-        <h3 className="text-4xl font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif", letterSpacing: "1px" }}>Nuestra flota de autos</h3>
-        <p className="text-xl text-gray-300 mb-10 font-light">Descubre nuestra amplia gama de vehículos disponibles para alquilar</p>
-        
-        {/* Car Carousel Integration */}
-        <CarCarousel />
+      <div className="w-full bg-base-100 py-16 px-6 lg:px-12 flex flex-col justify-center relative z-10 min-h-screen snap-center">
+        <div className="max-w-[90rem] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center h-full">
+          
+          {/* Left Column: Text & Button */}
+          <div className="flex flex-col justify-center text-left space-y-10 order-2 lg:order-1 mt-10 lg:mt-0">
+            <div className="space-y-6">
+              <h3 
+                className="text-5xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl" 
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Alquila con nosotros en <br/>
+                <span className="text-primary italic font-light">Córdoba, Argentina</span>
+              </h3>
+              <p className="text-xl lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl">
+                Descubre nuestra exclusiva selección de vehículos. Diseño, confort y el mejor rendimiento para que disfrutes cada kilómetro de tu viaje.
+              </p>
+            </div>
+            
+            {/* Botón Ver Flota Completa */}
+            <div className="pt-4">
+              <button 
+                className="outlineButton px-12 py-4 rounded-full text-sm md:text-base tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-primary/30"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+                onClick={() => setLocation("/car-rentals")}
+              >
+                VER FLOTA COMPLETA
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Car Carousel */}
+          <div className="w-full flex justify-center lg:justify-end order-1 lg:order-2">
+            <div className="w-full relative">
+              {/* Optional glowing effect behind carousel */}
+              <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+              <div className="relative z-10 w-full">
+                <CarCarousel />
+              </div>
+            </div>
+          </div>
+          
+        </div>
       </div>
 
-      <PremiumFeatures />
+      <div className="snap-center min-h-screen">
+        <PremiumFeatures />
+      </div>
     </>
   );
 }
