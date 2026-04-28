@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "patente": "ABC123",
+    "marca": "Audi",
+    "modelo": "A3",
+    "año": 2023,
+    "estado": "disponible",
+    "costo": 65000,
+    "periodicidad_mantenimiento": 6,
+    "imagen": "/Images/autos/audiA3.png"
+  },
+  {
+    "id": 2,
+    "patente": "XYZ789",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "año": 2023,
+    "estado": "disponible",
+    "costo": 50000,
+    "periodicidad_mantenimiento": 6,
+    "imagen": "/Images/autos/corolla.png"
+  },
+  {
+    "id": 3,
+    "patente": "DEF456",
+    "marca": "Toyota",
+    "modelo": "RAV4",
+    "año": 2022,
+    "estado": "en_alquiler",
+    "costo": 55000,
+    "periodicidad_mantenimiento": 8,
+    "imagen": "/Images/autos/Rav4.png"
+  },
+  {
+    "id": 4,
+    "patente": "GHI012",
+    "marca": "Toyota",
+    "modelo": "Yaris Cross",
+    "año": 2023,
+    "estado": "disponible",
+    "costo": 45000,
+    "periodicidad_mantenimiento": 12,
+    "imagen": "/Images/autos/YarisCross.png"
+  }
+]

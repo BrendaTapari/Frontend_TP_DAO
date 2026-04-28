@@ -1,118 +1,218 @@
-import { ShieldCheck, MapPin, Bone, Baby, Clock, Map } from "lucide-react";
+import {
+  ShieldCheck,
+  MapPin,
+  Bone,
+  Baby,
+  Clock,
+  Map,
+  Zap,
+  Shield,
+  Wifi,
+} from "lucide-react";
 
-const features = [
+const detailImages = [
   {
-    icon: <Baby className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Asientos para Niños",
-    description:
-      "Seguridad garantizada para los más pequeños. Disponemos de huevitos (0-13kg), butacas (9-18kg) y boosters (15-36kg) instalados profesionalmente según normativa.",
-    colSpan: "md:col-span-2 lg:col-span-2",
-    gradient: "from-blue-900/40 via-transparent to-transparent",
+    src: "/Images/landing/niños_en_auto.jpg",
+    alt: "Seguridad para Niños",
+    position: "left",
   },
   {
-    icon: <Bone className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Pet Friendly",
-    description:
-      "Tu fiel compañero viaja contigo. Incluimos cobertores de asientos premium y arneses de seguridad sin costo adicional.",
-    colSpan: "md:col-span-1 lg:col-span-1",
-    gradient: "from-amber-900/40 via-transparent to-transparent",
+    src: "/Images/landing/gps.jpg",
+    alt: "Sistema GPS Integrado",
+    position: "right",
   },
   {
-    icon: <Map className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Navegación GPS y Wi-Fi",
+    src: "/Images/landing/autos_discapacitados.jpg",
+    alt: "Accesibilidad para Todos",
+    position: "left",
+  },
+];
+
+const luxuryFeatures = [
+  {
+    title: "Seguridad para Niños",
+    subtitle: "Protección Máxima",
     description:
-      "Rutas precisas con sistemas GPS integrados de alta gama, Apple CarPlay, Android Auto y conectividad Wi-Fi a bordo para todos los pasajeros.",
-    colSpan: "md:col-span-1 lg:col-span-1",
-    gradient: "from-emerald-900/40 via-transparent to-transparent",
+      "Sistemas de retención infantil certificados para todas las edades. Asientos de seguridad premium con protección lateral reforzada. Instalación profesional conforme a normativas internacionales de seguridad.",
+    icon: <Baby className="w-12 h-12" />,
+    gradient: "from-blue-500/20 to-cyan-500/20",
   },
   {
-    icon: <Clock className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Asistencia 24/7",
+    title: "Navegación Inteligente",
+    subtitle: "Tecnología GPS Avanzada",
     description:
-      "Soporte exclusivo en carretera a cualquier hora del día. Porque en un viaje de lujo, tu tranquilidad es nuestra absoluta prioridad.",
-    colSpan: "md:col-span-2 lg:col-span-1",
-    gradient: "from-purple-900/40 via-transparent to-transparent",
+      "Sistema GPS de última generación con mapas en tiempo real. Pantalla táctil integrada con Apple CarPlay y Android Auto. Conectividad total para una navegación sin interrupciones durante todo tu viaje.",
+    icon: <Wifi className="w-12 h-12" />,
+    gradient: "from-green-500/20 to-emerald-500/20",
+  },
+  {
+    title: "Accesibilidad Total",
+    subtitle: "Para Todos los Viajeros",
+    description:
+      "Vehículos adaptados con rampas de acceso y sistemas de elevación. Espacios amplios y cómodos para personas con movilidad reducida. Equipamiento especial diseñado para garantizar inclusión y comodidad.",
+    icon: <Zap className="w-12 h-12" />,
+    gradient: "from-purple-500/20 to-pink-500/20",
+  },
+];
+
+const premiumServices = [
+  {
+    icon: <Shield className="w-8 h-8 text-white" strokeWidth={1.5} />,
+    title: "Seguro Premium Todo Riesgo",
+    description: "Cobertura total sin sorpresas. Asistencia en carretera 24/7.",
   },
   {
     icon: <MapPin className="w-8 h-8 text-white" strokeWidth={1.5} />,
     title: "Concierge Delivery",
     description:
-      "Nos encargamos de llevar el vehículo directamente a la puerta de tu hotel, domicilio o recibiéndote en el aeropuerto con un trato VIP.",
-    colSpan: "md:col-span-1 lg:col-span-1",
-    gradient: "from-rose-900/40 via-transparent to-transparent",
+      "Entrega directa a tu hotel, domicilio o aeropuerto con trato VIP.",
   },
   {
-    icon: <ShieldCheck className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Seguro Premium Todo Riesgo",
-    description:
-      "Nuestra tarifa incluye una cobertura total sin sorpresas. Relájate y disfruta del camino sin preocuparte por pequeños detalles.",
-    colSpan: "md:col-span-2 lg:col-span-3",
-    gradient: "from-slate-800/60 via-transparent to-transparent",
+    icon: <Clock className="w-8 h-8 text-white" strokeWidth={1.5} />,
+    title: "Asistencia 24/7",
+    description: "Soporte exclusivo en carretera a cualquier hora del día.",
+  },
+  {
+    icon: <Bone className="w-8 h-8 text-white" strokeWidth={1.5} />,
+    title: "Pet Friendly",
+    description: "Tu fiel compañero viaja contigo con todas las comodidades.",
   },
 ];
 
 export default function PremiumFeatures() {
   return (
-    <section className="relative w-full py-32 bg-[#050505] flex justify-center items-center overflow-hidden">
-      {/* Gradiente de transición desde la sección superior */}
-      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-base-100 to-transparent z-10 pointer-events-none"></div>
-
-      {/* Subtle Grid Pattern para dar un toque técnico/premium */}
-      <div className="absolute inset-0 z-0 opacity-[0.03]">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="premium-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#premium-grid)" />
-        </svg>
+    <section className="relative w-full py-32 bg-gradient-to-b from-[#050505] to-black overflow-hidden snap-start">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Background Orbs de Lujo (Dorado y Azul Oscuro Profundo) */}
-      <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-amber-600/10 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-screen"></div>
-      <div className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-900/15 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-screen"></div>
+      {/* Transition from previous section */}
+      <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-base-100 to-transparent pointer-events-none"></div>
 
-      <div className="max-w-7xl w-full px-6 relative z-10">
-        <div className="text-center mb-20">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-24">
           <h2
-            className="text-4xl md:text-5xl font-bold text-white mb-6"
+            className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             La Diferencia Está en los Detalles
           </h2>
-          <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto tracking-wide">
-            Cada viaje incluye de forma opcional accesorios pensados para
-            maximizar tu confort, seguridad y la de tu familia.
+          <div className="h-1 w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-8"></div>
+          <p className="text-lg md:text-xl text-gray-400 font-light max-w-2xl mx-auto">
+            Cada experiencia es cuidadosamente diseñada para superar tus
+            expectativas
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
+        {/* Luxury Features with Images */}
+        <div className="space-y-24">
+          {luxuryFeatures.map((feature, index) => (
             <div
               key={index}
-              className={`relative group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm p-8 transition-all duration-500 hover:-translate-y-2 hover:border-white/30 cursor-pointer ${feature.colSpan}`}
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center ${index % 2 === 1 ? "lg:grid-cols-2 lg:direction-rtl" : ""}`}
             >
-              {/* Hover Effect Background */}
+              {/* Text Content */}
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}
-              ></div>
+                className={`${index % 2 === 1 ? "lg:order-2" : "lg:order-1"}`}
+              >
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`p-3 rounded-lg bg-gradient-to-br ${feature.gradient}`}
+                    >
+                      <div className="text-primary">{feature.icon}</div>
+                    </div>
+                    <div>
+                      <p className="text-primary text-sm uppercase tracking-widest font-semibold">
+                        {feature.subtitle}
+                      </p>
+                      <h3 className="text-3xl md:text-4xl font-bold text-white">
+                        {feature.title}
+                      </h3>
+                    </div>
+                  </div>
 
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="bg-white/10 p-4 rounded-2xl w-fit mb-8 group-hover:scale-110 transition-transform duration-500 shadow-lg">
-                  {feature.icon}
+                  <p className="text-gray-400 text-lg leading-relaxed font-light">
+                    {feature.description}
+                  </p>
+
+                  <div className="pt-4">
+                    <div className="inline-block px-6 py-2 border border-primary/30 rounded-full text-primary text-sm font-semibold hover:bg-primary/10 transition-all cursor-pointer">
+                      Descubre más →
+                    </div>
+                  </div>
                 </div>
-                
-                <h3 className="text-2xl text-white font-semibold mb-4 tracking-wide">
-                  {feature.title}
-                </h3>
-                
-                <p className="text-gray-400 leading-relaxed font-light mt-auto">
-                  {feature.description}
-                </p>
+              </div>
+
+              {/* Image */}
+              <div
+                className={`${index % 2 === 1 ? "lg:order-1" : "lg:order-2"}`}
+              >
+                <div className="relative group">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500`}
+                  ></div>
+                  <div className="relative overflow-hidden rounded-3xl border border-white/10 group-hover:border-white/20 transition-all duration-500">
+                    <img
+                      src={detailImages[index]?.src}
+                      alt={detailImages[index]?.alt}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent group-hover:from-black/60 transition-all duration-500"></div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Services Grid */}
+        <div className="mt-32 pt-24 border-t border-white/10">
+          <h3
+            className="text-3xl md:text-4xl font-bold text-white mb-16 text-center"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Servicios Premium Incluidos
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {premiumServices.map((service, index) => (
+              <div
+                key={index}
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/50"
+              >
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-accent/0 group-hover:from-primary/10 group-hover:to-accent/10 transition-all duration-500 pointer-events-none"></div>
+
+                <div className="relative z-10">
+                  <div className="mb-4 p-3 w-fit rounded-lg bg-primary/10">
+                    {service.icon}
+                  </div>
+
+                  <h4 className="text-lg font-bold text-white mb-3">
+                    {service.title}
+                  </h4>
+
+                  <p className="text-gray-400 text-sm leading-relaxed font-light">
+                    {service.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="mt-24 text-center">
+          <p className="text-gray-400 text-lg mb-8">
+            Vive la experiencia de lujo que mereces
+          </p>
+          <button className="px-12 py-4 bg-gradient-to-r from-primary to-accent text-white font-bold rounded-full text-lg hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:-translate-y-1">
+            Reserva Ahora
+          </button>
         </div>
       </div>
     </section>

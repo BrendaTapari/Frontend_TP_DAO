@@ -1,33 +1,17 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
+import mockCars from "../data/mockCars.json";
 
-const cars = [
-  {
-    id: 1,
-    name: "Audi A3",
-    type: "Premium Sedan",
-    image: "/Images/audiA3.png",
-  },
-  {
-    id: 2,
-    name: "Toyota Corolla",
-    type: "Hybrid Sedan",
-    image: "/Images/corolla.png",
-  },
-  {
-    id: 3,
-    name: "Toyota RAV4",
-    type: "Premium SUV",
-    image: "/Images/Rav4.png",
-  },
-  {
-    id: 4,
-    name: "Toyota Yaris Cross",
-    type: "Compact SUV",
-    image: "/Images/YarisCross.png",
-  },
-];
+// Transformar mockCars al formato del carrusel
+const cars = mockCars.map((car) => ({
+  id: car.id,
+  name: `${car.marca} ${car.modelo}`,
+  type: `${car.año} - ${car.estado}`,
+  image: car.imagen,
+}));
 
 export default function CarCarousel() {
+  const [, setLocation] = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const nextCar = () => {
@@ -40,6 +24,11 @@ export default function CarCarousel() {
 
   const goToCar = (index: number) => {
     setActiveIndex(index);
+  };
+
+  const handleCarClick = () => {
+    const selectedCar = mockCars[activeIndex];
+    setLocation(`/car-detail/${selectedCar.id}`);
   };
 
   return (
@@ -93,7 +82,13 @@ export default function CarCarousel() {
           return (
             <div
               key={car.id}
-              onClick={() => goToCar(index)}
+              onClick={() => {
+                if (isActive) {
+                  handleCarClick();
+                } else {
+                  goToCar(index);
+                }
+              }}
               className={`absolute transition-all duration-700 ease-out cursor-pointer flex flex-col items-center justify-center ${blur}`}
               style={{
                 transform: `translateX(${translateX}) scale(${scale})`,
@@ -131,7 +126,11 @@ export default function CarCarousel() {
             stroke="currentColor"
             className="w-6 h-6"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 19.5L8.25 12l7.5-7.5"
+            />
           </svg>
         </button>
         <button
@@ -146,7 +145,11 @@ export default function CarCarousel() {
             stroke="currentColor"
             className="w-6 h-6"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+            />
           </svg>
         </button>
       </div>
@@ -160,8 +163,14 @@ export default function CarCarousel() {
         <p className="text-gray-400 font-serif italic text-lg tracking-wide">
           {cars[activeIndex].type}
         </p>
+        <button
+          onClick={handleCarClick}
+          className="mt-6 px-8 py-2 bg-gradient-to-r from-primary to-accent text-white font-semibold rounded-full hover:opacity-90 transition-opacity"
+        >
+          Ver Detalles
+        </button>
       </div>
-      
+
       {/* Indicators */}
       <div className="flex gap-3 mt-6">
         {cars.map((_, idx) => (

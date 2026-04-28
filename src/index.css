@@ -10,7 +10,7 @@
   --color-base-200: oklch(22.5% 0 0);
   --color-base-300: oklch(27% 0 0);
   --color-base-content: oklch(96% 0.01 240);
-  --color-primary: oklch(66.08% 0.134 87.47);
+  --color-primary: oklch(71.93% 0.165 83.33);
   --color-primary-content: oklch(20% 0.006 0.13);
   --color-secondary: oklch(48.06% 0.144 0.07);
   --color-secondary-content: oklch(98% 0.01 0.07);
@@ -57,12 +57,12 @@ body {
 
 .outlineButton {
   background: transparent;
-  border: 2px solid var(--color-primary); 
+  border: 2px solid var(--color-primary);
   color: var(--color-primary);
   padding: 0.8rem 1.5rem;
   border-radius: 8px; /* O tu var(--radius-box) */
   cursor: pointer;
-  font-family: 'Playfair Display', serif; /* Aplicando tu fuente de lujo */
+  font-family: "Playfair Display", serif; /* Aplicando tu fuente de lujo */
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -73,16 +73,16 @@ body {
 
 .outlineButton:hover {
   /* Fondo primary semi-transparente para poder notar el desenfoque del fondo (blur) */
-  background: color-mix(in oklch, var(--color-primary) 5%, transparent); 
+  background: color-mix(in oklch, var(--color-primary) 5%, transparent);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px); /* Soporte para Safari */
-  
+
   /* El borde acompaña al mismo color */
   border-color: var(--color-primary);
-  
+
   /* Para mantener legibilidad dependiendo del fondo */
-  color: var(--color-primary); 
-  
+  color: var(--color-primary);
+
   /* Sombra sutil para elevación */
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
@@ -146,7 +146,7 @@ body {
 /* Mejoras para el scrolling suave */
 html {
   scroll-behavior: smooth;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
 }
 
 /* Efectos de glassmorphism */
@@ -212,9 +212,17 @@ html {
 .rdp-root {
   /* Colors */
   --rdp-accent-color: var(--color-primary) !important;
-  --rdp-accent-background-color: color-mix(in oklch, var(--color-primary) 15%, transparent) !important;
+  --rdp-accent-background-color: color-mix(
+    in oklch,
+    var(--color-primary) 15%,
+    transparent
+  ) !important;
   --rdp-today-color: var(--color-primary) !important;
-  --rdp-range_middle-background-color: color-mix(in oklch, var(--color-primary) 25%, transparent) !important;
+  --rdp-range_middle-background-color: color-mix(
+    in oklch,
+    var(--color-primary) 25%,
+    transparent
+  ) !important;
   --rdp-range_middle-color: #f3f4f6 !important;
   --rdp-weekday-opacity: 1 !important;
   --rdp-weekday-padding: 15px !important;
@@ -224,7 +232,7 @@ html {
 
 /* meses y años */
 .rdp-caption_label {
-  font-size: 1.50rem !important;
+  font-size: 1.5rem !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.15em !important;
