@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "patente": "ABC123",
+    "patente": "AG025CD",
     "marca": "Audi",
     "modelo": "A3",
     "año": 2023,
@@ -12,7 +12,7 @@
   },
   {
     "id": 2,
-    "patente": "XYZ789",
+    "patente": "AI789JV",
     "marca": "Toyota",
     "modelo": "Corolla",
     "año": 2023,
@@ -23,7 +23,7 @@
   },
   {
     "id": 3,
-    "patente": "DEF456",
+    "patente": "AH236KL",
     "marca": "Toyota",
     "modelo": "RAV4",
     "año": 2022,
@@ -34,7 +34,7 @@
   },
   {
     "id": 4,
-    "patente": "GHI012",
+    "patente": "AH236OL",
     "marca": "Toyota",
     "modelo": "Yaris Cross",
     "año": 2023,

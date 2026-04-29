@@ -150,7 +150,7 @@ export default function CarFleet() {
                   {/* Action Button */}
                   <button
                     onClick={() => setLocation(`/car-detail/${auto.id}`)}
-                    className="w-full bg-gradient-to-r from-primary to-accent text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity"
+                    className="w-full btn  btn-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity"
                   >
                     Ver Detalles
                   </button>

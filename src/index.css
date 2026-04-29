@@ -53,6 +53,7 @@
 
 body {
   color: var(--color-base-content);
+  overflow-x: hidden;
 }
 
 .outlineButton {
@@ -147,6 +148,12 @@ body {
 html {
   scroll-behavior: smooth;
   scroll-snap-type: y proximity;
+}
+
+@media (max-width: 1023px) {
+  html {
+    scroll-snap-type: none;
+  }
 }
 
 /* Efectos de glassmorphism */

@@ -105,7 +105,7 @@ function App() {
               />
             </div>
             <span
-              className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-white to-zinc-400 hover:cursor-pointer transition-all duration-700 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+              className="text-transparent bg-clip-text hover:cursor-pointer transition-all duration-700 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
               style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: "2.2rem",
@@ -113,7 +113,7 @@ function App() {
                 letterSpacing: "0.25em",
                 marginLeft: "0.25em",
               }}
-              onClick={() => handleBackHome()}
+              onClick={() => setLocation("/")}
             >
               LuxDrive
             </span>
@@ -145,13 +145,13 @@ function App() {
 
         <div
           ref={heroRef}
-          className="relative z-10 ml-40 flex flex-col justify-start pt-[55vh] pb-12 w-fit"
+          className="relative z-10 w-full max-w-4xl px-6 sm:px-10 flex flex-col justify-start pt-[48vh] sm:pt-[52vh] lg:pt-[55vh] pb-2 mx-auto lg:mx-0 lg:ml-20"
         >
-          <div className="mb-6">
+          <div className="mb-6 text-center lg:text-left">
             <div
               style={{
                 fontFamily: "'Playfair Display', serif",
-                fontSize: "4rem",
+                fontSize: "clamp(2.5rem, 8vw, 4rem)",
                 lineHeight: "1.2",
               }}
             >
@@ -161,12 +161,13 @@ function App() {
           </div>
 
           <button
-            className="outlineButton px-6 py-2 rounded-xl font-semibold w-max bg-black/20"
+            className="outlineButton px-6 py-3 rounded-xl font-semibold w-full sm:w-max bg-black/20"
             style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: "1.4rem",
+              fontSize: "clamp(1rem, 4vw, 1.4rem)",
               letterSpacing: "2px",
             }}
+            onClick={handleAlquilaYaButton}
           >
             ALQUILA YA!
           </button>
@@ -192,13 +193,13 @@ function App() {
       </div>
 
       {/* SECCIÓN FLOTA DE AUTOS */}
-      <div className="w-full bg-base-100 py-16 px-6 lg:px-12 flex flex-col justify-center relative z-10 min-h-screen snap-start">
+      <div className="w-full bg-base-100 py-16 px-4 sm:px-6 lg:px-12 flex flex-col justify-center relative z-10 min-h-screen snap-start">
         <div className="max-w-[90rem] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center h-full">
           {/* Left Column: Text & Button */}
-          <div className="flex flex-col justify-center text-left space-y-10 order-2 lg:order-1 mt-10 lg:mt-0">
-            <div className="space-y-6">
+          <div className="flex flex-col justify-center text-center lg:text-left space-y-8 sm:space-y-10 order-2 lg:order-1 mt-6 lg:mt-0 max-w-3xl mx-auto lg:mx-0">
+            <div className="space-y-5 sm:space-y-6">
               <h3
-                className="text-5xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl"
+                className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Alquila con nosotros en <br />
@@ -206,7 +207,7 @@ function App() {
                   Córdoba, Argentina
                 </span>
               </h3>
-              <p className="text-xl lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl">
+              <p className="text-base sm:text-lg lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Descubre nuestra exclusiva selección de vehículos. Diseño,
                 confort y el mejor rendimiento para que disfrutes cada kilómetro
                 de tu viaje.
@@ -216,7 +217,7 @@ function App() {
             {/* Botón Ver Flota Completa */}
             <div className="pt-4">
               <button
-                className="outlineButton px-12 py-4 rounded-full text-sm md:text-base tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-primary/30"
+                className="outlineButton w-full sm:w-auto px-8 sm:px-12 py-4 rounded-full text-sm md:text-base tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-primary/30"
                 style={{ fontFamily: "'Playfair Display', serif" }}
                 onClick={() => setLocation("/car-fleet")}
               >
