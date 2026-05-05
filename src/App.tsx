@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import ParticleBackground from "./components/ParticleBackground";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import CarCarousel from "./components/CarCarousel";
 import PremiumFeatures from "./components/PremiumFeatures";
 import { ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -59,7 +59,7 @@ function App() {
     }
 
     const welcomeTimer = setTimeout(() => {
-      setShowWelcome(false);
+      setShowWelcome(true);
       sessionStorage.setItem("hasShownWelcome", "true");
     }, 5000);
 
@@ -91,37 +91,140 @@ function App() {
     setLocation("/add-rental");
   };
 
+  const AnimatedLogo = () => (
+    <motion.div
+      className="flex flex-col items-center gap-4"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <motion.img
+        src="/Images/logo/logo-lux-drive.svg"
+        alt="LuxDrive"
+        className="h-24 w-auto sm:h-28 drop-shadow-[0_0_28px_rgba(255,255,255,0.18)] "
+        initial={{ scale: 0.92, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+      <motion.div
+        className="text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.35, duration: 0.45 }}
+      >
+        <p
+          className="text-3xl sm:text-4xl tracking-[0.28em] text-white"
+          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 300 }}
+        >
+          LuxDrive
+        </p>
+        <p
+          className="mt-1 text-[0.65rem] sm:text-xs uppercase tracking-[0.45em] text-white/50"
+          style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 200 }}
+        >
+          Movilidad de élite
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+
+  const ProgressBar = () => (
+    <div className="w-56 h-px bg-primary/10 relative overflow-hidden mt-2">
+      <motion.div
+        className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-primary to-transparent"
+        initial={{ x: "-100%" }}
+        animate={{ x: "100%" }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
+  );
   return (
     <>
       {showWelcome && (
-        <div className="fixed inset-0 bg-gradient-to-br from-base-300 via-secondary to-base-100 z-50 flex flex-col items-center justify-center">
-          <div className="text-center">
-            <div className="w-3 h-3 rounded-full animate-bounce"></div>
-            <div className="w-full h-72 mx-auto mt-14">
-              <DotLottieReact
-                src="https://lottie.host/acfe4ef8-1b28-480f-acd5-d4aad64a05e5/16Stl4t9eF.lottie"
-                loop
-                autoplay
-              />
-            </div>
-            <span
-              className="text-transparent bg-clip-text hover:cursor-pointer transition-all duration-700 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-10"
+            initial={{ opacity: 1 }}
+            exit={{
+              opacity: 0,
+              transition: { duration: 0.8, ease: "easeInOut" },
+            }}
+          >
+            {/* Grid decorativo de fondo */}
+            <div
+              className="absolute inset-0 opacity-[0.03]"
               style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: "2.2rem",
-                fontWeight: 300,
-                letterSpacing: "0.25em",
-                marginLeft: "0.25em",
+                backgroundImage:
+                  "linear-gradient(var(--color-primary) 1px, transparent 1px), linear-gradient(90deg, var(--color-primary) 0.5px, transparent 0.5px)",
+                backgroundSize: "60px 60px",
               }}
-              onClick={() => setLocation("/")}
+            />
+
+            {/* Orbe de luz central */}
+            <motion.div
+              className="absolute w-72 h-72 rounded-full bg-primary/5"
+              animate={{ scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Esquinas decorativas */}
+            {[
+              "top-5 left-5 border-t border-l",
+              "top-5 right-5 border-t border-r",
+              "bottom-5 left-5 border-b border-l",
+              "bottom-5 right-5 border-b border-r",
+            ].map((cls, i) => (
+              <motion.div
+                key={i}
+                className={`absolute w-6 h-6 border-primary/25 ${cls}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.2, duration: 0.6 }}
+              />
+            ))}
+
+            {/* Logo animado */}
+            <motion.div
+              className="relative z-10"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              LuxDrive
-            </span>
-            <p className="text-xl text-gray-300 mt-2 animate-fade-in">
-              Cargando experiencia de movilidad...
-            </p>
-          </div>
-        </div>
+              <AnimatedLogo />
+            </motion.div>
+
+            {/* Divisor con diamante */}
+            <motion.div
+              className="relative z-10 flex items-center gap-3 w-56"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8, duration: 0.6 }}
+            >
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
+              <div className="w-1.5 h-1.5 bg-primary/60 rotate-45 shrink-0" />
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/40" />
+            </motion.div>
+
+            {/* Progress bar + texto */}
+            <motion.div
+              className="relative z-10 flex flex-col items-center gap-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2, duration: 0.6 }}
+            >
+              <ProgressBar />
+              <p
+                className="text-primary/40 uppercase tracking-[0.45em] text-[0.6rem] ml-1"
+                style={{
+                  fontFamily: "'Josefin Sans', sans-serif",
+                  fontWeight: 200,
+                }}
+              >
+                Preparando su experiencia
+              </p>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       )}
 
       {/* HERO SECTION */}
