@@ -8,7 +8,8 @@
     "estado": "disponible",
     "costo": 65000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/audiA3.png"
+    "imagen": "/Images/autos/audiA3.png",
+    "alt": "Imagen de Audi A3"
   },
   {
     "id": 2,
@@ -19,7 +20,8 @@
     "estado": "disponible",
     "costo": 50000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/Corolla.png"
+    "imagen": "/Images/autos/Corolla.png",
+    "alt": "Imagen de Toyota Corolla"
   },
   {
     "id": 3,
@@ -30,7 +32,8 @@
     "estado": "en_alquiler",
     "costo": 55000,
     "periodicidad_mantenimiento": 8,
-    "imagen": "/Images/autos/Rav4.png"
+    "imagen": "/Images/autos/Rav4.png",
+    "alt": "Imagen de Toyota RAV4"
   },
   {
     "id": 4,
@@ -41,7 +44,8 @@
     "estado": "disponible",
     "costo": 45000,
     "periodicidad_mantenimiento": 12,
-    "imagen": "/Images/autos/YarisCross.png"
+    "imagen": "/Images/autos/YarisCross.png",
+    "alt": "Imagen de Toyota Yaris Cross"
   },
   {
     "id": 5,
@@ -52,7 +56,8 @@
     "estado": "disponible",
     "costo": 52000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/VolkswagenTaos.png"
+    "imagen": "/Images/autos/VolkswagenTaos.png",
+    "alt": "Imagen de Volkswagen Taos"
   },
   {
     "id": 6,
@@ -63,7 +68,8 @@
     "estado": "disponible",
     "costo": 58000,
     "periodicidad_mantenimiento": 8,
-    "imagen": "/Images/autos/HondaCivic.png"
+    "imagen": "/Images/autos/HondaCivic.png",
+    "alt": "Imagen de Honda Civic"
   },
   {
     "id": 7,
@@ -74,7 +80,8 @@
     "estado": "en_alquiler",
     "costo": 85000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/BMWX1.png"
+    "imagen": "/Images/autos/BMWX1.png",
+    "alt": "Imagen de BMW X1"
   },
   {
     "id": 8,
@@ -85,7 +92,8 @@
     "estado": "disponible",
     "costo": 92000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/AudiQ5.png"
+    "imagen": "/Images/autos/AudiQ5.png",
+    "alt": "Imagen de Audi SUV Q5"
   },
   {
     "id": 9,
@@ -96,7 +104,8 @@
     "estado": "en_alquiler",
     "costo": 60000,
     "periodicidad_mantenimiento": 10,
-    "imagen": "/Images/autos/MercedesBenz.png"
+    "imagen": "/Images/autos/MercedesBenz.png",
+    "alt": "Imagen de Mercedes-Benz GLA 200"
   },
   {
     "id": 10,
@@ -107,7 +116,8 @@
     "estado": "disponible",
     "costo": 47000,
     "periodicidad_mantenimiento": 12,
-    "imagen": "/Images/autos/ChevroletTracker.png"
+    "imagen": "/Images/autos/ChevroletTracker.png",
+    "alt": "Imagen de Chevrolet Tracker"
   },
   {
     "id": 11,
@@ -118,7 +128,8 @@
     "estado": "disponible",
     "costo": 55000,
     "periodicidad_mantenimiento": 12,
-    "imagen": "/Images/autos/FordBronco.png"
+    "imagen": "/Images/autos/FordBronco.png",
+    "alt": "Imagen de Ford Bronco"
   },
   {
     "id": 12,
@@ -129,7 +140,8 @@
     "estado": "en_alquiler",
     "costo": 67000,
     "periodicidad_mantenimiento": 8,
-    "imagen": "/Images/autos/JeepCompass.png"
+    "imagen": "/Images/autos/JeepCompass.png",
+    "alt": "Imagen de Jeep Compass"
   },
   {
     "id": 13,
@@ -140,7 +152,8 @@
     "estado": "disponible",
     "costo": 51000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/NissanKick.png"
+    "imagen": "/Images/autos/NissanKick.png",
+    "alt": "Imagen de Nissan Kick"
   },
   {
     "id": 14,
@@ -151,6 +164,7 @@
     "estado": "en_alquiler",
     "costo": 64000,
     "periodicidad_mantenimiento": 8,
-    "imagen": "/Images/autos/HyundaiTucson.png"
+    "imagen": "/Images/autos/HyundaiTucson.png",
+    "alt": "Imagen de Hyundai Tucson"
   }
 ]

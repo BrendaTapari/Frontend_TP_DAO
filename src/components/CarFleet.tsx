@@ -2,6 +2,8 @@ import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getAutos } from "../services/autosService";
+import { useVisibleFocus } from "../hooks/useVisibleFocus";
+import { useTranslation } from "react-i18next";
 
 interface Auto {
   id: number;
@@ -21,6 +23,11 @@ export default function CarFleet() {
   const [loading, setLoading] = useState(true);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+
+  // Activar navegación TAB solo en elementos visibles
+  useVisibleFocus(containerRef, "button, a, article, [role='listitem']");
 
   useEffect(() => {
     fetchAutos();
@@ -70,27 +77,26 @@ export default function CarFleet() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 pt-20 pb-12">
+    <div className="min-h-screen bg-base-100 pt-20 pb-12" ref={containerRef}>
       {/* Header */}
       <header className="px-4 lg:px-12 mb-12">
         <button
           onClick={() => setLocation("/")}
           className="btn flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-          aria-label="Volver a la página de inicio"
+          aria-label={t("common.back")}
         >
           <ArrowLeft size={20} />
-          <span>Volver</span>
+          <span>{t("common.back")}</span>
         </button>
 
         <h1
           className="text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-xl"
           style={{ fontFamily: "'Playfair Display', serif" }}
         >
-          Nuestra Flota
+          {t("fleet.title")}
         </h1>
         <p className="text-xl text-gray-300 max-w-2xl">
-          Explora todos nuestros vehículos disponibles y encuentra el perfecto
-          para tu viaje. Usa las flechas del teclado para navegar.
+          {t("fleet.description")}
         </p>
       </header>
 
@@ -101,7 +107,7 @@ export default function CarFleet() {
           role="status"
           aria-live="polite"
         >
-          <div className="text-xl text-gray-400">Cargando flota...</div>
+          <div className="text-xl text-gray-400">{t("fleet.loading")}</div>
         </div>
       ) : (
         <main className="px-4 lg:px-12">
@@ -146,7 +152,7 @@ export default function CarFleet() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Año
+                        {t("fleet.year")}
                       </p>
                       <p className="text-lg font-semibold text-white">
                         {auto.año}
@@ -154,7 +160,7 @@ export default function CarFleet() {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Costo
+                        {t("fleet.cost")}
                       </p>
                       <p className="text-lg font-semibold text-primary">
                         ${auto.costo.toLocaleString()}
@@ -162,15 +168,15 @@ export default function CarFleet() {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Mantenimiento
+                        {t("fleet.maintenance")}
                       </p>
                       <p className="text-lg font-semibold text-white">
-                        {auto.periodicidad_mantenimiento} meses
+                        {auto.periodicidad_mantenimiento} {t("fleet.months")}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Estado
+                        {t("fleet.state")}
                       </p>
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getEstadoColor(
@@ -188,9 +194,9 @@ export default function CarFleet() {
                     onClick={() => setLocation(`/car-detail/${auto.id}`)}
                     onKeyDown={(e) => handleKeyDown(e, auto)}
                     className="w-full btn btn-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-                    aria-label={`Ver detalles del ${auto.marca} ${auto.modelo}`}
+                    aria-label={`${t("fleet.view_details")} ${auto.marca} ${auto.modelo}`}
                   >
-                    Ver Detalles
+                    {t("fleet.view_details")}
                   </button>
                 </div>
               </article>
@@ -200,26 +206,24 @@ export default function CarFleet() {
           {/* Empty State */}
           {autos.length === 0 && (
             <div className="text-center py-20" role="status">
-              <p className="text-2xl text-gray-400">
-                No hay autos disponibles en la flota.
-              </p>
+              <p className="text-2xl text-gray-400">{t("fleet.no_vehicles")}</p>
             </div>
           )}
 
           {/* Stats */}
           <section
             className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-4"
-            aria-label="Estadísticas de la flota"
+            aria-label={t("fleet.fleet_stats")}
           >
             <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
               <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                Total de Autos
+                {t("fleet.total_vehicles")}
               </p>
               <p className="text-4xl font-bold text-white">{autos.length}</p>
             </div>
             <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
               <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                Disponibles
+                {t("fleet.available")}
               </p>
               <p className="text-4xl font-bold text-green-400">
                 {autos.filter((a) => a.estado === "disponible").length}
@@ -227,7 +231,7 @@ export default function CarFleet() {
             </div>
             <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
               <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                En Alquiler
+                {t("fleet.renting")}
               </p>
               <p className="text-4xl font-bold text-blue-400">
                 {autos.filter((a) => a.estado === "en_alquiler").length}
@@ -235,7 +239,7 @@ export default function CarFleet() {
             </div>
             <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
               <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                En Mantenimiento
+                {t("fleet.maintenance")}
               </p>
               <p className="text-4xl font-bold text-yellow-400">
                 {autos.filter((a) => a.estado === "en_mantenimiento").length}

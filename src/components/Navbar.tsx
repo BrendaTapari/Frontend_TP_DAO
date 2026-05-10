@@ -1,10 +1,12 @@
-import { Menu, X } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
   const [, setLocation] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const handleBackHome = () => {
     setLocation("/");
@@ -13,6 +15,10 @@ export default function Navbar() {
   const goTo = (path: string) => {
     setLocation(path);
     setMobileOpen(false);
+  };
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
@@ -31,10 +37,47 @@ export default function Navbar() {
               marginLeft: "0.25em",
             }}
           >
-            LuxDrive
+            {t("landing.logo")}
           </button>
 
-          <div className="ml-auto flex shrink-0">
+          <div className="ml-auto flex shrink-0 gap-3 items-center">
+            {/* Language Selector */}
+            <div className="dropdown dropdown-end">
+              <button
+                tabIndex={0}
+                className="btn btn-circle border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+                aria-label={t("nav.language")}
+                title={t("nav.language")}
+              >
+                <Globe size={20} />
+              </button>
+              <ul
+                tabIndex={0}
+                role="menu"
+                className="dropdown-content z-[100] menu mt-2 w-40 rounded-2xl border border-white/10 bg-black/85 p-2 shadow-2xl backdrop-blur-md"
+              >
+                <li>
+                  <button
+                    onClick={() => changeLanguage("es")}
+                    className={`${i18n.language === "es" ? "bg-primary text-black" : "text-zinc-100"}`}
+                    aria-current={i18n.language === "es" ? "page" : undefined}
+                  >
+                    {t("nav.spanish")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => changeLanguage("en")}
+                    className={`${i18n.language === "en" ? "bg-primary text-black" : "text-zinc-100"}`}
+                    aria-current={i18n.language === "en" ? "page" : undefined}
+                  >
+                    {t("nav.english")}
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Menu */}
             <div
               className={`dropdown dropdown-end ${mobileOpen ? "dropdown-open" : ""}`}
             >
@@ -67,7 +110,7 @@ export default function Navbar() {
                     onClick={() => goTo("/car-fleet")}
                     className="text-zinc-100 text-base"
                   >
-                    Ver flota
+                    {t("fleet.title")}
                   </button>
                 </li>
                 <li>
@@ -76,7 +119,7 @@ export default function Navbar() {
                     onClick={() => goTo("/add-rental")}
                     className="text-base text-black bg-amber-500 hover:bg-amber-400"
                   >
-                    Alquilar
+                    {t("landing.rent_now")}
                   </button>
                 </li>
               </ul>

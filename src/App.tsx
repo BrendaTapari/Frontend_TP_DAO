@@ -7,6 +7,8 @@ import CarCarousel from "./components/CarCarousel";
 import PremiumFeatures from "./components/PremiumFeatures";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useVisibleFocus } from "./hooks/useVisibleFocus";
+import { useTranslation } from "react-i18next";
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -19,6 +21,14 @@ function App() {
   });
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const appRef = useRef<HTMLDivElement | null>(null);
+  const { t } = useTranslation();
+
+  // Activar navegación TAB solo en elementos visibles
+  useVisibleFocus(
+    appRef as React.RefObject<HTMLElement | null>,
+    "button, a, [role='listitem'], input",
+  );
 
   useEffect(() => {
     if (heroRef.current) {
@@ -108,8 +118,8 @@ function App() {
     >
       <motion.img
         src="/Images/logo/logo-lux-drive.svg"
-        alt="LuxDrive"
-        className="h-24 w-auto sm:h-28 drop-shadow-[0_0_28px_rgba(255,255,255,0.18)] "
+        alt={t("landing.logo")}
+        className="h-24 w-auto sm:h-28 drop-shadow-[0_0_28px_rgba(255,255,255,0.18)]"
         initial={{ scale: 0.92, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -124,13 +134,13 @@ function App() {
           className="text-3xl sm:text-4xl tracking-[0.28em] text-white"
           style={{ fontFamily: "'Playfair Display', serif", fontWeight: 300 }}
         >
-          LuxDrive
+          {t("landing.logo")}
         </p>
         <p
           className="mt-1 text-[0.65rem] sm:text-xs uppercase tracking-[0.45em] text-white/50"
           style={{ fontFamily: "'Josefin Sans', sans-serif", fontWeight: 200 }}
         >
-          Movilidad de élite
+          {t("landing.tagline")}
         </p>
       </motion.div>
     </motion.div>
@@ -147,7 +157,7 @@ function App() {
     </div>
   );
   return (
-    <>
+    <div ref={appRef}>
       {showWelcome && (
         <AnimatePresence>
           <motion.div
@@ -159,7 +169,7 @@ function App() {
             }}
             role="status"
             aria-live="polite"
-            aria-label="Pantalla de bienvenida de carga"
+            aria-label={t("landing.welcome_screen_label")}
           >
             {/* Grid decorativo de fondo */}
             <div
@@ -231,7 +241,7 @@ function App() {
                   fontWeight: 200,
                 }}
               >
-                Preparando su experiencia
+                {t("landing.loading_experience")}
               </p>
             </motion.div>
           </motion.div>
@@ -279,8 +289,12 @@ function App() {
                 lineHeight: "1.2",
               }}
             >
-              <h1 className="text-white drop-shadow-md">Un auto,</h1>
-              <h1 className="text-white drop-shadow-md">muchos propósitos</h1>
+              <h1 className="text-white drop-shadow-md">
+                {t("landing.hero_line1")}
+              </h1>
+              <h1 className="text-white drop-shadow-md">
+                {t("landing.hero_line2")}
+              </h1>
             </div>
           </div>
 
@@ -292,9 +306,9 @@ function App() {
               letterSpacing: "2px",
             }}
             onClick={handleAlquilaYaButton}
-            aria-label="Alquilar un vehículo ahora"
+            aria-label={t("landing.rent_now")}
           >
-            ALQUILA YA!
+            {t("landing.rent_now")}
           </button>
         </div>
         {showIconSroll && (
@@ -304,14 +318,14 @@ function App() {
               window.scrollTo({ top: window.innerHeight, behavior: "smooth" })
             }
             onKeyDown={handleScrollIconKeyDown}
-            aria-label="Desplazarse hacia abajo para ver más contenido"
+            aria-label={t("landing.scroll_down_label")}
           >
             <div className="flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity p-2">
               <span
                 className="text-white mb-2 font-light tracking-wide uppercase text-sm"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Bajar
+                {t("landing.scroll_down")}
               </span>
               <ChevronDown className="w-10 h-10 text-white" />
             </div>
@@ -333,15 +347,13 @@ function App() {
                 className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Alquila con nosotros en <br />
+                {t("landing.fleet_heading")} <br />
                 <span className="text-primary italic font-light">
-                  Córdoba, Argentina
+                  {t("landing.fleet_location")}
                 </span>
               </h2>
               <p className="text-base sm:text-lg lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Descubre nuestra exclusiva selección de vehículos. Diseño,
-                confort y el mejor rendimiento para que disfrutes cada kilómetro
-                de tu viaje.
+                {t("landing.fleet_description")}
               </p>
             </div>
 
@@ -351,9 +363,9 @@ function App() {
                 className="outlineButton w-full sm:w-auto px-8 sm:px-12 py-4 rounded-full text-sm md:text-base tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-primary/30 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 style={{ fontFamily: "'Playfair Display', serif" }}
                 onClick={() => setLocation("/car-fleet")}
-                aria-label="Ver flota completa de vehículos"
+                aria-label={t("landing.view_fleet")}
               >
-                VER FLOTA COMPLETA
+                {t("landing.view_fleet")}
               </button>
             </div>
           </div>
@@ -380,7 +392,7 @@ function App() {
       >
         <PremiumFeatures />
       </section>
-    </>
+    </div>
   );
 }
 

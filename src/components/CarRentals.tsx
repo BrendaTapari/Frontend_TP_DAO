@@ -1,8 +1,10 @@
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getActiveRentals, getRentals } from "../services/rentalService";
 import { ArrowLeft, Plus } from "lucide-react";
 import SpecificRental from "./Modals/SpecificRental";
+import { useVisibleFocus } from "../hooks/useVisibleFocus";
+import { useTranslation } from "react-i18next";
 
 interface Auto {
   patente: string;
@@ -77,6 +79,11 @@ export default function CarRentals() {
   const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
   const [isSpecificRentalOpen, setIsSpecificRentalOpen] =
     useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+
+  // Activar navegación TAB solo en elementos visibles
+  useVisibleFocus(containerRef, "button, a, tr, [role='row']");
 
   const handleBackButton = () => {
     setLocations("/");
@@ -177,7 +184,7 @@ export default function CarRentals() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 p-6" ref={containerRef}>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <header className="bg-white rounded-2xl shadow-xl p-8 mb-8">
@@ -186,17 +193,15 @@ export default function CarRentals() {
               <button
                 className="btn btn-ghost mb-4 text-sm font-medium focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 onClick={handleBackButton}
-                aria-label="Volver a la página de inicio"
+                aria-label={t('common.back')}
               >
-                <ArrowLeft /> Volver al inicio
+                <ArrowLeft /> {t('rentals.back')}
               </button>
               <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                Gestión de Alquileres
+                {t('rentals.title')}
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl">
-                Administra y visualiza todos los alquileres de vehículos
-                registrados en el sistema. Controla fechas, costos y sanciones
-                de manera eficiente. Presiona Enter o Space en cualquier fila para ver detalles.
+                {t('rentals.description')}
               </p>
             </div>
 
@@ -204,24 +209,24 @@ export default function CarRentals() {
               <button
                 className="btn btn-secondary text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 onClick={handleAddRental}
-                aria-label="Crear un nuevo alquiler de vehículo"
+                aria-label={t('rentals.add_rental')}
               >
                 <Plus />
-                Nuevo Alquiler
+                {t('rentals.add_rental')}
               </button>
               <button
                 className="btn btn-warning text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 onClick={handleAddSancion}
-                aria-label="Gestionar sanciones de alquileres"
+                aria-label={t('rentals.add_sanctions')}
               >
-                Gestionar Sanciones
+                {t('rentals.add_sanctions')}
               </button>
             </div>
           </div>
         </header>
 
         {/* Stats Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label="Estadísticas de alquileres">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label={t('rentals.rental_stats')}>
           <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl p-6 text-white shadow-lg">
             <h3 className="text-lg font-semibold mb-2">
               Total Alquileres
@@ -503,9 +508,9 @@ export default function CarRentals() {
                   )}
               </tbody>
             </table>
-            </div>
           </div>
         </section>
+        
         ) : (
         <div></div>
       )   }

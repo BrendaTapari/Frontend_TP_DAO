@@ -1,75 +1,73 @@
 import { MapPin, Bone, Baby, Clock, Zap, Shield, Wifi } from "lucide-react";
-
-const detailImages = [
-  {
-    src: "/Images/landing/niños_en_auto.jpg",
-    alt: "Seguridad para Niños",
-    position: "left",
-  },
-  {
-    src: "/Images/landing/gps.jpg",
-    alt: "Sistema GPS Integrado",
-    position: "right",
-  },
-  {
-    src: "/Images/landing/autos_discapacitados.jpg",
-    alt: "Accesibilidad para Todos",
-    position: "left",
-  },
-];
-
-const luxuryFeatures = [
-  {
-    title: "Seguridad para Niños",
-    subtitle: "Protección Máxima",
-    description:
-      "Sistemas de retención infantil certificados para todas las edades. Asientos de seguridad premium con protección lateral reforzada. Instalación profesional conforme a normativas internacionales de seguridad.",
-    icon: <Baby className="w-12 h-12" />,
-    gradient: "from-blue-500/20 to-cyan-500/20",
-  },
-  {
-    title: "Navegación Inteligente",
-    subtitle: "Tecnología GPS Avanzada",
-    description:
-      "Sistema GPS de última generación con mapas en tiempo real. Pantalla táctil integrada con Apple CarPlay y Android Auto. Conectividad total para una navegación sin interrupciones durante todo tu viaje.",
-    icon: <Wifi className="w-12 h-12" />,
-    gradient: "from-green-500/20 to-emerald-500/20",
-  },
-  {
-    title: "Accesibilidad Total",
-    subtitle: "Para Todos los Viajeros",
-    description:
-      "Vehículos adaptados con rampas de acceso y sistemas de elevación. Espacios amplios y cómodos para personas con movilidad reducida. Equipamiento especial diseñado para garantizar inclusión y comodidad.",
-    icon: <Zap className="w-12 h-12" />,
-    gradient: "from-purple-500/20 to-pink-500/20",
-  },
-];
-
-const premiumServices = [
-  {
-    icon: <Shield className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Seguro Premium Todo Riesgo",
-    description: "Cobertura total sin sorpresas. Asistencia en carretera 24/7.",
-  },
-  {
-    icon: <MapPin className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Concierge Delivery",
-    description:
-      "Entrega directa a tu hotel, domicilio o aeropuerto con trato VIP.",
-  },
-  {
-    icon: <Clock className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Asistencia 24/7",
-    description: "Soporte exclusivo en carretera a cualquier hora del día.",
-  },
-  {
-    icon: <Bone className="w-8 h-8 text-white" strokeWidth={1.5} />,
-    title: "Pet Friendly",
-    description: "Tu fiel compañero viaja contigo con todas las comodidades.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export default function PremiumFeatures() {
+  const { t } = useTranslation();
+
+  const detailImages = [
+    {
+      src: "/Images/landing/niños_en_auto.jpg",
+      alt: t("premium_features.feature1_title"),
+      position: "left",
+    },
+    {
+      src: "/Images/landing/gps.jpg",
+      alt: t("premium_features.feature2_title"),
+      position: "right",
+    },
+    {
+      src: "/Images/landing/autos_discapacitados.jpg",
+      alt: t("premium_features.feature3_title"),
+      position: "left",
+    },
+  ];
+
+  const luxuryFeatures = [
+    {
+      title: t("premium_features.feature1_title"),
+      subtitle: t("premium_features.feature1_subtitle"),
+      description: t("premium_features.feature1_desc"),
+      icon: <Baby className="w-12 h-12" />,
+      gradient: "from-blue-500/20 to-cyan-500/20",
+    },
+    {
+      title: t("premium_features.feature2_title"),
+      subtitle: t("premium_features.feature2_subtitle"),
+      description: t("premium_features.feature2_desc"),
+      icon: <Wifi className="w-12 h-12" />,
+      gradient: "from-green-500/20 to-emerald-500/20",
+    },
+    {
+      title: t("premium_features.feature3_title"),
+      subtitle: t("premium_features.feature3_subtitle"),
+      description: t("premium_features.feature3_desc"),
+      icon: <Zap className="w-12 h-12" />,
+      gradient: "from-purple-500/20 to-pink-500/20",
+    },
+  ];
+
+  const premiumServices = [
+    {
+      icon: <Shield className="w-8 h-8 text-white" strokeWidth={1.5} />,
+      title: t("premium_features.service1_title"),
+      description: t("premium_features.service1_desc"),
+    },
+    {
+      icon: <MapPin className="w-8 h-8 text-white" strokeWidth={1.5} />,
+      title: t("premium_features.service2_title"),
+      description: t("premium_features.service2_desc"),
+    },
+    {
+      icon: <Clock className="w-8 h-8 text-white" strokeWidth={1.5} />,
+      title: t("premium_features.service3_title"),
+      description: t("premium_features.service3_desc"),
+    },
+    {
+      icon: <Bone className="w-8 h-8 text-white" strokeWidth={1.5} />,
+      title: t("premium_features.service4_title"),
+      description: t("premium_features.service4_desc"),
+    },
+  ];
   return (
     <section className="relative w-full py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-[#050505] to-black overflow-hidden snap-start">
       {/* Animated Background Elements */}
@@ -88,12 +86,11 @@ export default function PremiumFeatures() {
             className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-tight"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            La Diferencia Está en los Detalles
+            {t("premium_features.title")}
           </h2>
           <div className="h-1 w-20 sm:w-24 bg-gradient-to-r from-primary via-primary/20  to-primary mx-auto mb-6 sm:mb-8"></div>
           <p className="text-base sm:text-lg md:text-xl text-gray-400 font-light max-w-2xl mx-auto px-2 sm:px-0">
-            Cada experiencia es cuidadosamente diseñada para superar tus
-            expectativas
+            {t("premium_features.subtitle")}
           </p>
         </div>
 
@@ -161,7 +158,7 @@ export default function PremiumFeatures() {
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-10 sm:mb-14 lg:mb-16 text-center"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            Servicios Premium Incluidos
+            {t("premium_features.services_title")}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -194,10 +191,10 @@ export default function PremiumFeatures() {
         {/* CTA Section */}
         <div className="mt-16 sm:mt-20 lg:mt-24 text-center">
           <p className="text-gray-400 text-base sm:text-lg mb-6 sm:mb-8 px-4">
-            Vive la experiencia de lujo que mereces
+            {t("premium_features.cta_text")}
           </p>
           <button className="px-8 sm:px-12 py-4 btn btn-outline btn-primary text-white font-bold rounded-full text-base sm:text-lg w-full sm:w-auto max-w-sm">
-            Reserva Ahora
+            {t("premium_features.reserve_now")}
           </button>
         </div>
       </div>
