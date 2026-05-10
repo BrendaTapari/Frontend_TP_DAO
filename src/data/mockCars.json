@@ -112,13 +112,13 @@
   {
     "id": 11,
     "patente": "AH431DF",
-    "marca": "Peugeot",
-    "modelo": "208",
+    "marca": "Ford",
+    "modelo": "Bronco",
     "año": 2024,
     "estado": "disponible",
-    "costo": 43000,
+    "costo": 55000,
     "periodicidad_mantenimiento": 12,
-    "imagen": "/Images/autos/Peugeot.png"
+    "imagen": "/Images/autos/FordBronco.png"
   },
   {
     "id": 12,
