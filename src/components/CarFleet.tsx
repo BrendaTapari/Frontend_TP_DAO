@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAutos } from "../services/autosService";
 
 interface Auto {
@@ -19,6 +19,8 @@ export default function CarFleet() {
   const [, setLocation] = useLocation();
   const [autos, setAutos] = useState<Auto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchAutos();
@@ -48,13 +50,33 @@ export default function CarFleet() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, auto: Auto) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setLocation(`/car-detail/${auto.id}`);
+    }
+  };
+
+  const handleListKeyDown = (e: React.KeyboardEvent) => {
+    if (!autos.length) return;
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setFocusedIndex((prev) => (prev + 1) % autos.length);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setFocusedIndex((prev) => (prev - 1 + autos.length) % autos.length);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-100 pt-20 pb-12">
       {/* Header */}
-      <div className="px-4 lg:px-12 mb-12">
+      <header className="px-4 lg:px-12 mb-12">
         <button
           onClick={() => setLocation("/")}
-          className="btn  flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6"
+          className="btn flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+          aria-label="Volver a la página de inicio"
         >
           <ArrowLeft size={20} />
           <span>Volver</span>
@@ -68,23 +90,37 @@ export default function CarFleet() {
         </h1>
         <p className="text-xl text-gray-300 max-w-2xl">
           Explora todos nuestros vehículos disponibles y encuentra el perfecto
-          para tu viaje.
+          para tu viaje. Usa las flechas del teclado para navegar.
         </p>
-      </div>
+      </header>
 
       {/* Loading */}
       {loading ? (
-        <div className="flex justify-center items-center h-96">
+        <div
+          className="flex justify-center items-center h-96"
+          role="status"
+          aria-live="polite"
+        >
           <div className="text-xl text-gray-400">Cargando flota...</div>
         </div>
       ) : (
-        <div className="px-4 lg:px-12">
-          {/* Grid de Autos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {autos.map((auto) => (
-              <div
+        <main className="px-4 lg:px-12">
+          {/* Lista de Autos */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            role="list"
+            ref={listRef}
+            onKeyDown={handleListKeyDown}
+            aria-label="Lista de vehículos disponibles"
+          >
+            {autos.map((auto, index) => (
+              <article
                 key={auto.id}
-                className="group bg-base-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-gray-700/50"
+                role="listitem"
+                className={`group bg-base-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-gray-700/50 focus-within:shadow-2xl focus-within:shadow-primary/40 focus-within:ring-2 focus-within:ring-primary ${
+                  focusedIndex === index ? "ring-2 ring-primary" : ""
+                }`}
+                aria-label={`${auto.marca} ${auto.modelo}, Patente: ${auto.patente}, Estado: ${auto.estado.replace("_", " ")}`}
               >
                 {/* Image Container */}
                 <div className="relative h-64 bg-base-300 overflow-hidden flex items-center justify-center">
@@ -102,7 +138,7 @@ export default function CarFleet() {
                       {auto.marca} {auto.modelo}
                     </h3>
                     <p className="text-sm text-gray-400">
-                      Patente: {auto.patente}
+                      Patente: <span aria-label="patente">{auto.patente}</span>
                     </p>
                   </div>
 
@@ -150,18 +186,20 @@ export default function CarFleet() {
                   {/* Action Button */}
                   <button
                     onClick={() => setLocation(`/car-detail/${auto.id}`)}
-                    className="w-full btn  btn-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity"
+                    onKeyDown={(e) => handleKeyDown(e, auto)}
+                    className="w-full btn btn-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+                    aria-label={`Ver detalles del ${auto.marca} ${auto.modelo}`}
                   >
                     Ver Detalles
                   </button>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
 
           {/* Empty State */}
           {autos.length === 0 && (
-            <div className="text-center py-20">
+            <div className="text-center py-20" role="status">
               <p className="text-2xl text-gray-400">
                 No hay autos disponibles en la flota.
               </p>
@@ -169,7 +207,10 @@ export default function CarFleet() {
           )}
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <section
+            className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-4"
+            aria-label="Estadísticas de la flota"
+          >
             <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
               <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
                 Total de Autos
@@ -200,8 +241,8 @@ export default function CarFleet() {
                 {autos.filter((a) => a.estado === "en_mantenimiento").length}
               </p>
             </div>
-          </div>
-        </div>
+          </section>
+        </main>
       )}
     </div>
   );

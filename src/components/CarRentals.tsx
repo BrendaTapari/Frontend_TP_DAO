@@ -127,6 +127,18 @@ export default function CarRentals() {
     setIsSpecificRentalOpen(true);
   };
 
+  const handleRowKeyDown = (e: React.KeyboardEvent, rental: Rental) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setSelectedRental(rental);
+      setIsSpecificRentalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsSpecificRentalOpen(false);
+  };
+
   const fetchRentals = async () => {
     setIsLoading(true);
     try {
@@ -168,12 +180,13 @@ export default function CarRentals() {
     <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <header className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="mb-6 lg:mb-0">
               <button
-                className="btn btn-ghost mb-4 text-sm font-medium"
+                className="btn btn-ghost mb-4 text-sm font-medium focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 onClick={handleBackButton}
+                aria-label="Volver a la página de inicio"
               >
                 <ArrowLeft /> Volver al inicio
               </button>
@@ -183,30 +196,32 @@ export default function CarRentals() {
               <p className="text-lg text-gray-600 max-w-2xl">
                 Administra y visualiza todos los alquileres de vehículos
                 registrados en el sistema. Controla fechas, costos y sanciones
-                de manera eficiente.
+                de manera eficiente. Presiona Enter o Space en cualquier fila para ver detalles.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                className="btn btn-secondary text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="btn btn-secondary text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 onClick={handleAddRental}
+                aria-label="Crear un nuevo alquiler de vehículo"
               >
                 <Plus />
                 Nuevo Alquiler
               </button>
               <button
-                className="btn btn-warning text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="btn btn-warning text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 onClick={handleAddSancion}
+                aria-label="Gestionar sanciones de alquileres"
               >
                 Gestionar Sanciones
               </button>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label="Estadísticas de alquileres">
           <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl p-6 text-white shadow-lg">
             <h3 className="text-lg font-semibold mb-2">
               Total Alquileres
@@ -240,7 +255,7 @@ export default function CarRentals() {
             </p>
             <p className="text-red-100 text-sm">Activos</p>
           </div>
-        </div>
+        </section>
 
         {/* Controls */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -251,8 +266,9 @@ export default function CarRentals() {
             <button
               className={`btn ${
                 showInfoRental ? "btn-error" : "btn-success"
-              } rounded-lg font-medium transition-all`}
+              } rounded-lg font-medium transition-all focus:outline-2 focus:outline-offset-2 focus:outline-primary`}
               onClick={handleShowInfoRental}
+              aria-label={showInfoRental ? "Ocultar tabla de alquileres activos" : "Mostrar tabla de alquileres activos"}
             >
               {showInfoRental ? "Ocultar Tabla" : "Mostrar Tabla"}
             </button>
@@ -261,9 +277,9 @@ export default function CarRentals() {
 
         {/* Table Section */}
         {showInfoRental && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <section className="bg-white rounded-2xl shadow-xl overflow-hidden" aria-label="Tabla de alquileres activos">
             <div className="overflow-x-auto">
-              <table className="table table-zebra w-full">
+              <table className="table table-zebra w-full" role="table">
                 <thead>
                   <tr className="bg-gradient-to-r from-gray-800 to-gray-900 text-white">
                     <th className="text-center font-bold text-sm">ID</th>
@@ -281,8 +297,12 @@ export default function CarRentals() {
                     rentals.map((rental: Rental, index: number) => (
                       <tr
                         key={rental.id || index}
-                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="hover:bg-gray-50 transition-colors cursor-pointer focus-within:bg-gray-100 focus:outline-none"
+                        role="row"
+                        tabIndex={0}
                         onDoubleClick={() => handleRowDoubleClick(rental)}
+                        onKeyDown={(e) => handleRowKeyDown(e, rental)}
+                        aria-label={`Alquiler ${rental.id}: Cliente ${rental.cliente.apellido}, Vehículo ${rental.vehiculo.modelo}, Estado ${rental.estado.nombre}`}
                       >
                         <td className="text-center font-semibold text-gray-700">
                           <div className="badge badge-outline">
@@ -336,7 +356,7 @@ export default function CarRentals() {
                             </span>
                           )}
                         </td>
-                                                <td className="text-center">
+                        <td className="text-center">
                           <div
                             className={`badge ${
                               rental.estado.nombre === "En curso"
@@ -353,7 +373,7 @@ export default function CarRentals() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-12">
+                      <td colSpan={8} className="text-center py-12">
                         <div className="flex flex-col items-center gap-4">
                           <div className="text-6xl">🚗</div>
                           <div>
@@ -365,8 +385,9 @@ export default function CarRentals() {
                             </p>
                           </div>
                           <button
-                            className="btn btn-primary mt-4"
+                            className="btn btn-primary mt-4 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                             onClick={handleAddRental}
+                            aria-label="Agregar el primer alquiler de vehículo"
                           >
                             Agregar Primer Alquiler
                           </button>
@@ -377,19 +398,20 @@ export default function CarRentals() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
         )}
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 mt-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-800">
-              Historico de Alquileres 
+              Histórico de Alquileres 
             </h2>
             <button
               className={`btn ${
                 allRentals ? "btn-warning" : "btn-success"
-              } rounded-lg font-medium transition-all`}
+              } rounded-lg font-medium transition-all focus:outline-2 focus:outline-offset-2 focus:outline-primary`}
               onClick={handleSeeAllRentals}
+              aria-label={allRentals ? "Ocultar tabla de histórico de alquileres" : "Mostrar tabla de histórico de alquileres"}
             >
               {allRentals ? "Ocultar Tabla" : "Mostrar Tabla"}
             </button>
@@ -397,9 +419,9 @@ export default function CarRentals() {
         </div>
 
       {allRentals ? (
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <section className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8" aria-label="Tabla histórico de alquileres">
           <div className="overflow-x-auto">
-            <table className="table table-zebra w-full">
+            <table className="table table-zebra w-full" role="table">
               <thead>
                 <tr className="bg-gradient-to-r from-gray-800 to-gray-900 text-white">  
                   <th className="text-center font-bold text-sm">ID</th>
@@ -416,8 +438,12 @@ export default function CarRentals() {
                     rentalsHistory.map((rental: Rental, index: number) => (
                       <tr
                         key={rental.id || index}
-                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="hover:bg-gray-50 transition-colors cursor-pointer focus-within:bg-gray-100 focus:outline-none"
+                        role="row"
+                        tabIndex={0}
                         onDoubleClick={() => handleRowDoubleClick(rental)}
+                        onKeyDown={(e) => handleRowKeyDown(e, rental)}
+                        aria-label={`Alquiler ${rental.id}: Cliente ${rental.cliente.apellido}, Vehículo ${rental.vehiculo.modelo}, Estado ${rental.estado.nombre}`}
                       >
                         <td className="text-center font-semibold text-gray-700">
                           <div className="badge badge-outline">
@@ -479,17 +505,18 @@ export default function CarRentals() {
             </table>
             </div>
           </div>
+        </section>
         ) : (
         <div></div>
       )   }
     
       
       
-    </div>
+      </div>
       <SpecificRental
         rental={selectedRental}
         isOpen={isSpecificRentalOpen}
-        onClose={() => setIsSpecificRentalOpen(false)}
+        onClose={handleCloseModal}
         onUpdate={handleRentalUpdate}
         />
 

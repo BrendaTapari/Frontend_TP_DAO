@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import mockCars from "../data/mockCars.json";
 
-// Transformar mockCars al formato del carrusel
-const cars = mockCars.map((car) => ({
+// Filtrar solo autos disponibles y transformar al formato del carrusel
+const availableCars = mockCars.filter((car) => car.estado === "disponible");
+const cars = availableCars.map((car) => ({
   id: car.id,
   name: `${car.marca} ${car.modelo}`,
   type: `${car.año} - ${car.estado}`,
@@ -29,10 +30,12 @@ export default function CarCarousel() {
   }, []);
 
   const nextCar = () => {
+    if (cars.length === 0) return;
     setActiveIndex((prev) => (prev + 1) % cars.length);
   };
 
   const prevCar = () => {
+    if (cars.length === 0) return;
     setActiveIndex((prev) => (prev - 1 + cars.length) % cars.length);
   };
 
@@ -41,14 +44,43 @@ export default function CarCarousel() {
   };
 
   const handleCarClick = () => {
-    const selectedCar = mockCars[activeIndex];
+    if (cars.length === 0) return;
+    const selectedCar = availableCars[activeIndex];
     setLocation(`/car-detail/${selectedCar.id}`);
   };
 
+  const handleCarouselKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextCar();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      prevCar();
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleCarClick();
+    }
+  };
+
   return (
-    <div className="relative w-full max-w-6xl mx-auto h-[420px] sm:h-[520px] lg:h-[600px] flex flex-col items-center justify-center overflow-hidden">
+    <div
+      className="relative w-full max-w-6xl mx-auto h-[420px] sm:h-[520px] lg:h-[600px] flex flex-col items-center justify-center overflow-hidden"
+      role="region"
+      aria-label="Carrusel de vehículos disponibles"
+      onKeyDown={handleCarouselKeyDown}
+      tabIndex={0}
+    >
       {/* Carousel Container */}
-      <div className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] flex items-center justify-center">
+      <div
+        className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] flex items-center justify-center"
+        role="list"
+        aria-live="polite"
+        aria-label={
+          cars.length > 0
+            ? `Vehículo ${activeIndex + 1} de ${cars.length}: ${cars[activeIndex].name}`
+            : "No hay vehículos disponibles"
+        }
+      >
         {cars.map((car, index) => {
           // Calculate distance from active index (-1, 0, 1) handling the wrap around
           let distance = index - activeIndex;
@@ -103,6 +135,7 @@ export default function CarCarousel() {
           return (
             <div
               key={car.id}
+              role="listitem"
               onClick={() => {
                 if (isActive) {
                   handleCarClick();
@@ -110,12 +143,23 @@ export default function CarCarousel() {
                   goToCar(index);
                 }
               }}
-              className={`absolute transition-all duration-700 ease-out cursor-pointer flex flex-col items-center justify-center ${blur} ${shouldShow ? "pointer-events-auto" : "pointer-events-none"}`}
+              onKeyDown={(e) => {
+                if ((e.key === "Enter" || e.key === " ") && isActive) {
+                  e.preventDefault();
+                  handleCarClick();
+                }
+              }}
+              className={`absolute transition-all duration-700 ease-out flex flex-col items-center justify-center ${blur} ${shouldShow ? "pointer-events-auto" : "pointer-events-none"} ${
+                isActive ? "cursor-pointer" : "cursor-default"
+              }`}
               style={{
                 transform: `translateX(${translateX}) scale(${scale})`,
                 opacity: opacity,
                 zIndex: zIndex,
               }}
+              tabIndex={isActive ? 0 : -1}
+              aria-label={`${car.name} - ${car.type}`}
+              aria-current={isActive ? "true" : "false"}
             >
               <img
                 src={car.image}
@@ -134,10 +178,17 @@ export default function CarCarousel() {
       </div>
 
       {/* Navigation & Controls */}
-      <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 sm:px-6 lg:px-10 z-50 pointer-events-none">
+      <div
+        className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 sm:px-6 lg:px-10 z-50 pointer-events-none"
+        role="group"
+        aria-label="Controles del carrusel"
+      >
         <button
           onClick={prevCar}
-          className="pointer-events-auto rounded-full p-2 sm:p-3 bg-white/5 border border-white/10 hover:bg-white/20 transition-all backdrop-blur-md text-white hover:scale-110"
+          className="pointer-events-auto rounded-full p-2 sm:p-3 bg-white/5 border border-white/10 hover:bg-white/20 transition-all backdrop-blur-md text-white hover:scale-110 focus:outline-2 focus:outline-offset-2 focus:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Vehículo anterior"
+          title="Anterior (flecha izquierda)"
+          disabled={cars.length === 0}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +207,10 @@ export default function CarCarousel() {
         </button>
         <button
           onClick={nextCar}
-          className="pointer-events-auto rounded-full p-2 sm:p-3 bg-white/5 border border-white/10 hover:bg-white/20 transition-all backdrop-blur-md text-white hover:scale-110"
+          className="pointer-events-auto rounded-full p-2 sm:p-3 bg-white/5 border border-white/10 hover:bg-white/20 transition-all backdrop-blur-md text-white hover:scale-110 focus:outline-2 focus:outline-offset-2 focus:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Vehículo siguiente"
+          title="Siguiente (flecha derecha)"
+          disabled={cars.length === 0}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -175,31 +229,48 @@ export default function CarCarousel() {
         </button>
       </div>
 
-      {/* Car Info Display */}
       <div className="mt-6 sm:mt-8 flex flex-col items-center justify-center min-h-[88px] transition-all duration-700 px-4 text-center">
-        <h4 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-[0.2em] sm:tracking-widest uppercase transition-all duration-500 pb-2">
-          {cars[activeIndex].name}
-        </h4>
-        <div className="h-[1px] w-16 bg-gradient-to-r from-transparent via-white/50 to-transparent my-1"></div>
-        <button
-          onClick={handleCarClick}
-          className="inline-block px-5 sm:px-6 py-2 border border-primary/30 rounded-full text-primary text-sm sm:text-base mt-2 font-semibold hover:bg-primary/10 transition-all cursor-pointer"
-        >
-          Ver Detalles
-        </button>
+        {cars.length > 0 ? (
+          <>
+            <h4 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-[0.2em] sm:tracking-widest uppercase transition-all duration-500 pb-2">
+              {cars[activeIndex].name}
+            </h4>
+            <div
+              className="h-[1px] w-16 bg-gradient-to-r from-transparent via-white/50 to-transparent my-1"
+              aria-hidden="true"
+            ></div>
+            <button
+              onClick={handleCarClick}
+              className="inline-block px-5 sm:px-6 py-2 border border-primary/30 rounded-full text-primary text-sm sm:text-base mt-2 font-semibold hover:bg-primary/10 transition-all cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+              aria-label={`Ver detalles del ${cars[activeIndex].name}`}
+            >
+              Ver Detalles
+            </button>
+          </>
+        ) : (
+          <p className="text-lg text-gray-300">
+            No hay vehículos disponibles en este momento
+          </p>
+        )}
       </div>
 
       {/* Indicators */}
-      <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
+      <div
+        className="flex gap-2 sm:gap-3 mt-4 sm:mt-6"
+        role="group"
+        aria-label="Indicadores del carrusel"
+      >
         {cars.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goToCar(idx)}
-            className={`transition-all duration-500 rounded-full ${
+            className={`transition-all duration-500 rounded-full focus:outline-2 focus:outline-offset-2 focus:outline-primary ${
               idx === activeIndex
                 ? "w-6 sm:w-8 h-1.5 bg-white"
                 : "w-2 h-1.5 bg-white/30 hover:bg-white/50"
             }`}
+            aria-label={`Ir al vehículo ${idx + 1}`}
+            aria-current={idx === activeIndex ? "true" : "false"}
           />
         ))}
       </div>
