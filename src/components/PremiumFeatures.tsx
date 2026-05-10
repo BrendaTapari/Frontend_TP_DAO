@@ -1,12 +1,4 @@
-import {
-  MapPin,
-  Bone,
-  Baby,
-  Clock,
-  Zap,
-  Shield,
-  Wifi,
-} from "lucide-react";
+import { MapPin, Bone, Baby, Clock, Zap, Shield, Wifi } from "lucide-react";
 
 const detailImages = [
   {
@@ -121,7 +113,9 @@ export default function PremiumFeatures() {
                     <div
                       className={`p-3 rounded-lg bg-gradient-to-br ${feature.gradient}`}
                     >
-                      <div className="text-primary flex items-center justify-center">{feature.icon}</div>
+                      <div className="text-primary flex items-center justify-center">
+                        {feature.icon}
+                      </div>
                     </div>
                     <div>
                       <p className="text-primary text-sm uppercase tracking-widest font-semibold">
@@ -136,20 +130,18 @@ export default function PremiumFeatures() {
                   <p className="text-gray-400 text-base sm:text-lg leading-relaxed font-light max-w-2xl mx-auto lg:mx-0">
                     {feature.description}
                   </p>
-
-                  
                 </div>
               </div>
 
               {/* Image */}
               <div
-                className={`${index % 2 === 1 ? "lg:order-1" : "lg:order-2"}`}
+                className={`flex items-center justify-center ${index % 2 === 1 ? "lg:order-1" : "lg:order-2"}`}
               >
-                <div className="relative group">
+                <div className="relative group w-full max-w-md">
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500`}
                   ></div>
-                  <div className="relative overflow-hidden rounded-3xl border border-white/10 group-hover:border-white/20 transition-all duration-500">
+                  <div className="relative overflow-hidden rounded-3xl border border-white/10 group-hover:border-white/20 transition-all duration-500 max-h-[250px] sm:max-h-[350px] lg:max-h-[450px]">
                     <img
                       src={detailImages[index]?.src}
                       alt={detailImages[index]?.alt}
