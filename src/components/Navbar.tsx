@@ -41,7 +41,6 @@ export default function Navbar() {
           </button>
 
           <div className="ml-auto flex shrink-0 gap-3 items-center">
-            {/* Language Selector */}
             <div className="dropdown dropdown-end">
               <button
                 tabIndex={0}
@@ -51,6 +50,7 @@ export default function Navbar() {
               >
                 <Globe size={20} />
               </button>
+
               <ul
                 tabIndex={0}
                 role="menu"
@@ -59,16 +59,25 @@ export default function Navbar() {
                 <li>
                   <button
                     onClick={() => changeLanguage("es")}
-                    className={`${i18n.language === "es" ? "bg-primary text-black" : "text-zinc-100"}`}
+                    className={`${
+                      i18n.language === "es"
+                        ? "bg-primary text-black"
+                        : "text-zinc-100"
+                    }`}
                     aria-current={i18n.language === "es" ? "page" : undefined}
                   >
                     {t("nav.spanish")}
                   </button>
                 </li>
+
                 <li>
                   <button
                     onClick={() => changeLanguage("en")}
-                    className={`${i18n.language === "en" ? "bg-primary text-black" : "text-zinc-100"}`}
+                    className={`${
+                      i18n.language === "en"
+                        ? "bg-primary text-black"
+                        : "text-zinc-100"
+                    }`}
                     aria-current={i18n.language === "en" ? "page" : undefined}
                   >
                     {t("nav.english")}
@@ -77,9 +86,10 @@ export default function Navbar() {
               </ul>
             </div>
 
-            {/* Menu */}
             <div
-              className={`dropdown dropdown-end ${mobileOpen ? "dropdown-open" : ""}`}
+              className={`dropdown dropdown-end ${
+                mobileOpen ? "dropdown-open" : ""
+              }`}
             >
               <label className="btn btn-circle swap swap-rotate border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10">
                 <input
@@ -91,7 +101,6 @@ export default function Navbar() {
                 />
 
                 <Menu className="swap-off fill-current" />
-
                 <X className="swap-on fill-current" />
               </label>
 
@@ -113,6 +122,17 @@ export default function Navbar() {
                     {t("fleet.title")}
                   </button>
                 </li>
+
+                <li>
+                  <button
+                    role="menuitem"
+                    onClick={() => goTo("/about-us")}
+                    className="text-zinc-100 text-base"
+                  >
+                    {t("nav.about_us")}
+                  </button>
+                </li>
+
                 <li>
                   <button
                     role="menuitem"
