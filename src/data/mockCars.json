@@ -42,5 +42,115 @@
     "costo": 45000,
     "periodicidad_mantenimiento": 12,
     "imagen": "/Images/autos/YarisCross.png"
+  },
+  {
+    "id": 5,
+    "patente": "AF458TR",
+    "marca": "Volkswagen",
+    "modelo": "Taos",
+    "año": 2024,
+    "estado": "disponible",
+    "costo": 52000,
+    "periodicidad_mantenimiento": 6,
+    "imagen": "/Images/autos/VolkswagenTaos.png"
+  },
+  {
+    "id": 6,
+    "patente": "AG921LM",
+    "marca": "Honda",
+    "modelo": "Civic",
+    "año": 2024,
+    "estado": "disponible",
+    "costo": 58000,
+    "periodicidad_mantenimiento": 8,
+    "imagen": "/Images/autos/HondaCivic.png"
+  },
+  {
+    "id": 7,
+    "patente": "AH552QP",
+    "marca": "BMW",
+    "modelo": "X1",
+    "año": 2023,
+    "estado": "en_alquiler",
+    "costo": 85000,
+    "periodicidad_mantenimiento": 6,
+    "imagen": "/Images/autos/BMWX1.png"
+  },
+  {
+    "id": 8,
+    "patente": "AI102ZX",
+    "marca": "Audi",
+    "modelo": "SUV Q5",
+    "año": 2024,
+    "estado": "disponible",
+    "costo": 92000,
+    "periodicidad_mantenimiento": 6,
+    "imagen": "/Images/autos/AudiQ5.png"
+  },
+  {
+    "id": 9,
+    "patente": "AF764YU",
+    "marca": "Mercedes-Benz",
+    "modelo": "GLA 200",
+    "año": 2023,
+    "estado": "en_alquiler",
+    "costo": 60000,
+    "periodicidad_mantenimiento": 10,
+    "imagen": "/Images/autos/MercedesBenz.png"
+  },
+  {
+    "id": 10,
+    "patente": "AG874BC",
+    "marca": "Chevrolet",
+    "modelo": "Tracker",
+    "año": 2024,
+    "estado": "disponible",
+    "costo": 47000,
+    "periodicidad_mantenimiento": 12,
+    "imagen": "/Images/autos/ChevroletTracker.png"
+  },
+  {
+    "id": 11,
+    "patente": "AH431DF",
+    "marca": "Peugeot",
+    "modelo": "208",
+    "año": 2024,
+    "estado": "disponible",
+    "costo": 43000,
+    "periodicidad_mantenimiento": 12,
+    "imagen": "/Images/autos/Peugeot.png"
+  },
+  {
+    "id": 12,
+    "patente": "AI215GH",
+    "marca": "Jeep",
+    "modelo": "Compass",
+    "año": 2023,
+    "estado": "en_alquiler",
+    "costo": 67000,
+    "periodicidad_mantenimiento": 8,
+    "imagen": "/Images/autos/JeepCompass.png"
+  },
+  {
+    "id": 13,
+    "patente": "AF998JK",
+    "marca": "Nissan",
+    "modelo": "Kick",
+    "año": 2024,
+    "estado": "disponible",
+    "costo": 51000,
+    "periodicidad_mantenimiento": 6,
+    "imagen": "/Images/autos/NissanKick.png"
+  },
+  {
+    "id": 14,
+    "patente": "AG562MN",
+    "marca": "Hyundai",
+    "modelo": "Tucson",
+    "año": 2024,
+    "estado": "en_alquiler",
+    "costo": 64000,
+    "periodicidad_mantenimiento": 8,
+    "imagen": "/Images/autos/HyundaiTucson.png"
   }
 ]
