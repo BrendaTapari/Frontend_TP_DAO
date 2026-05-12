@@ -1,9 +1,13 @@
 {
   "nav": {
-  "language": "Language",
-  "spanish": "Español",
-  "english": "English",
-  "about_us": "About Us"
+    "language": "Language",
+    "spanish": "Español",
+    "english": "English",
+    "french": "French",
+    "german": "German",
+    "portuguese": "Portuguese",
+    "arabic": "Arabic",
+    "about_us": "About Us"
   },
   "landing": {
     "logo": "LuxDrive",

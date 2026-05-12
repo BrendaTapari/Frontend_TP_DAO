@@ -21,7 +21,6 @@ export default function Navbar() {
     i18n.changeLanguage(lng);
   };
 
-
   return (
     <>
       <div className="navbar absolute top-0 z-50 flex w-full justify-center bg-gradient-to-b from-black/90 via-black/50 to-transparent pt-4 pb-8">
@@ -55,7 +54,7 @@ export default function Navbar() {
               <ul
                 tabIndex={0}
                 role="menu"
-                className="dropdown-content z-[100] menu mt-2 w-40 rounded-2xl border border-white/10 bg-black/85 p-2 shadow-2xl backdrop-blur-md"
+                className="dropdown-content z-[100] menu mt-2 max-h-80 w-44 overflow-y-auto rounded-2xl border border-white/10 bg-black/85 p-2 shadow-2xl backdrop-blur-md"
               >
                 <li>
                   <button
@@ -82,6 +81,62 @@ export default function Navbar() {
                     aria-current={i18n.language === "en" ? "page" : undefined}
                   >
                     {t("nav.english")}
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    onClick={() => changeLanguage("fr")}
+                    className={`${
+                      i18n.language === "fr"
+                        ? "bg-primary text-black"
+                        : "text-zinc-100"
+                    }`}
+                    aria-current={i18n.language === "fr" ? "page" : undefined}
+                  >
+                    {t("nav.french")}
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    onClick={() => changeLanguage("de")}
+                    className={`${
+                      i18n.language === "de"
+                        ? "bg-primary text-black"
+                        : "text-zinc-100"
+                    }`}
+                    aria-current={i18n.language === "de" ? "page" : undefined}
+                  >
+                    {t("nav.german")}
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    onClick={() => changeLanguage("pt")}
+                    className={`${
+                      i18n.language === "pt"
+                        ? "bg-primary text-black"
+                        : "text-zinc-100"
+                    }`}
+                    aria-current={i18n.language === "pt" ? "page" : undefined}
+                  >
+                    {t("nav.portuguese")}
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    onClick={() => changeLanguage("ar")}
+                    className={`${
+                      i18n.language === "ar"
+                        ? "bg-primary text-black"
+                        : "text-zinc-100"
+                    }`}
+                    aria-current={i18n.language === "ar" ? "page" : undefined}
+                  >
+                    {t("nav.arabic")}
                   </button>
                 </li>
               </ul>
