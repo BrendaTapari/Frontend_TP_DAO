@@ -18,6 +18,7 @@ import MaintenanceOrderDetail from "./components/Maintenance/MaintenanceOrderDet
 import Seguros from "./components/Seguros.tsx";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n/i18n";
+import AboutUs from "./components/AboutUs.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -37,6 +38,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/car-maintenance" component={MaintenanceOrders} />
         <Route path="/car-maintenance/:id" component={MaintenanceOrderDetail} />
         <Route path="/car-insurance" component={Seguros} />
+        <Route path="/about-us" component={AboutUs} />
       </Router>
     </I18nextProvider>
   </StrictMode>,

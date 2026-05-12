@@ -21,6 +21,7 @@ export default function Navbar() {
     i18n.changeLanguage(lng);
   };
 
+
   return (
     <>
       <div className="navbar absolute top-0 z-50 flex w-full justify-center bg-gradient-to-b from-black/90 via-black/50 to-transparent pt-4 pb-8">

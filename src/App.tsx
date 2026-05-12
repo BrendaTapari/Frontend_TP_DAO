@@ -111,6 +111,8 @@ function App() {
     }
   };
 
+
+
   const AnimatedLogo = () => (
     <motion.div
       className="flex flex-col items-center gap-4"
