@@ -26,16 +26,23 @@ export default function AboutUs() {
             <ShieldCheck className="text-primary mb-5" size={42} />
             <h2 className="text-2xl font-bold mb-4">Confianza</h2>
             <p className="text-gray-400">
-              Trabajamos con vehículos seguros, mantenidos y listos para
-              brindar una experiencia cómoda y confiable.
+              Trabajamos con vehículos seguros, mantenidos y listos para brindar
+              una experiencia cómoda y confiable.
             </p>
           </div>
 
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 hover:border-primary transition-all">
             <MapPin className="text-primary mb-5" size={42} />
             <h2 className="text-2xl font-bold mb-4">Ubicación</h2>
-            <p className="text-gray-400">Ayacucho 386</p>
-            <p className="text-gray-500 mt-2">Córdoba, Argentina</p>
+            <a
+              href="https://www.google.com/maps/search/Ayacucho+386,+Córdoba,+Argentina"
+              target="_blank"
+              rel="noreferrer"
+              className="text-gray-400 hover:text-primary transition-colors cursor-pointer"
+            >
+              <p>Ayacucho 386</p>
+              <p className="text-gray-500 mt-2">Córdoba, Argentina</p>
+            </a>
           </div>
 
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 hover:border-primary transition-all">

@@ -260,3 +260,8 @@ html {
   font-size: 1.25rem !important;
   font-weight: 500 !important;
 }
+
+::selection {
+  background: var(--color-primary);
+  color: #000000;
+}
