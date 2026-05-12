@@ -167,9 +167,7 @@ function App() {
   return (
     <div ref={appRef}>
       {location === "/about-us" ? (
-        <main className="min-h-screen bg-black text-white pt-40 px-10">
-          <h1 className="text-6xl text-white">PRUEBA ABOUT US</h1>
-        </main>
+        <AboutUs />
       ) : (
         <>
           {showWelcome && (
@@ -364,7 +362,6 @@ function App() {
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     {t("landing.fleet_heading")} <br />
-
                     <span className="text-primary italic font-light">
                       {t("landing.fleet_location")}
                     </span>
