@@ -1,7 +1,6 @@
 [
   {
     "id": 1,
-    "patente": "AG025CD",
     "marca": "Audi",
     "modelo": "A3",
     "año": 2023,
@@ -13,19 +12,17 @@
   },
   {
     "id": 2,
-    "patente": "AI789JV",
     "marca": "Toyota",
     "modelo": "Corolla",
     "año": 2023,
     "estado": "disponible",
     "costo": 50000,
     "periodicidad_mantenimiento": 6,
-    "imagen": "/Images/autos/Corolla.png",
+    "imagen": "/Images/autos/corolla.png",
     "alt": "Imagen de Toyota Corolla"
   },
   {
     "id": 3,
-    "patente": "AH236KL",
     "marca": "Toyota",
     "modelo": "RAV4",
     "año": 2022,
@@ -37,7 +34,6 @@
   },
   {
     "id": 4,
-    "patente": "AH236OL",
     "marca": "Toyota",
     "modelo": "Yaris Cross",
     "año": 2023,
@@ -49,7 +45,6 @@
   },
   {
     "id": 5,
-    "patente": "AF458TR",
     "marca": "Volkswagen",
     "modelo": "Taos",
     "año": 2024,
@@ -61,7 +56,6 @@
   },
   {
     "id": 6,
-    "patente": "AG921LM",
     "marca": "Honda",
     "modelo": "Civic",
     "año": 2024,
@@ -73,7 +67,6 @@
   },
   {
     "id": 7,
-    "patente": "AH552QP",
     "marca": "BMW",
     "modelo": "X1",
     "año": 2023,
@@ -85,7 +78,6 @@
   },
   {
     "id": 8,
-    "patente": "AI102ZX",
     "marca": "Audi",
     "modelo": "SUV Q5",
     "año": 2024,
@@ -97,7 +89,6 @@
   },
   {
     "id": 9,
-    "patente": "AF764YU",
     "marca": "Mercedes-Benz",
     "modelo": "GLA 200",
     "año": 2023,
@@ -109,7 +100,6 @@
   },
   {
     "id": 10,
-    "patente": "AG874BC",
     "marca": "Chevrolet",
     "modelo": "Tracker",
     "año": 2024,
@@ -121,7 +111,6 @@
   },
   {
     "id": 11,
-    "patente": "AH431DF",
     "marca": "Ford",
     "modelo": "Bronco",
     "año": 2024,
@@ -133,7 +122,6 @@
   },
   {
     "id": 12,
-    "patente": "AI215GH",
     "marca": "Jeep",
     "modelo": "Compass",
     "año": 2023,
@@ -145,7 +133,6 @@
   },
   {
     "id": 13,
-    "patente": "AF998JK",
     "marca": "Nissan",
     "modelo": "Kick",
     "año": 2024,
@@ -157,7 +144,6 @@
   },
   {
     "id": 14,
-    "patente": "AG562MN",
     "marca": "Hyundai",
     "modelo": "Tucson",
     "año": 2024,

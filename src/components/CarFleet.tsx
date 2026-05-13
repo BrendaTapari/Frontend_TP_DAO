@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 interface Auto {
   id: number;
-  patente: string;
   marca: string;
   modelo: string;
   año: number;
@@ -85,30 +84,30 @@ export default function CarFleet() {
     >
       {/* Header */}
       <header className="px-4 lg:px-12 mb-12">
-        <button
-          onClick={() => setLocation("/")}
-          className="btn flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-          aria-label={t("common.back")}
-        >
-          {isRtl ? (
-            <>
-              <span>{t("common.back")}</span>
-              <ArrowLeft size={20} style={{ transform: "scaleX(-1)" }} />
-            </>
-          ) : (
-            <>
-              <ArrowLeft size={20} />
-              <span>{t("common.back")}</span>
-            </>
-          )}
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => setLocation("/")}
+            className="btn btn-circle btn-icon btn-outline btn-accent flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+            aria-label={t("common.back")}
+          >
+            {isRtl ? (
+              <>
+                <ArrowLeft size={20} style={{ transform: "scaleX(-1)" }} />
+              </>
+            ) : (
+              <>
+                <ArrowLeft size={20} />
+              </>
+            )}
+          </button>
 
-        <h1
-          className="text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-xl"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          {t("fleet.title")}
-        </h1>
+          <h1
+            className="text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-xl"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {t("fleet.title")}
+          </h1>
+        </div>
         <p className="text-xl text-gray-300 max-w-2xl">
           {t("fleet.description")}
         </p>
@@ -140,7 +139,7 @@ export default function CarFleet() {
                 className={`group bg-base-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-gray-700/50 focus-within:shadow-2xl focus-within:shadow-primary/40 focus-within:ring-2 focus-within:ring-primary ${
                   focusedIndex === index ? "ring-2 ring-primary" : ""
                 }`}
-                aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.license_plate")}: ${auto.patente}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
+                aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
               >
                 {/* Image Container */}
                 <div className="relative h-64 bg-base-300 overflow-hidden flex items-center justify-center">
@@ -157,12 +156,6 @@ export default function CarFleet() {
                     <h3 className="text-2xl font-bold text-white mb-1">
                       {auto.marca} {auto.modelo}
                     </h3>
-                    <p className="text-sm text-gray-400">
-                      {t("fleet.license_plate")}:{" "}
-                      <span aria-label={t("fleet.license_plate")}>
-                        {auto.patente}
-                      </span>
-                    </p>
                   </div>
 
                   {/* Details Grid */}

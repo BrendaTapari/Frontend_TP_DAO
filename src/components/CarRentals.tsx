@@ -7,7 +7,6 @@ import { useVisibleFocus } from "../hooks/useVisibleFocus";
 import { useTranslation } from "react-i18next";
 
 interface Auto {
-  patente: string;
   marca: string;
   modelo: string;
   anio: number;
@@ -329,10 +328,7 @@ export default function CarRentals() {
                         </td>
                         <td>
                           <div className="font-medium text-gray-700">
-                            {rental.vehiculo.modelo +
-                              " (" +
-                              rental.vehiculo.patente +
-                              ")" || "No especificado"}
+                            {rental.vehiculo.modelo || "No especificado"}
                           </div>
                         </td>
                         <td>

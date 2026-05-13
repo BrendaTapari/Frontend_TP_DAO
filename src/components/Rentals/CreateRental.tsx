@@ -1,22 +1,21 @@
-import {
+import React, {
   useState,
   useEffect,
   useCallback,
   useMemo,
-  type ChangeEvent,
   type FormEvent,
+  type ChangeEvent,
 } from "react";
-import { getClients } from "../../services/clientService";
+import { useLocation } from "wouter";
+import { DayPicker } from "react-day-picker";
+import { es } from "date-fns/locale";
+import toast from "react-hot-toast";
+import { Car } from "lucide-react";
+import CoveredCarImage from "../../images/CoveredCar.jpg";
+
 import { getAviableCarsForRental } from "../../services/autosService";
 import { getEmployees } from "../../services/employeeService";
 import { createRental } from "../../services/rentalService";
-import { useLocation } from "wouter";
-import { ArrowLeft, Car, ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
-import { es } from "date-fns/locale";
-import type { Client } from "../../services/clientService.d";
-import CoveredCarImage from "../../images/CoveredCar.jpg";
 
 interface CarOption {
   id: number;
@@ -31,223 +30,231 @@ interface CarOption {
 
 interface EmployeeOption {
   id: number;
-  legajo: string;
   nombre: string;
   apellido: string;
+  legajo?: string;
 }
 
 export default function CreateRental() {
   const [, setLocation] = useLocation();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
+  const [cars, setCars] = useState<CarOption[]>([]);
+  const [employees, setEmployees] = useState<EmployeeOption[]>([]);
+  const [isFetchingCars, setIsFetchingCars] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
-    cliente: "",
-    costo: 0,
-    auto: "",
+    nombre: "",
+    apellido: "",
+    nacionalidad: "",
+    dni: "",
+    tipo_dni: "",
+    fechaDeNacimiento: "",
     fechaInicio: "",
     fechaFin: "",
+    auto: "", // will store car id as string
+    costo: 0,
     empleado: "",
   });
 
-  const [client, setClient] = useState<Client[]>([]);
-  const [car, setCar] = useState<CarOption[]>([]);
-  const [employee, setEmployee] = useState<EmployeeOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingCars, setIsFetchingCars] = useState(false);
-  const [error, setError] = useState("");
-
   const dateCalculations = useMemo(() => {
-    if (!formData.fechaInicio || !formData.fechaFin) {
+    if (!formData.fechaInicio || !formData.fechaFin)
       return { isValid: false, days: 0 };
-    }
-
-    const start = new Date(formData.fechaInicio);
-    const end = new Date(formData.fechaFin);
-
-    if (start >= end) {
+    const start = new Date(formData.fechaInicio + "T12:00:00");
+    const end = new Date(formData.fechaFin + "T12:00:00");
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end)
       return { isValid: false, days: 0 };
-    }
-
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const days = Math.ceil((end.getTime() - start.getTime()) / msPerDay);
     return { isValid: true, days };
   }, [formData.fechaInicio, formData.fechaFin]);
 
   useEffect(() => {
-    const fetchClientsAndEmployees = async () => {
-      try {
-        const clientData = await getClients();
-        setClient(clientData);
-
-        const employeesData = await getEmployees();
-        setEmployee(employeesData);
-      } catch (error) {
-        console.error("Error fetching:", error);
-      }
+    // fetch employees once
+    let mounted = true;
+    getEmployees()
+      .then((res: any) => {
+        if (!mounted) return;
+        // normalize minimal shape
+        const list = (res || []).map((e: any) => ({
+          id: e.id,
+          nombre: e.nombre,
+          apellido: e.apellido,
+          legajo: e.legajo,
+        }));
+        setEmployees(list);
+      })
+      .catch(() => {
+        // ignore
+      });
+    return () => {
+      mounted = false;
     };
-
-    fetchClientsAndEmployees();
   }, []);
 
   useEffect(() => {
-    const fetchAvailableCars = async () => {
+    // fetch available cars when dates change
+    const fetchCars = async () => {
       if (!dateCalculations.isValid) {
-        setCar([]);
+        setCars([]);
+        setSelectedCarId(null);
+        setFormData((p) => ({ ...p, costo: 0 }));
         return;
       }
-
       setIsFetchingCars(true);
       try {
-        const carsData = await getAviableCarsForRental(
+        const res = await getAviableCarsForRental(
           formData.fechaInicio,
           formData.fechaFin,
         );
-        setCar(carsData);
-      } catch (error) {
-        console.error("Error fetching available cars:", error);
-        setCar([]);
+        const list = (res || []).map((c: any) => ({
+          id: c.id,
+          marca: c.marca,
+          modelo: c.modelo,
+          patente: c.patente,
+          costo: c.costo,
+          imagen: c.imagen,
+          color: c.color,
+          año: c.año,
+        }));
+        setCars(list);
+        // clear selection if not present
+        if (
+          selectedCarId &&
+          !list.some((c: CarOption) => c.id === selectedCarId)
+        ) {
+          setSelectedCarId(null);
+          setFormData((p) => ({ ...p, auto: "" }));
+        }
+      } catch (err) {
+        toast.error("Error al buscar autos disponibles");
       } finally {
         setIsFetchingCars(false);
       }
     };
 
-    fetchAvailableCars();
-  }, [formData.fechaInicio, formData.fechaFin, dateCalculations.isValid]);
+    fetchCars();
+  }, [
+    formData.fechaInicio,
+    formData.fechaFin,
+    dateCalculations.isValid,
+    selectedCarId,
+  ]);
 
   const getImageUrl = (imagen?: string) => {
-    if (imagen) {
-      return `data:image/jpeg;base64,${imagen}`;
-    }
-
-    return CoveredCarImage;
+    if (!imagen) return CoveredCarImage;
+    if (
+      imagen.startsWith("/") ||
+      imagen.startsWith("http://") ||
+      imagen.startsWith("https://")
+    )
+      return imagen;
+    return `data:image/jpeg;base64,${imagen}`;
   };
 
   useEffect(() => {
-    const calculateCost = () => {
-      if (!dateCalculations.isValid || !formData.auto) {
-        setFormData((prev) => ({ ...prev, costo: 0 }));
-        return;
-      }
-
-      const selectedCar = car.find((c) => c.patente === formData.auto);
-      if (selectedCar) {
-        setFormData((prev) => ({
-          ...prev,
-          costo: dateCalculations.days * selectedCar.costo,
-        }));
-      }
-    };
-
-    calculateCost();
-  }, [dateCalculations.isValid, dateCalculations.days, formData.auto]);
-
-  useEffect(() => {
-    if (formData.auto && dateCalculations.isValid && car.length > 0) {
-      const selectedCar = car.find((c) => c.patente === formData.auto);
-      if (selectedCar) {
-        setFormData((prev) => ({
-          ...prev,
-          costo: dateCalculations.days * selectedCar.costo,
-        }));
-      }
+    // calculate cost when car or days change
+    if (!dateCalculations.isValid || !formData.auto) {
+      setFormData((p) => ({ ...p, costo: 0 }));
+      return;
     }
-  }, [car, formData.auto, dateCalculations.isValid, dateCalculations.days]);
+    const sel = cars.find((c) => String(c.id) === formData.auto);
+    if (sel)
+      setFormData((p) => ({ ...p, costo: sel.costo * dateCalculations.days }));
+  }, [dateCalculations.days, dateCalculations.isValid, formData.auto, cars]);
 
-  const handleVolver = useCallback(() => {
-    setLocation("/");
-  }, [setLocation]);
+  const handleCarSelection = useCallback((id: number) => {
+    setSelectedCarId(id);
+    setFormData((p) => ({ ...p, auto: String(id) }));
+  }, []);
 
-  const handleFormChange = useCallback(
+  const handleInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+      const { name, value } = e.target;
+      setFormData((p) => ({ ...p, [name]: value }));
     },
     [],
   );
 
-  const handleCarSelection = useCallback((patente: string) => {
-    setFormData((prev) => ({ ...prev, auto: patente }));
-  }, []);
-
   const handleDateValidation = async () => {
     if (!formData.fechaInicio || !formData.fechaFin) {
-      setError("Por favor, seleccione ambas fechas (inicio y fin)");
+      toast.error("Por favor seleccione inicio y fin");
       return false;
     }
-
-    const fechaInicio = new Date(formData.fechaInicio);
-    const fechaFin = new Date(formData.fechaFin);
-
-    if (fechaInicio >= fechaFin) {
-      setError("La fecha de inicio debe ser anterior a la fecha de fin");
+    const start = new Date(formData.fechaInicio);
+    const end = new Date(formData.fechaFin);
+    if (start >= end) {
+      toast.error("La fecha de inicio debe ser anterior a la fecha de fin");
       return false;
     }
-
     return true;
   };
 
   const handleNextStep = async () => {
-    setError("");
-
     if (currentStep === 1) {
-      const isValid = await handleDateValidation();
-      if (isValid) {
-        setCurrentStep(2);
-      }
-    } else if (currentStep === 2) {
+      const ok = await handleDateValidation();
+      if (ok) setCurrentStep(2);
+      return;
+    }
+    if (currentStep === 2) {
       if (!formData.auto) {
-        setError("Por favor, seleccione un auto");
+        toast.error("Por favor seleccione un auto");
         return;
       }
       setCurrentStep(3);
-    } else if (currentStep === 3) {
-      if (!formData.cliente || !formData.empleado) {
-        setError("Por favor, seleccione cliente y empleado");
+      return;
+    }
+    if (currentStep === 3) {
+      if (
+        !formData.nombre ||
+        !formData.apellido ||
+        !formData.dni ||
+        !formData.tipo_dni ||
+        !formData.fechaDeNacimiento ||
+        !formData.empleado
+      ) {
+        toast.error(
+          "Complete todos los datos personales y seleccione un empleado",
+        );
         return;
       }
       setCurrentStep(4);
+      return;
     }
   };
 
-  const handlePrevStep = useCallback(() => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setError("");
-    }
-  }, [currentStep]);
+  const handlePrevStep = () => {
+    if (currentStep > 1) setCurrentStep((s) => s - 1);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    const fechasValidas = await handleDateValidation();
-    if (!fechasValidas) {
-      return;
-    }
-
+    const ok = await handleDateValidation();
+    if (!ok) return;
     try {
       setIsLoading(true);
-
-      const selectedClient = client.find(
-        (c) => `${c.nombre} ${c.apellido}` === formData.cliente,
-      );
-      const selectedEmployee = employee.find(
-        (e) => `${e.nombre} ${e.apellido}` === formData.empleado,
-      );
-
-      const rentalData = {
-        ...formData,
-        cliente:
-          selectedClient?.dni_cliente || selectedClient?.id || formData.cliente,
-        empleado:
-          selectedEmployee?.legajo_empleado ||
-          selectedEmployee?.id ||
-          formData.empleado,
+      const payload = {
+        cliente: {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          nacionalidad: formData.nacionalidad,
+          dni: formData.dni,
+          tipo_dni: formData.tipo_dni,
+          fechaDeNacimiento: formData.fechaDeNacimiento,
+        },
+        fechaInicio: formData.fechaInicio,
+        fechaFin: formData.fechaFin,
+        autoId: Number(formData.auto),
+        empleado: formData.empleado,
+        costo: formData.costo,
       };
-
-      await createRental(rentalData);
+      await createRental(payload as any);
+      toast.success("Alquiler creado");
       setLocation("/car-rentals");
-    } catch (error) {
-      console.error("Error creating rental:", error);
-      setError("Error al crear el alquiler");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al crear el alquiler");
     } finally {
       setIsLoading(false);
     }
@@ -271,78 +278,63 @@ export default function CreateRental() {
                 </div>
               </div>
             )}
+
             <div className="flex justify-center w-full">
               <div className="form-control w-full max-w-xl">
                 <label className="label justify-center pb-4">
-                  <span className="label-text font-medium text-xl text-white">Seleccione el período de alquiler</span>
+                  <span className="label-text font-medium text-xl text-white">
+                    Seleccione el período de alquiler
+                  </span>
                 </label>
                 <div className="relative inline-block w-full text-center">
-                  <button 
+                  <button
                     type="button"
-                    popoverTarget="rdp-popover-range" 
-                    className="input input-bordered w-full h-16 text-center text-gray-200 flex items-center justify-center bg-base-200/50 hover:bg-base-200 transition-colors text-lg tracking-wide border-white/20" 
-                    style={{ anchorName: "--rdp-range" } as React.CSSProperties}
+                    className="input input-bordered w-full h-16 text-center text-gray-200 flex items-center justify-center bg-base-200/50 hover:bg-base-200 transition-colors text-lg tracking-wide border-white/20"
                   >
-                    {formData.fechaInicio ? (
-                      formData.fechaFin ? (
-                        `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()}   —   ${new Date(formData.fechaFin + "T12:00:00").toLocaleDateString()}`
-                      ) : (
-                        `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()}   —   Seleccione fin`
-                      )
-                    ) : (
-                      "Fechas de check-in y check-out"
-                    )}
+                    {formData.fechaInicio
+                      ? formData.fechaFin
+                        ? `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — ${new Date(formData.fechaFin + "T12:00:00").toLocaleDateString()}`
+                        : `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — Seleccione fin`
+                      : "Fechas de inicio y fin"}
                   </button>
-                  <div 
-                    popover="auto" 
-                    id="rdp-popover-range" 
-                    className="dropdown bg-base-200 border border-white/10 rounded-2xl p-2  m-2 text-gray-200 shadow-xl" 
-                    style={{ positionAnchor: "--rdp-range" } as React.CSSProperties}
-                  >
-                    <DayPicker 
+
+                  <div className="dropdown bg-base-200 border border-white/10 rounded-2xl p-2 m-2 text-gray-200 shadow-xl">
+                    <DayPicker
                       locale={es}
-                      className="react-day-picker" 
-                      mode="range" 
-                      numberOfMonths={2}  
+                      className="react-day-picker"
+                      mode="range"
+                      numberOfMonths={2}
                       selected={{
-                        from: formData.fechaInicio ? new Date(formData.fechaInicio + "T12:00:00") : undefined,
-                        to: formData.fechaFin ? new Date(formData.fechaFin + "T12:00:00") : undefined,
-                      }} 
+                        from: formData.fechaInicio
+                          ? new Date(formData.fechaInicio + "T12:00:00")
+                          : undefined,
+                        to: formData.fechaFin
+                          ? new Date(formData.fechaFin + "T12:00:00")
+                          : undefined,
+                      }}
                       disabled={{ before: new Date() }}
                       onSelect={(range) => {
                         let inicio = "";
                         let fin = "";
-                        
                         if (range?.from) {
-                            inicio = `${range.from.getFullYear()}-${String(range.from.getMonth() + 1).padStart(2, "0")}-${String(range.from.getDate()).padStart(2, "0")}`;
+                          inicio = `${range.from.getFullYear()}-${String(range.from.getMonth() + 1).padStart(2, "0")}-${String(range.from.getDate()).padStart(2, "0")}`;
                         }
                         if (range?.to) {
-                            fin = `${range.to.getFullYear()}-${String(range.to.getMonth() + 1).padStart(2, "0")}-${String(range.to.getDate()).padStart(2, "0")}`;
+                          fin = `${range.to.getFullYear()}-${String(range.to.getMonth() + 1).padStart(2, "0")}-${String(range.to.getDate()).padStart(2, "0")}`;
                         }
-                        
-                        setFormData({ ...formData, fechaInicio: inicio, fechaFin: fin, auto: "" });
-                      }} 
+                        setFormData((p) => ({
+                          ...p,
+                          fechaInicio: inicio,
+                          fechaFin: fin,
+                          auto: "",
+                        }));
+                        setSelectedCarId(null);
+                      }}
                     />
-                    <div className="flex gap-2 w-full px-4 pb-4 mt-2">
-                      <button
-                        className="btn btn-outline btn-error btn-sm flex-1 font-light"
-                        onClick={() => setFormData({ ...formData, fechaInicio: "", fechaFin: "", auto: "" })}
-                        disabled={!formData.fechaInicio && !formData.fechaFin}
-                      >
-                        Limpiar
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm flex-1 font-medium text-black"
-                        onClick={() => document.getElementById("rdp-popover-range")?.hidePopover?.()}
-                      >
-                        Aceptar
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            
           </div>
         );
 
@@ -360,7 +352,7 @@ export default function CreateRental() {
                   Buscando autos disponibles...
                 </p>
               </div>
-            ) : car?.length === 0 ? (
+            ) : cars.length === 0 ? (
               <div className="text-center">
                 <p className="text-lg text-gray-200">
                   No hay autos disponibles para estas fechas
@@ -368,18 +360,15 @@ export default function CreateRental() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                {car?.map((carItem) => (
+                {cars.map((carItem) => (
                   <div
-                    key={carItem.patente}
-                    className={`card bg-base-100 text-gray-100 w-full shadow-sm cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                      formData.auto === carItem.patente
-                        ? "ring-2 ring-primary shadow-lg"
-                        : "hover:scale-105"
-                    }`}
-                    onClick={() => handleCarSelection(carItem.patente)}
+                    key={carItem.id}
+                    className={`card bg-base-100 text-gray-100 w-full shadow-sm cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedCarId === carItem.id ? "ring-2 ring-primary shadow-lg" : "hover:scale-105"}`}
+                    onClick={() => handleCarSelection(carItem.id)}
                   >
                     <figure className="h-48 bg-gray-100 overflow-hidden">
                       {carItem.imagen ? (
+                        // eslint-disable-next-line jsx-a11y/img-redundant-alt
                         <img
                           src={getImageUrl(carItem.imagen)}
                           alt={`${carItem.marca} ${carItem.modelo}`}
@@ -425,17 +414,14 @@ export default function CreateRental() {
                       </div>
                       <div className="card-actions justify-end mt-4">
                         <button
-                          className={`btn ${
-                            formData.auto === carItem.patente
-                              ? "btn-success"
-                              : "btn-primary"
-                          }`}
+                          type="button"
+                          className={`btn ${selectedCarId === carItem.id ? "btn-success" : "btn-primary"}`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleCarSelection(carItem.patente);
+                            handleCarSelection(carItem.id);
                           }}
                         >
-                          {formData.auto === carItem.patente
+                          {selectedCarId === carItem.id
                             ? "Seleccionado"
                             : "Alquilar"}
                         </button>
@@ -469,73 +455,123 @@ export default function CreateRental() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-center mb-6">
-              Selecciona cliente y empleado
+              Datos del cliente
             </h2>
-            <div className="flex gap-4 justify-center">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Cliente:</span>
+                  <span className="label-text">Nombre</span>
+                </label>
+                <input
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full"
+                  aria-label="Nombre"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Apellido</span>
+                </label>
+                <input
+                  name="apellido"
+                  value={formData.apellido}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full"
+                  aria-label="Apellido"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Nacionalidad</span>
+                </label>
+                <input
+                  name="nacionalidad"
+                  value={formData.nacionalidad}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full"
+                  aria-label="Nacionalidad"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Tipo de documento</span>
                 </label>
                 <select
-                  className="select select-bordered w-full max-w-xs"
-                  name="cliente"
-                  value={formData.cliente}
-                  onChange={handleFormChange}
-                  disabled={isLoading}
+                  name="tipo_dni"
+                  value={formData.tipo_dni}
+                  onChange={handleInputChange}
+                  className="select select-bordered w-full"
+                  aria-label="Tipo de documento"
                 >
-                  <option value="">Seleccione un cliente</option>
-                  {client?.map((clientItem) => (
-                    <option
-                      key={clientItem.id}
-                      value={`${clientItem.nombre} ${clientItem.apellido}`}
-                    >
-                      {clientItem.nombre} {clientItem.apellido}
-                    </option>
-                  ))}
-                  {client?.length === 0 && (
-                    <option disabled>No hay clientes registrados</option>
-                  )}
+                  <option value="">Seleccione tipo</option>
+                  <option value="DNI">DNI</option>
+                  <option value="PAS">Pasaporte</option>
                 </select>
               </div>
+
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Empleado:</span>
+                  <span className="label-text">Número de documento</span>
+                </label>
+                <input
+                  name="dni"
+                  value={formData.dni}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full"
+                  aria-label="Documento"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Fecha de nacimiento</span>
+                </label>
+                <input
+                  type="date"
+                  name="fechaDeNacimiento"
+                  value={formData.fechaDeNacimiento}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full"
+                  aria-label="Fecha de nacimiento"
+                />
+              </div>
+
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="label-text">Empleado responsable</span>
                 </label>
                 <select
-                  className="select select-bordered w-full max-w-xs"
                   name="empleado"
                   value={formData.empleado}
-                  onChange={handleFormChange}
-                  disabled={isLoading}
+                  onChange={handleInputChange}
+                  className="select select-bordered w-full"
+                  aria-label="Empleado"
                 >
                   <option value="">Seleccione un empleado</option>
-                  {employee?.map((employeeItem) => (
+                  {employees.map((emp) => (
                     <option
-                      key={employeeItem.id}
-                      value={`${employeeItem.nombre} ${employeeItem.apellido}`}
+                      key={emp.id}
+                      value={`${emp.nombre} ${emp.apellido}`}
                     >
-                      {employeeItem.legajo} - {employeeItem.nombre}{" "}
-                      {employeeItem.apellido}
+                      {emp.nombre} {emp.apellido}
                     </option>
                   ))}
-                  {employee?.length === 0 && (
-                    <option disabled>No hay empleados registrados</option>
-                  )}
                 </select>
               </div>
             </div>
           </div>
         );
 
-      case 4:
-        const selectedCar = car.find((c) => c.patente === formData.auto);
-        const selectedClient = client.find(
-          (c) => `${c.nombre} ${c.apellido}` === formData.cliente,
-        );
-        const selectedEmployee = employee.find(
-          (e) => `${e.nombre} ${e.apellido}` === formData.empleado,
-        );
-
+      case 4: {
+        const sel = cars.find((c) => c.id === selectedCarId) as
+          | CarOption
+          | undefined;
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-center mb-6">
@@ -551,45 +587,44 @@ export default function CreateRental() {
                       <p className="font-semibold">Fechas:</p>
                       <p>
                         Desde:{" "}
-                        {new Date(formData.fechaInicio).toLocaleDateString()}
+                        {formData.fechaInicio
+                          ? new Date(formData.fechaInicio).toLocaleDateString()
+                          : "-"}
                       </p>
                       <p>
                         Hasta:{" "}
-                        {new Date(formData.fechaFin).toLocaleDateString()}
+                        {formData.fechaFin
+                          ? new Date(formData.fechaFin).toLocaleDateString()
+                          : "-"}
                       </p>
                     </div>
                     <div>
                       <p className="font-semibold">Auto:</p>
-                      <p>
-                        {selectedCar?.marca} {selectedCar?.modelo}
-                      </p>
-                      <p>Patente: {selectedCar?.patente}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Cliente:</p>
-                      <p>
-                        {selectedClient?.nombre && selectedClient?.apellido
-                          ? `${selectedClient.nombre} ${selectedClient.apellido}`
-                          : "No encontrado"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Empleado:</p>
-                      <p>
-                        {selectedEmployee?.nombre && selectedEmployee?.apellido
-                          ? `${selectedEmployee.nombre} ${selectedEmployee.apellido}`
-                          : "No encontrado"}
-                      </p>
+                      <p>{sel ? `${sel.marca} ${sel.modelo}` : "-"}</p>
+                      <p>Patente: {sel?.patente || "-"}</p>
                     </div>
                   </div>
-                  <div className="divider"></div>
+
+                  <div className="divider" />
+
+                  <div>
+                    <p className="font-semibold">Cliente:</p>
+                    <p>
+                      {formData.nombre} {formData.apellido}
+                    </p>
+                    <p>
+                      {formData.tipo_dni}: {formData.dni}
+                    </p>
+                    <p>Nacionalidad: {formData.nacionalidad}</p>
+                  </div>
+
                   <div className="text-center">
                     <p className="text-2xl font-bold text-success">
                       Total:{" "}
                       {new Intl.NumberFormat("es-AR", {
                         style: "currency",
                         currency: "ARS",
-                      }).format(formData.costo)}
+                      }).format(formData.costo || 0)}
                     </p>
                   </div>
                 </div>
@@ -597,6 +632,7 @@ export default function CreateRental() {
             </div>
           </div>
         );
+      }
 
       default:
         return null;
@@ -604,86 +640,37 @@ export default function CreateRental() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 text-gray-100 p-6">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8 mt-16">
-        <button
-          className="btn btn-primary btn-outline btn-circle tooltip"
-          data-tip="Volver"
-          onClick={() => handleVolver()}
-        >
-          <ChevronLeft/>
-        </button>
-        <h1 className="font-semibold text-3xl text-white">
-          Registro de alquiler
-        </h1>
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-8 py-8">
+      <div className="container mx-auto px-4">
+        {renderStepContent()}
 
-      {/* Steps Progress */}
-      <div className="flex justify-center mb-8">
-        <ul className="steps steps-vertical lg:steps-horizontal bg-base-200 rounded-box p-4 ">
-          <li className={`step ${currentStep >= 1 ? "step-primary" : ""}`}>
-            Elegir fecha
-          </li>
-          <li className={`step ${currentStep >= 2 ? "step-primary" : ""}`}>
-            Elegir auto
-          </li>
-          <li className={`step ${currentStep >= 3 ? "step-primary" : ""}`}>
-            Elegir cliente y vendedor
-          </li>
-          <li className={`step ${currentStep >= 4 ? "step-primary" : ""}`}>
-            Confirmar
-          </li>
-        </ul>
-      </div>
-
-      {/* Error Alert */}
-      {error && (
-        <div className="alert alert-error mb-6 max-w-2xl mx-auto">
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Step Content */}
-      <div className="card bg-base-100 text-gray-100 shadow-xl max-w-4xl mx-auto">
-        <div className="card-body">{renderStepContent()}</div>
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex justify-between max-w-4xl mx-auto mt-6">
-        <button
-          className={`btn btn-outline ${
-            currentStep === 1 ? "btn-disabled" : ""
-          }`}
-          onClick={handlePrevStep}
-          disabled={currentStep === 1}
-        >
-          <ChevronLeft />
-          Anterior
-        </button>
-
-        <div className="flex gap-2">
+        <div className="flex justify-between max-w-3xl mx-auto mt-8">
+          <button
+            type="button"
+            onClick={handlePrevStep}
+            className="btn btn-ghost"
+            disabled={currentStep === 1}
+          >
+            Volver
+          </button>
           {currentStep < 4 ? (
             <button
-              className="btn btn-primary"
+              type="button"
               onClick={handleNextStep}
-              disabled={isLoading}
+              className="btn btn-primary"
             >
               Siguiente
-              <ChevronRight />
             </button>
           ) : (
             <button
-              className="btn btn-success"
-              onClick={handleSubmit}
-              disabled={isLoading}
+              type="submit"
+              className={`btn btn-success ${isLoading ? "loading" : ""}`}
             >
-              <Car />
-              {isLoading ? "Creando..." : "Confirmar Alquiler"}
+              Confirmar y crear
             </button>
           )}
         </div>
       </div>
-    </div>
+    </form>
   );
 }
