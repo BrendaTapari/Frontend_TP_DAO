@@ -8,7 +8,11 @@
     "costo": 65000,
     "periodicidad_mantenimiento": 6,
     "imagen": "/Images/autos/audiA3.png",
-    "alt": "Imagen de Audi A3"
+    "alt": "Imagen de Audi A3",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 380
   },
   {
     "id": 2,
@@ -19,7 +23,11 @@
     "costo": 50000,
     "periodicidad_mantenimiento": 6,
     "imagen": "/Images/autos/corolla.png",
-    "alt": "Imagen de Toyota Corolla"
+    "alt": "Imagen de Toyota Corolla",
+    "caja": "Manual",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 380
   },
   {
     "id": 3,
@@ -30,7 +38,11 @@
     "costo": 55000,
     "periodicidad_mantenimiento": 8,
     "imagen": "/Images/autos/Rav4.png",
-    "alt": "Imagen de Toyota RAV4"
+    "alt": "Imagen de Toyota RAV4",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 470
   },
   {
     "id": 4,
@@ -41,7 +53,11 @@
     "costo": 45000,
     "periodicidad_mantenimiento": 12,
     "imagen": "/Images/autos/YarisCross.png",
-    "alt": "Imagen de Toyota Yaris Cross"
+    "alt": "Imagen de Toyota Yaris Cross",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 420
   },
   {
     "id": 5,
@@ -52,7 +68,11 @@
     "costo": 52000,
     "periodicidad_mantenimiento": 6,
     "imagen": "/Images/autos/VolkswagenTaos.png",
-    "alt": "Imagen de Volkswagen Taos"
+    "alt": "Imagen de Volkswagen Taos",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 420
   },
   {
     "id": 6,
@@ -63,7 +83,11 @@
     "costo": 58000,
     "periodicidad_mantenimiento": 8,
     "imagen": "/Images/autos/HondaCivic.png",
-    "alt": "Imagen de Honda Civic"
+    "alt": "Imagen de Honda Civic",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 470
   },
   {
     "id": 7,
@@ -74,7 +98,11 @@
     "costo": 85000,
     "periodicidad_mantenimiento": 6,
     "imagen": "/Images/autos/BMWX1.png",
-    "alt": "Imagen de BMW X1"
+    "alt": "Imagen de BMW X1",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 450
   },
   {
     "id": 8,
@@ -85,7 +113,11 @@
     "costo": 92000,
     "periodicidad_mantenimiento": 6,
     "imagen": "/Images/autos/AudiQ5.png",
-    "alt": "Imagen de Audi SUV Q5"
+    "alt": "Imagen de Audi SUV Q5",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 380
   },
   {
     "id": 9,
@@ -96,7 +128,11 @@
     "costo": 60000,
     "periodicidad_mantenimiento": 10,
     "imagen": "/Images/autos/MercedesBenz.png",
-    "alt": "Imagen de Mercedes-Benz GLA 200"
+    "alt": "Imagen de Mercedes-Benz GLA 200",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 420
   },
   {
     "id": 10,
@@ -107,7 +143,11 @@
     "costo": 47000,
     "periodicidad_mantenimiento": 12,
     "imagen": "/Images/autos/ChevroletTracker.png",
-    "alt": "Imagen de Chevrolet Tracker"
+    "alt": "Imagen de Chevrolet Tracker",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 420
   },
   {
     "id": 11,
@@ -118,7 +158,11 @@
     "costo": 55000,
     "periodicidad_mantenimiento": 12,
     "imagen": "/Images/autos/FordBronco.png",
-    "alt": "Imagen de Ford Bronco"
+    "alt": "Imagen de Ford Bronco",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 600
   },
   {
     "id": 12,
@@ -129,7 +173,11 @@
     "costo": 67000,
     "periodicidad_mantenimiento": 8,
     "imagen": "/Images/autos/JeepCompass.png",
-    "alt": "Imagen de Jeep Compass"
+    "alt": "Imagen de Jeep Compass",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 580
   },
   {
     "id": 13,
@@ -140,7 +188,11 @@
     "costo": 51000,
     "periodicidad_mantenimiento": 6,
     "imagen": "/Images/autos/NissanKick.png",
-    "alt": "Imagen de Nissan Kick"
+    "alt": "Imagen de Nissan Kick",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 420
   },
   {
     "id": 14,
@@ -151,6 +203,10 @@
     "costo": 64000,
     "periodicidad_mantenimiento": 8,
     "imagen": "/Images/autos/HyundaiTucson.png",
-    "alt": "Imagen de Hyundai Tucson"
+    "alt": "Imagen de Hyundai Tucson",
+    "caja": "automática",
+    "kilometraje": "ilimitado",
+    "cant_pasajeros": 5,
+    "litros_baul": 430
   }
 ]

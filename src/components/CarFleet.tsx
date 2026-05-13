@@ -108,9 +108,8 @@ export default function CarFleet() {
             {t("fleet.title")}
           </h1>
         </div>
-        <p className="text-xl text-gray-300 max-w-2xl">
-          {t("fleet.description")}
-        </p>
+
+        <p className="text-xl text-gray-300 ">{t("fleet.description")}</p>
       </header>
 
       {/* Loading */}
@@ -142,11 +141,11 @@ export default function CarFleet() {
                 aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
               >
                 {/* Image Container */}
-                <div className="relative h-64 bg-base-300 overflow-hidden flex items-center justify-center">
+                <div className="relative h-56 p-16 bg-base-300 overflow-hidden flex items-center justify-center">
                   <img
                     src={auto.imagen}
                     alt={`${auto.marca} ${auto.modelo}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className=" object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
 
@@ -176,14 +175,7 @@ export default function CarFleet() {
                         ${auto.costo.toLocaleString()}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.maintenance")}
-                      </p>
-                      <p className="text-lg font-semibold text-white">
-                        {auto.periodicidad_mantenimiento} {t("fleet.months")}
-                      </p>
-                    </div>
+                    
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                         {t("fleet.state")}

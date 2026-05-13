@@ -77,7 +77,7 @@
     "no_vehicles": "No hay autos disponibles en la flota.",
     "total_vehicles": "Total de Autos",
     "available": "Disponibles",
-    "renting": "En Alquiler",
+    "renting": "Reservado",
     "maintenance": "En Mantenimiento",
     "statistics": "Estadísticas de la flota",
     "fleet_stats": "Estadísticas de la flota"
