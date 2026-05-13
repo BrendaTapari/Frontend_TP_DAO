@@ -66,6 +66,7 @@
     "description": "Explora todos nuestros vehículos disponibles y encuentra el perfecto para tu viaje. Usa las flechas del teclado para navegar.",
     "back": "Volver",
     "loading": "Cargando flota...",
+    "license_plate": "Patente",
     "vehicle_stats": "Lista de vehículos disponibles",
     "year": "Año",
     "cost": "Costo",

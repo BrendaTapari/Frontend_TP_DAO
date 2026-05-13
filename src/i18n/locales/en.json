@@ -66,6 +66,7 @@
     "description": "Explore all our available vehicles and find the perfect one for your trip. Use the arrow keys on your keyboard to navigate.",
     "back": "Back",
     "loading": "Loading fleet...",
+    "license_plate": "License plate",
     "vehicle_stats": "List of available vehicles",
     "year": "Year",
     "cost": "Cost",

@@ -24,7 +24,8 @@ export default function CarFleet() {
   const [focusedIndex, setFocusedIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
 
   // Activar navegación TAB solo en elementos visibles
   useVisibleFocus(containerRef, "button, a, article, [role='listitem']");
@@ -77,7 +78,11 @@ export default function CarFleet() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 pt-20 pb-12" ref={containerRef}>
+    <div
+      dir={i18n.dir()}
+      className="min-h-screen bg-base-100 pt-20 pb-12"
+      ref={containerRef}
+    >
       {/* Header */}
       <header className="px-4 lg:px-12 mb-12">
         <button
@@ -85,8 +90,17 @@ export default function CarFleet() {
           className="btn flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
           aria-label={t("common.back")}
         >
-          <ArrowLeft size={20} />
-          <span>{t("common.back")}</span>
+          {isRtl ? (
+            <>
+              <span>{t("common.back")}</span>
+              <ArrowLeft size={20} style={{ transform: "scaleX(-1)" }} />
+            </>
+          ) : (
+            <>
+              <ArrowLeft size={20} />
+              <span>{t("common.back")}</span>
+            </>
+          )}
         </button>
 
         <h1
@@ -126,7 +140,7 @@ export default function CarFleet() {
                 className={`group bg-base-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-gray-700/50 focus-within:shadow-2xl focus-within:shadow-primary/40 focus-within:ring-2 focus-within:ring-primary ${
                   focusedIndex === index ? "ring-2 ring-primary" : ""
                 }`}
-                aria-label={`${auto.marca} ${auto.modelo}, Patente: ${auto.patente}, Estado: ${auto.estado.replace("_", " ")}`}
+                aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.license_plate")}: ${auto.patente}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
               >
                 {/* Image Container */}
                 <div className="relative h-64 bg-base-300 overflow-hidden flex items-center justify-center">
@@ -144,7 +158,10 @@ export default function CarFleet() {
                       {auto.marca} {auto.modelo}
                     </h3>
                     <p className="text-sm text-gray-400">
-                      Patente: <span aria-label="patente">{auto.patente}</span>
+                      {t("fleet.license_plate")}:{" "}
+                      <span aria-label={t("fleet.license_plate")}>
+                        {auto.patente}
+                      </span>
                     </p>
                   </div>
 
