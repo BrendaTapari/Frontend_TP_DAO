@@ -6,7 +6,7 @@ import ParticleBackground from "./components/ParticleBackground";
 import CarCarousel from "./components/CarCarousel";
 import PremiumFeatures from "./components/PremiumFeatures";
 import { ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
 import { useVisibleFocus } from "./hooks/useVisibleFocus";
 import { useTranslation } from "react-i18next";
 
@@ -24,8 +24,17 @@ function App() {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
+
+  // Scroll para efectos parallax
+  const { scrollY } = useScroll();
+
+  // Transformaciones basadas en scroll
+  const heroY = useTransform(scrollY, [0, 500], [0, 150]);
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
+  const heroScale = useTransform(scrollY, [0, 500], [1, 0.95]);
 
   useVisibleFocus(
     appRef as React.RefObject<HTMLElement | null>,
@@ -108,6 +117,34 @@ function App() {
       e.preventDefault();
       window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
     }
+  };
+
+  // Componente reutilizable para animaciones de scroll entrada
+  const ScrollReveal = ({
+    children,
+    delay = 0,
+  }: {
+    children: React.ReactNode;
+    delay?: number;
+  }) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+      target: ref,
+      offset: ["start 0.9", "start 0.25"],
+    });
+
+    const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+    const y = useTransform(scrollYProgress, [0, 1], [80, 0]);
+
+    return (
+      <motion.div
+        ref={ref}
+        style={{ opacity, y }}
+        transition={{ delay, duration: 0.8 }}
+      >
+        {children}
+      </motion.div>
+    );
   };
 
   const AnimatedLogo = () => (
@@ -256,18 +293,24 @@ function App() {
 
       {/* HERO SECTION */}
       <header
-        className="relative min-h-screen w-full flex flex-col overflow-hidden snap-start"
+        className="relative min-h-screen w-full flex flex-col overflow-hidden"
         role="banner"
+        ref={scrollContainerRef}
       >
-        <video
-          autoPlay
-          muted
-          loop
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          aria-hidden="true"
+        <motion.div
+          className="absolute inset-0 w-full h-full"
+          style={{ y: heroY }}
         >
-          <source src="/Videos/output.webm" type="video/webm" />
-        </video>
+          <video
+            autoPlay
+            muted
+            loop
+            className="w-full h-full object-cover"
+            aria-hidden="true"
+          >
+            <source src="/Videos/output.webm" type="video/webm" />
+          </video>
+        </motion.div>
 
         <div
           className="absolute inset-0 z-0 pointer-events-none"
@@ -276,14 +319,16 @@ function App() {
           <ParticleBackground />
         </div>
 
-        <div
+        <motion.div
           className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-base-100 z-0 pointer-events-none"
           aria-hidden="true"
-        ></div>
+          style={{ opacity: heroOpacity }}
+        ></motion.div>
 
-        <div
+        <motion.div
           ref={heroRef}
           className="relative z-10 w-full max-w-4xl px-6 sm:px-10 flex flex-col justify-start pt-[48vh] sm:pt-[52vh] lg:pt-[55vh] pb-2 mx-auto lg:mx-0 lg:ml-20"
+          style={{ y: heroY, scale: heroScale }}
         >
           <div className="mb-6 text-center lg:text-left">
             <div
@@ -293,17 +338,27 @@ function App() {
                 lineHeight: "1.2",
               }}
             >
-              <h1 className="text-white drop-shadow-md">
+              <motion.h1
+                className="text-white drop-shadow-md"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 {t("landing.hero_line1")}
-              </h1>
+              </motion.h1>
 
-              <h1 className="text-white drop-shadow-md">
+              <motion.h1
+                className="text-white drop-shadow-md"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              >
                 {t("landing.hero_line2")}
-              </h1>
+              </motion.h1>
             </div>
           </div>
 
-          <button
+          <motion.button
             className="outlineButton px-6 py-3 rounded-xl font-semibold w-full sm:w-max bg-black/20 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
             style={{
               fontFamily: "'Playfair Display', serif",
@@ -312,14 +367,19 @@ function App() {
             }}
             onClick={handleAlquilaYaButton}
             aria-label={t("landing.rent_now")}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
           >
             {t("landing.rent_now")}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {showIconSroll && (
-          <button
-            className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate-bounce focus:outline-2 focus:outline-offset-2 focus:outline-primary rounded-lg"
+          <motion.button
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 focus:outline-2 focus:outline-offset-2 focus:outline-primary rounded-lg"
             onClick={() =>
               window.scrollTo({
                 top: window.innerHeight,
@@ -328,8 +388,15 @@ function App() {
             }
             onKeyDown={handleScrollIconKeyDown}
             aria-label={t("landing.scroll_down_label")}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1 }}
           >
-            <div className="flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity p-2">
+            <motion.div
+              className="flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity p-2"
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <span
                 className="text-white mb-2 font-light tracking-wide uppercase text-sm"
                 style={{ fontFamily: "'Playfair Display', serif" }}
@@ -338,69 +405,111 @@ function App() {
               </span>
 
               <ChevronDown className="w-10 h-10 text-white" />
-            </div>
-          </button>
+            </motion.div>
+          </motion.button>
         )}
       </header>
 
       {/* FLOTA */}
       <section
-        className="w-full bg-base-100 py-16 px-4 sm:px-6 lg:px-12 flex flex-col justify-center relative z-10 min-h-screen snap-start"
+        className="w-full bg-base-100 py-16 px-4 sm:px-6 lg:px-12 flex flex-col justify-center relative z-10 min-h-screen"
         aria-labelledby="fleet-heading"
       >
         <div className="max-w-[90rem] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center h-full">
-          <div className="flex flex-col justify-center text-center lg:text-left space-y-8 sm:space-y-10 order-2 lg:order-1 mt-6 lg:mt-0 max-w-3xl mx-auto lg:mx-0">
-            <div className="space-y-5 sm:space-y-6">
-              <h2
-                id="fleet-heading"
-                className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {t("landing.fleet_heading")} <br />
-                <span className="text-primary italic font-light">
-                  {t("landing.fleet_location")}
-                </span>
-              </h2>
+          <ScrollReveal>
+            <div className="flex flex-col justify-center text-center lg:text-left space-y-8 sm:space-y-10 order-2 lg:order-1 mt-6 lg:mt-0 max-w-3xl mx-auto lg:mx-0">
+              <div className="space-y-5 sm:space-y-6">
+                <motion.h2
+                  id="fleet-heading"
+                  className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  {t("landing.fleet_heading")} <br />
+                  <motion.span
+                    className="text-primary italic font-light"
+                    initial={{ opacity: 0, x: -40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                  >
+                    {t("landing.fleet_location")}
+                  </motion.span>
+                </motion.h2>
 
-              <p className="text-base sm:text-lg lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
-                {t("landing.fleet_description")}
-              </p>
-            </div>
+                <motion.p
+                  className="text-base sm:text-lg lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl mx-auto lg:mx-0"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  {t("landing.fleet_description")}
+                </motion.p>
+              </div>
 
-            <div className="pt-4">
-              <button
-                className="outlineButton w-full sm:w-auto px-8 sm:px-12 py-4 rounded-full text-sm md:text-base tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-primary/30 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-                onClick={() => setLocation("/car-fleet")}
-                aria-label={t("landing.view_fleet")}
-              >
-                {t("landing.view_fleet")}
-              </button>
-            </div>
-          </div>
-
-          <div className="w-full flex justify-center lg:justify-end order-1 lg:order-2">
-            <div className="w-full relative">
-              <div
-                className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none"
-                aria-hidden="true"
-              ></div>
-
-              <div className="relative z-10 w-full">
-                <CarCarousel />
+              <div className="pt-4">
+                <motion.button
+                  className="outlineButton w-full sm:w-auto px-8 sm:px-12 py-4 rounded-full text-sm md:text-base tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-300 shadow-2xl hover:shadow-primary/30 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  onClick={() => setLocation("/car-fleet")}
+                  aria-label={t("landing.view_fleet")}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  whileHover={{ scale: 1.05, y: -8 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {t("landing.view_fleet")}
+                </motion.button>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.2}>
+            <motion.div
+              className="w-full flex justify-center lg:justify-end order-1 lg:order-2"
+              initial={{ opacity: 0, x: 50, rotate: -5 }}
+              whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              <div className="w-full relative">
+                <motion.div
+                  className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none"
+                  aria-hidden="true"
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                ></motion.div>
+
+                <div className="relative z-10 w-full">
+                  <CarCarousel />
+                </div>
+              </div>
+            </motion.div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* PREMIUM FEATURES */}
-      <section
-        className="snap-start min-h-screen"
+      <motion.section
+        className="min-h-screen"
         aria-label="Características Premium"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true, margin: "-100px" }}
       >
         <PremiumFeatures />
-      </section>
+      </motion.section>
     </div>
   );
 }

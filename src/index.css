@@ -147,13 +147,7 @@ body {
 /* Mejoras para el scrolling suave */
 html {
   scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
-}
-
-@media (max-width: 1023px) {
-  html {
-    scroll-snap-type: none;
-  }
+  scroll-snap-type: none;
 }
 
 /* Efectos de glassmorphism */
