@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 interface Auto {
   id: number;
-  patente: string;
   marca: string;
   modelo: string;
   año: number;
@@ -15,6 +14,10 @@ interface Auto {
   costo: number;
   periodicidad_mantenimiento: number;
   imagen: string;
+  caja?: string;
+  kilometraje?: string;
+  cant_pasajeros?: number;
+  litros_baul?: number;
 }
 
 export default function CarFleet() {
@@ -24,7 +27,8 @@ export default function CarFleet() {
   const [focusedIndex, setFocusedIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
 
   // Activar navegación TAB solo en elementos visibles
   useVisibleFocus(containerRef, "button, a, article, [role='listitem']");
@@ -50,8 +54,6 @@ export default function CarFleet() {
         return "bg-green-500/20 text-green-400 border-green-500/30";
       case "en_alquiler":
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "en_mantenimiento":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     }
@@ -77,27 +79,39 @@ export default function CarFleet() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 pt-20 pb-12" ref={containerRef}>
+    <div
+      dir={i18n.dir()}
+      className="min-h-screen bg-base-100 pt-20 pb-12"
+      ref={containerRef}
+    >
       {/* Header */}
       <header className="px-4 lg:px-12 mb-12">
-        <button
-          onClick={() => setLocation("/")}
-          className="btn flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-          aria-label={t("common.back")}
-        >
-          <ArrowLeft size={20} />
-          <span>{t("common.back")}</span>
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => setLocation("/")}
+            className="btn btn-circle btn-icon btn-outline btn-accent h-13 w-13 flex items-center gap-2 mt-6 text-gray-300 hover:text-white transition-colors mb-6 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+            aria-label={t("common.back")}
+          >
+            {isRtl ? (
+              <>
+                <ArrowLeft size={28} className="font-bold" style={{ transform: "scaleX(-1)" }} />
+              </>
+            ) : (
+              <>
+                <ArrowLeft size={28} className="font-bold"/>
+              </>
+            )}
+          </button>
 
-        <h1
-          className="text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-xl"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          {t("fleet.title")}
-        </h1>
-        <p className="text-xl text-gray-300 max-w-2xl">
-          {t("fleet.description")}
-        </p>
+          <h1
+            className="text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-xl"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {t("fleet.title")}
+          </h1>
+        </div>
+
+        <p className="text-xl text-gray-300 ">{t("fleet.description")}</p>
       </header>
 
       {/* Loading */}
@@ -113,7 +127,7 @@ export default function CarFleet() {
         <main className="px-4 lg:px-12">
           {/* Lista de Autos */}
           <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16"
             role="list"
             ref={listRef}
             onKeyDown={handleListKeyDown}
@@ -126,14 +140,14 @@ export default function CarFleet() {
                 className={`group bg-base-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-gray-700/50 focus-within:shadow-2xl focus-within:shadow-primary/40 focus-within:ring-2 focus-within:ring-primary ${
                   focusedIndex === index ? "ring-2 ring-primary" : ""
                 }`}
-                aria-label={`${auto.marca} ${auto.modelo}, Patente: ${auto.patente}, Estado: ${auto.estado.replace("_", " ")}`}
+                aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
               >
                 {/* Image Container */}
-                <div className="relative h-64 bg-base-300 overflow-hidden flex items-center justify-center">
+                <div className="relative h-56 p-16 bg-base-300 overflow-hidden flex items-center justify-center">
                   <img
                     src={auto.imagen}
                     alt={`${auto.marca} ${auto.modelo}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className=" object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
 
@@ -143,9 +157,6 @@ export default function CarFleet() {
                     <h3 className="text-2xl font-bold text-white mb-1">
                       {auto.marca} {auto.modelo}
                     </h3>
-                    <p className="text-sm text-gray-400">
-                      Patente: <span aria-label="patente">{auto.patente}</span>
-                    </p>
                   </div>
 
                   {/* Details Grid */}
@@ -166,14 +177,7 @@ export default function CarFleet() {
                         ${auto.costo.toLocaleString()}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.maintenance")}
-                      </p>
-                      <p className="text-lg font-semibold text-white">
-                        {auto.periodicidad_mantenimiento} {t("fleet.months")}
-                      </p>
-                    </div>
+
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                         {t("fleet.state")}
@@ -187,6 +191,25 @@ export default function CarFleet() {
                           auto.estado.slice(1).replace("_", " ")}
                       </span>
                     </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                        Caja
+                      </p>
+                      <p className="text-sm font-semibold text-white">
+                        {auto.caja || "-"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                        Pasajeros
+                      </p>
+                      <p className="text-sm font-semibold text-white">
+                        {auto.cant_pasajeros ?? "-"}
+                      </p>
+                    </div>
+
                   </div>
 
                   {/* Action Button */}
@@ -209,43 +232,6 @@ export default function CarFleet() {
               <p className="text-2xl text-gray-400">{t("fleet.no_vehicles")}</p>
             </div>
           )}
-
-          {/* Stats */}
-          <section
-            className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-4"
-            aria-label={t("fleet.fleet_stats")}
-          >
-            <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
-              <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                {t("fleet.total_vehicles")}
-              </p>
-              <p className="text-4xl font-bold text-white">{autos.length}</p>
-            </div>
-            <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
-              <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                {t("fleet.available")}
-              </p>
-              <p className="text-4xl font-bold text-green-400">
-                {autos.filter((a) => a.estado === "disponible").length}
-              </p>
-            </div>
-            <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
-              <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                {t("fleet.renting")}
-              </p>
-              <p className="text-4xl font-bold text-blue-400">
-                {autos.filter((a) => a.estado === "en_alquiler").length}
-              </p>
-            </div>
-            <div className="bg-base-200 rounded-xl p-6 border border-gray-700/50">
-              <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">
-                {t("fleet.maintenance")}
-              </p>
-              <p className="text-4xl font-bold text-yellow-400">
-                {autos.filter((a) => a.estado === "en_mantenimiento").length}
-              </p>
-            </div>
-          </section>
         </main>
       )}
     </div>

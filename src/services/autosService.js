@@ -61,6 +61,12 @@ export const getAviableCars = async () => {
 };
 
 export const getAviableCarsForRental = async (fechaInicio, fechaFin) => {
+  if (USE_MOCK_DATA) {
+    return Promise.resolve(
+      mockCars.filter((car) => car.estado === "disponible"),
+    );
+  }
+
   const response = await axios.get(`${API_URL}/availableForRental`, {
     params: { fechaInicio, fechaFin },
   });
