@@ -66,7 +66,7 @@ export default function Navbar() {
                     }`}
                     aria-current={i18n.language === "es" ? "page" : undefined}
                   >
-                    {t("nav.spanish")}
+                    Español
                   </button>
                 </li>
 
@@ -80,7 +80,7 @@ export default function Navbar() {
                     }`}
                     aria-current={i18n.language === "en" ? "page" : undefined}
                   >
-                    {t("nav.english")}
+                    English
                   </button>
                 </li>
 
@@ -94,7 +94,7 @@ export default function Navbar() {
                     }`}
                     aria-current={i18n.language === "fr" ? "page" : undefined}
                   >
-                    {t("nav.french")}
+                    Français
                   </button>
                 </li>
 
@@ -108,7 +108,7 @@ export default function Navbar() {
                     }`}
                     aria-current={i18n.language === "de" ? "page" : undefined}
                   >
-                    {t("nav.german")}
+                    Deutsch
                   </button>
                 </li>
 
@@ -122,7 +122,7 @@ export default function Navbar() {
                     }`}
                     aria-current={i18n.language === "pt" ? "page" : undefined}
                   >
-                    {t("nav.portuguese")}
+                    Português
                   </button>
                 </li>
 
@@ -136,7 +136,7 @@ export default function Navbar() {
                     }`}
                     aria-current={i18n.language === "ar" ? "page" : undefined}
                   >
-                    {t("nav.arabic")}
+                    العربية
                   </button>
                 </li>
               </ul>

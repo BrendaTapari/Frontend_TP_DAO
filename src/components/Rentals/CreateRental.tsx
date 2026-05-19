@@ -8,9 +8,11 @@ import React, {
 } from "react";
 import { useLocation } from "wouter";
 import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 import { es } from "date-fns/locale";
 import toast from "react-hot-toast";
 import { Car } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
 
 import { getAviableCarsForRental } from "../../services/autosService";
@@ -37,6 +39,7 @@ interface EmployeeOption {
 
 export default function CreateRental() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
   const [cars, setCars] = useState<CarOption[]>([]);
@@ -128,7 +131,7 @@ export default function CreateRental() {
           setFormData((p) => ({ ...p, auto: "" }));
         }
       } catch (err) {
-        toast.error("Error al buscar autos disponibles");
+        toast.error(t("create_rental.error_fetch_cars", "Error al buscar autos disponibles"));
       } finally {
         setIsFetchingCars(false);
       }
@@ -179,13 +182,13 @@ export default function CreateRental() {
 
   const handleDateValidation = async () => {
     if (!formData.fechaInicio || !formData.fechaFin) {
-      toast.error("Por favor seleccione inicio y fin");
+      toast.error(t("create_rental.error_select_dates", "Por favor seleccione inicio y fin"));
       return false;
     }
     const start = new Date(formData.fechaInicio);
     const end = new Date(formData.fechaFin);
     if (start >= end) {
-      toast.error("La fecha de inicio debe ser anterior a la fecha de fin");
+      toast.error(t("create_rental.error_date_order", "La fecha de inicio debe ser anterior a la fecha de fin"));
       return false;
     }
     return true;
@@ -199,7 +202,7 @@ export default function CreateRental() {
     }
     if (currentStep === 2) {
       if (!formData.auto) {
-        toast.error("Por favor seleccione un auto");
+        toast.error(t("create_rental.error_select_car", "Por favor seleccione un auto"));
         return;
       }
       setCurrentStep(3);
@@ -214,9 +217,7 @@ export default function CreateRental() {
         !formData.fechaDeNacimiento ||
         !formData.empleado
       ) {
-        toast.error(
-          "Complete todos los datos personales y seleccione un empleado",
-        );
+        toast.error(t("create_rental.error_missing_data", "Complete todos los datos personales y seleccione un empleado"));
         return;
       }
       setCurrentStep(4);
@@ -250,11 +251,11 @@ export default function CreateRental() {
         costo: formData.costo,
       };
       await createRental(payload as any);
-      toast.success("Alquiler creado");
+      toast.success(t("create_rental.success_create", "Alquiler creado"));
       setLocation("/car-rentals");
     } catch (err) {
       console.error(err);
-      toast.error("Error al crear el alquiler");
+      toast.error(t("create_rental.error_create", "Error al crear el alquiler"));
     } finally {
       setIsLoading(false);
     }
@@ -265,40 +266,46 @@ export default function CreateRental() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-3xl font-semibold text-center mb-6">
-              Selecciona las fechas
+            <h2 className="text-3xl font-semibold text-center mt-10 mb-6">
+              {t("create_rental.step1_title", "Selecciona las fechas")}
             </h2>
             {formData.fechaInicio && formData.fechaFin && (
               <div className="text-center">
                 <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
-                  <div className="stat-title">Duración del alquiler</div>
+                  <div className="stat-title">{t("create_rental.duration", "Duración del alquiler")}</div>
                   <div className="stat-value text-primary">
-                    {dateCalculations.days} días
+                    {dateCalculations.days} {t("create_rental.days", "días")}
                   </div>
                 </div>
               </div>
             )}
 
             <div className="flex justify-center w-full">
-              <div className="form-control w-full max-w-xl">
+              <div className="form-control w-full max-w-4xl">
                 <label className="label justify-center pb-4">
-                  <span className="label-text font-medium text-xl text-white">
-                    Seleccione el período de alquiler
+                  <span className="label-text font-medium text-xl text-base-content">
+                    {t("create_rental.select_period", "Seleccione el período de alquiler")}
                   </span>
                 </label>
-                <div className="relative inline-block w-full text-center">
-                  <button
-                    type="button"
-                    className="input input-bordered w-full h-16 text-center text-gray-200 flex items-center justify-center bg-base-200/50 hover:bg-base-200 transition-colors text-lg tracking-wide border-white/20"
-                  >
+                <div className="flex flex-col items-center w-full text-center space-y-4">
+                  <div className="bg-base-200 border border-base-300 rounded-2xl p-4 text-base-content w-full max-w-xl font-medium text-lg shadow-sm">
                     {formData.fechaInicio
                       ? formData.fechaFin
                         ? `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — ${new Date(formData.fechaFin + "T12:00:00").toLocaleDateString()}`
-                        : `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — Seleccione fin`
-                      : "Fechas de inicio y fin"}
-                  </button>
+                        : `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — ${t("create_rental.select_end", "Seleccione fin")}`
+                      : t("create_rental.start_end_dates", "Fechas de inicio y fin")}
+                  </div>
 
-                  <div className="dropdown bg-base-200 border border-white/10 rounded-2xl p-2 m-2 text-gray-200 shadow-xl">
+                  <div 
+                    className="bg-base-200 border border-base-300 rounded-2xl p-4 text-base-content shadow-xl inline-block overflow-hidden"
+                    style={{
+                      "--rdp-accent-color": "oklch(var(--p))",
+                      "--rdp-background-color": "oklch(var(--p) / 0.1)",
+                      "--rdp-accent-color-dark": "oklch(var(--p))",
+                      "--rdp-background-color-dark": "oklch(var(--p) / 0.1)",
+                      "--rdp-outline-color": "oklch(var(--p))"
+                    } as React.CSSProperties}
+                  >
                     <DayPicker
                       locale={es}
                       className="react-day-picker"
@@ -342,20 +349,20 @@ export default function CreateRental() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-center mb-6">
-              Selecciona el auto
+              {t("create_rental.step2_title", "Selecciona el auto")}
             </h2>
 
             {isFetchingCars ? (
               <div className="text-center">
                 <div className="loading loading-spinner loading-lg"></div>
                 <p className="text-lg text-gray-200 mt-2">
-                  Buscando autos disponibles...
+                  {t("create_rental.searching_cars", "Buscando autos disponibles...")}
                 </p>
               </div>
             ) : cars.length === 0 ? (
               <div className="text-center">
                 <p className="text-lg text-gray-200">
-                  No hay autos disponibles para estas fechas
+                  {t("create_rental.no_cars_available", "No hay autos disponibles para estas fechas")}
                 </p>
               </div>
             ) : (
@@ -389,18 +396,18 @@ export default function CreateRental() {
                       </h2>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="font-medium">Patente:</span>{" "}
+                          <span className="font-medium">{t("create_rental.license_plate", "Patente")}:</span>{" "}
                           {carItem.patente}
                         </p>
                         {carItem.año && (
                           <p>
-                            <span className="font-medium">Año:</span>{" "}
+                            <span className="font-medium">{t("create_rental.year", "Año")}:</span>{" "}
                             {carItem.año}
                           </p>
                         )}
                         {carItem.color && (
                           <p>
-                            <span className="font-medium">Color:</span>{" "}
+                            <span className="font-medium">{t("create_rental.color", "Color")}:</span>{" "}
                             {carItem.color}
                           </p>
                         )}
@@ -422,8 +429,8 @@ export default function CreateRental() {
                           }}
                         >
                           {selectedCarId === carItem.id
-                            ? "Seleccionado"
-                            : "Alquilar"}
+                            ? t("create_rental.selected", "Seleccionado")
+                            : t("create_rental.rent_btn", "Alquilar")}
                         </button>
                       </div>
                     </div>
@@ -435,7 +442,7 @@ export default function CreateRental() {
             {formData.auto && formData.fechaInicio && formData.fechaFin && (
               <div className="text-center mt-8">
                 <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
-                  <div className="stat-title">Costo total estimado</div>
+                  <div className="stat-title">{t("create_rental.estimated_cost", "Costo total estimado")}</div>
                   <div className="stat-value text-success">
                     {new Intl.NumberFormat("es-AR", {
                       style: "currency",
@@ -443,7 +450,7 @@ export default function CreateRental() {
                     }).format(formData.costo)}
                   </div>
                   <div className="stat-desc">
-                    {dateCalculations.days} días de alquiler
+                    {dateCalculations.days} {t("create_rental.rental_days", "días de alquiler")}
                   </div>
                 </div>
               </div>
@@ -455,13 +462,13 @@ export default function CreateRental() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-center mb-6">
-              Datos del cliente
+              {t("create_rental.client_data", "Datos del cliente")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Nombre</span>
+                  <span className="label-text">{t("create_rental.name", "Nombre")}</span>
                 </label>
                 <input
                   name="nombre"
@@ -474,7 +481,7 @@ export default function CreateRental() {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Apellido</span>
+                  <span className="label-text">{t("create_rental.last_name", "Apellido")}</span>
                 </label>
                 <input
                   name="apellido"
@@ -487,7 +494,7 @@ export default function CreateRental() {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Nacionalidad</span>
+                  <span className="label-text">{t("create_rental.nationality", "Nacionalidad")}</span>
                 </label>
                 <input
                   name="nacionalidad"
@@ -500,7 +507,7 @@ export default function CreateRental() {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Tipo de documento</span>
+                  <span className="label-text">{t("create_rental.doc_type", "Tipo de documento")}</span>
                 </label>
                 <select
                   name="tipo_dni"
@@ -509,15 +516,15 @@ export default function CreateRental() {
                   className="select select-bordered w-full"
                   aria-label="Tipo de documento"
                 >
-                  <option value="">Seleccione tipo</option>
+                  <option value="">{t("create_rental.select_type", "Seleccione tipo")}</option>
                   <option value="DNI">DNI</option>
-                  <option value="PAS">Pasaporte</option>
+                  <option value="PAS">{t("create_rental.passport", "Pasaporte")}</option>
                 </select>
               </div>
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Número de documento</span>
+                  <span className="label-text">{t("create_rental.doc_number", "Número de documento")}</span>
                 </label>
                 <input
                   name="dni"
@@ -530,7 +537,7 @@ export default function CreateRental() {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Fecha de nacimiento</span>
+                  <span className="label-text">{t("create_rental.birth_date", "Fecha de nacimiento")}</span>
                 </label>
                 <input
                   type="date"
@@ -544,7 +551,7 @@ export default function CreateRental() {
 
               <div className="form-control md:col-span-2">
                 <label className="label">
-                  <span className="label-text">Empleado responsable</span>
+                  <span className="label-text">{t("create_rental.employee", "Empleado responsable")}</span>
                 </label>
                 <select
                   name="empleado"
@@ -553,7 +560,7 @@ export default function CreateRental() {
                   className="select select-bordered w-full"
                   aria-label="Empleado"
                 >
-                  <option value="">Seleccione un empleado</option>
+                  <option value="">{t("create_rental.select_employee", "Seleccione un empleado")}</option>
                   {employees.map((emp) => (
                     <option
                       key={emp.id}
@@ -575,52 +582,52 @@ export default function CreateRental() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-center mb-6">
-              Confirma los detalles
+              {t("create_rental.confirm_details", "Confirma los detalles")}
             </h2>
 
-            <div className="card bg-base-200 text-gray-100 shadow-xl max-w-2xl mx-auto">
+            <div className="card bg-base-200 text-base-content shadow-xl max-w-2xl mx-auto">
               <div className="card-body">
-                <h3 className="card-title">Resumen del alquiler</h3>
+                <h3 className="card-title">{t("create_rental.summary", "Resumen del alquiler")}</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="font-semibold">Fechas:</p>
+                      <p className="font-semibold">{t("create_rental.dates", "Fechas")}:</p>
                       <p>
-                        Desde:{" "}
+                        {t("create_rental.from", "Desde")}:{" "}
                         {formData.fechaInicio
                           ? new Date(formData.fechaInicio).toLocaleDateString()
                           : "-"}
                       </p>
                       <p>
-                        Hasta:{" "}
+                        {t("create_rental.to", "Hasta")}:{" "}
                         {formData.fechaFin
                           ? new Date(formData.fechaFin).toLocaleDateString()
                           : "-"}
                       </p>
                     </div>
                     <div>
-                      <p className="font-semibold">Auto:</p>
+                      <p className="font-semibold">{t("create_rental.car", "Auto")}:</p>
                       <p>{sel ? `${sel.marca} ${sel.modelo}` : "-"}</p>
-                      <p>Patente: {sel?.patente || "-"}</p>
+                      <p>{t("create_rental.license_plate", "Patente")}: {sel?.patente || "-"}</p>
                     </div>
                   </div>
 
                   <div className="divider" />
 
                   <div>
-                    <p className="font-semibold">Cliente:</p>
+                    <p className="font-semibold">{t("create_rental.client_label", "Cliente")}:</p>
                     <p>
                       {formData.nombre} {formData.apellido}
                     </p>
                     <p>
                       {formData.tipo_dni}: {formData.dni}
                     </p>
-                    <p>Nacionalidad: {formData.nacionalidad}</p>
+                    <p>{t("create_rental.nationality", "Nacionalidad")}: {formData.nacionalidad}</p>
                   </div>
 
                   <div className="text-center">
                     <p className="text-2xl font-bold text-success">
-                      Total:{" "}
+                      {t("create_rental.total", "Total")}:{" "}
                       {new Intl.NumberFormat("es-AR", {
                         style: "currency",
                         currency: "ARS",
@@ -651,7 +658,7 @@ export default function CreateRental() {
             className="btn btn-ghost"
             disabled={currentStep === 1}
           >
-            Volver
+            {t("create_rental.back", "Volver")}
           </button>
           {currentStep < 4 ? (
             <button
@@ -659,14 +666,14 @@ export default function CreateRental() {
               onClick={handleNextStep}
               className="btn btn-primary"
             >
-              Siguiente
+              {t("create_rental.next", "Siguiente")}
             </button>
           ) : (
             <button
               type="submit"
               className={`btn btn-success ${isLoading ? "loading" : ""}`}
             >
-              Confirmar y crear
+              {t("create_rental.confirm", "Confirmar y crear")}
             </button>
           )}
         </div>
