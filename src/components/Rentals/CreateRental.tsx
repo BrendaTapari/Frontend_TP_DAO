@@ -11,13 +11,14 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { es } from "date-fns/locale";
 import toast from "react-hot-toast";
-import { Car } from "lucide-react";
+import { Car, Calendar, Palette, Hash, CheckCircle, User, Globe, IdCard, Briefcase, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
 
 import { getAviableCarsForRental } from "../../services/autosService";
 import { getEmployees } from "../../services/employeeService";
 import { createRental } from "../../services/rentalService";
+import { sendReservationConfirmation } from "../../services/emailService";
 
 interface CarOption {
   id: number;
@@ -50,6 +51,7 @@ export default function CreateRental() {
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
+    email: "",
     nacionalidad: "",
     dni: "",
     tipo_dni: "",
@@ -212,6 +214,7 @@ export default function CreateRental() {
       if (
         !formData.nombre ||
         !formData.apellido ||
+        !formData.email ||
         !formData.dni ||
         !formData.tipo_dni ||
         !formData.fechaDeNacimiento ||
@@ -251,6 +254,26 @@ export default function CreateRental() {
         costo: formData.costo,
       };
       await createRental(payload as any);
+
+      // Enviar correo de confirmación
+      const selectedCar = cars.find(c => c.id === Number(formData.auto));
+      if (selectedCar && formData.email) {
+        try {
+          await sendReservationConfirmation({
+            to_name: `${formData.nombre} ${formData.apellido}`,
+            to_email: formData.email,
+            car_brand: selectedCar.marca,
+            car_model: selectedCar.modelo,
+            start_date: formData.fechaInicio,
+            end_date: formData.fechaFin,
+            total_cost: new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(formData.costo),
+          });
+        } catch (emailErr) {
+          console.error("No se pudo enviar el correo:", emailErr);
+          // Falla silente para el usuario, ya que el alquiler se creó.
+        }
+      }
+
       toast.success(t("create_rental.success_create", "Alquiler creado"));
       setLocation("/car-rentals");
     } catch (err) {
@@ -271,8 +294,8 @@ export default function CreateRental() {
             </h2>
             {formData.fechaInicio && formData.fechaFin && (
               <div className="text-center">
-                <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
-                  <div className="stat-title">{t("create_rental.duration", "Duración del alquiler")}</div>
+                <div className="stat bg-base-200  rounded-lg inline-block">
+                  <div className="stat-title text-lg text-gray-50">{t("create_rental.duration", "Duración del alquiler:")}</div>
                   <div className="stat-value text-primary">
                     {dateCalculations.days} {t("create_rental.days", "días")}
                   </div>
@@ -348,7 +371,7 @@ export default function CreateRental() {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-center mb-6">
+            <h2 className="text-2xl font-semibold text-center mt-15 mb-6">
               {t("create_rental.step2_title", "Selecciona el auto")}
             </h2>
 
@@ -366,72 +389,85 @@ export default function CreateRental() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 {cars.map((carItem) => (
                   <div
                     key={carItem.id}
-                    className={`card bg-base-100 text-gray-100 w-full shadow-sm cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedCarId === carItem.id ? "ring-2 ring-primary shadow-lg" : "hover:scale-105"}`}
+                    className={`card bg-base-100 text-base-content w-full shadow-md cursor-pointer transition-all duration-300 relative overflow-hidden group ${selectedCarId === carItem.id ? "ring-2 ring-primary shadow-xl shadow-primary/20 scale-[1.02]" : "hover:scale-[1.02] hover:shadow-xl"}`}
                     onClick={() => handleCarSelection(carItem.id)}
                   >
-                    <figure className="h-48 bg-gray-100 overflow-hidden">
+                    {selectedCarId === carItem.id && (
+                      <div className="absolute top-4 right-4 z-20 bg-primary text-primary-content rounded-full p-1 shadow-lg">
+                        <CheckCircle size={28} />
+                      </div>
+                    )}
+                    <figure className="h-56 relative bg-base-300 overflow-hidden">
                       {carItem.imagen ? (
-                        // eslint-disable-next-line jsx-a11y/img-redundant-alt
                         <img
                           src={getImageUrl(carItem.imagen)}
                           alt={`${carItem.marca} ${carItem.modelo}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           onError={(e) => {
                             e.currentTarget.src = "/images/car-placeholder.jpg";
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-                          <Car size={64} className="text-gray-400" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-base-200 to-base-300">
+                          <Car size={64} className="text-base-content/30" />
                         </div>
                       )}
+                      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-base-100 to-transparent z-10" />
                     </figure>
-                    <div className="card-body p-4">
-                      <h2 className="card-title text-lg">
-                        {carItem.marca} {carItem.modelo}
-                      </h2>
-                      <div className="space-y-1 text-sm">
-                        <p>
-                          <span className="font-medium">{t("create_rental.license_plate", "Patente")}:</span>{" "}
-                          {carItem.patente}
+                    <div className="card-body p-6 pt-2 relative z-20">
+                      <div className="mb-2">
+                        <p className="uppercase tracking-widest text-xs font-semibold text-primary mb-1">
+                          {carItem.marca}
                         </p>
+                        <h2 className="card-title text-2xl font-bold text-base-content">
+                          {carItem.modelo}
+                        </h2>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 my-4">
+                        <div className="badge badge-neutral badge-lg gap-2 py-3 px-3 shadow-sm font-medium">
+                          <Hash size={14} className="opacity-70" /> {carItem.patente}
+                        </div>
                         {carItem.año && (
-                          <p>
-                            <span className="font-medium">{t("create_rental.year", "Año")}:</span>{" "}
-                            {carItem.año}
-                          </p>
+                          <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                            <Calendar size={14} className="opacity-70" /> {carItem.año}
+                          </div>
                         )}
                         {carItem.color && (
-                          <p>
-                            <span className="font-medium">{t("create_rental.color", "Color")}:</span>{" "}
-                            {carItem.color}
-                          </p>
+                          <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                            <Palette size={14} className="opacity-70" /> {carItem.color}
+                          </div>
                         )}
-                        <p className="text-lg font-bold text-success">
-                          {new Intl.NumberFormat("es-AR", {
-                            style: "currency",
-                            currency: "ARS",
-                          }).format(carItem.costo)}
-                          /día
-                        </p>
                       </div>
-                      <div className="card-actions justify-end mt-4">
-                        <button
-                          type="button"
-                          className={`btn ${selectedCarId === carItem.id ? "btn-success" : "btn-primary"}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCarSelection(carItem.id);
-                          }}
-                        >
-                          {selectedCarId === carItem.id
-                            ? t("create_rental.selected", "Seleccionado")
-                            : t("create_rental.rent_btn", "Alquilar")}
-                        </button>
+                      
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-base-content/10">
+                        <div>
+                          <p className="text-xs text-base-content/60 uppercase tracking-wider mb-1">{t("create_rental.cost_per_day", "Costo por día")}</p>
+                          <p className="text-2xl font-black text-success drop-shadow-sm">
+                            {new Intl.NumberFormat("es-AR", {
+                              style: "currency",
+                              currency: "ARS",
+                              maximumFractionDigits: 0
+                            }).format(carItem.costo)}
+                            <span className="text-sm font-normal text-base-content/60 ml-1">/día</span>
+                          </p>
+                        </div>
+                        <div className="card-actions">
+                          <button
+                            type="button"
+                            className={`btn ${selectedCarId === carItem.id ? "btn-primary shadow-lg shadow-primary/40" : "btn-outline border-base-content/20 hover:bg-base-200 hover:text-base-content"}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCarSelection(carItem.id);
+                            }}
+                          >
+                            {selectedCarId === carItem.id ? t("create_rental.selected", "Seleccionado") : t("create_rental.rent_btn", "Alquilar")}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -460,116 +496,165 @@ export default function CreateRental() {
 
       case 3:
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-center mb-6">
+          <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+            <h2 className="text-3xl font-semibold text-center mb-8 text-base-content">
               {t("create_rental.client_data", "Datos del cliente")}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.name", "Nombre")}</span>
-                </label>
-                <input
-                  name="nombre"
-                  value={formData.nombre}
-                  onChange={handleInputChange}
-                  className="input input-bordered w-full"
-                  aria-label="Nombre"
-                />
-              </div>
+            <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
+              <div className="card-body p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  
+                  {/* Nombre */}
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <User size={16} className="text-primary" /> {t("create_rental.name", "Nombre")}
+                      </span>
+                    </label>
+                    <input
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Nombre"
+                    />
+                  </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.last_name", "Apellido")}</span>
-                </label>
-                <input
-                  name="apellido"
-                  value={formData.apellido}
-                  onChange={handleInputChange}
-                  className="input input-bordered w-full"
-                  aria-label="Apellido"
-                />
-              </div>
+                  {/* Apellido */}
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <User size={16} className="text-primary opacity-0" /> {t("create_rental.last_name", "Apellido")}
+                      </span>
+                    </label>
+                    <input
+                      name="apellido"
+                      value={formData.apellido}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Apellido"
+                    />
+                  </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.nationality", "Nacionalidad")}</span>
-                </label>
-                <input
-                  name="nacionalidad"
-                  value={formData.nacionalidad}
-                  onChange={handleInputChange}
-                  className="input input-bordered w-full"
-                  aria-label="Nacionalidad"
-                />
-              </div>
+                  {/* Correo Electrónico */}
+                  <div className="form-control md:col-span-2">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <Mail size={16} className="text-primary" /> {t("create_rental.email", "Correo electrónico")}
+                      </span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Email"
+                      placeholder="Ej. cliente@correo.com"
+                    />
+                  </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.doc_type", "Tipo de documento")}</span>
-                </label>
-                <select
-                  name="tipo_dni"
-                  value={formData.tipo_dni}
-                  onChange={handleInputChange}
-                  className="select select-bordered w-full"
-                  aria-label="Tipo de documento"
-                >
-                  <option value="">{t("create_rental.select_type", "Seleccione tipo")}</option>
-                  <option value="DNI">DNI</option>
-                  <option value="PAS">{t("create_rental.passport", "Pasaporte")}</option>
-                </select>
-              </div>
+                  <div className="divider md:col-span-2 my-0"></div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.doc_number", "Número de documento")}</span>
-                </label>
-                <input
-                  name="dni"
-                  value={formData.dni}
-                  onChange={handleInputChange}
-                  className="input input-bordered w-full"
-                  aria-label="Documento"
-                />
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.birth_date", "Fecha de nacimiento")}</span>
-                </label>
-                <input
-                  type="date"
-                  name="fechaDeNacimiento"
-                  value={formData.fechaDeNacimiento}
-                  onChange={handleInputChange}
-                  className="input input-bordered w-full"
-                  aria-label="Fecha de nacimiento"
-                />
-              </div>
-
-              <div className="form-control md:col-span-2">
-                <label className="label">
-                  <span className="label-text">{t("create_rental.employee", "Empleado responsable")}</span>
-                </label>
-                <select
-                  name="empleado"
-                  value={formData.empleado}
-                  onChange={handleInputChange}
-                  className="select select-bordered w-full"
-                  aria-label="Empleado"
-                >
-                  <option value="">{t("create_rental.select_employee", "Seleccione un empleado")}</option>
-                  {employees.map((emp) => (
-                    <option
-                      key={emp.id}
-                      value={`${emp.nombre} ${emp.apellido}`}
+                  {/* Tipo de Documento */}
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <IdCard size={16} className="text-primary" /> {t("create_rental.doc_type", "Tipo de documento")}
+                      </span>
+                    </label>
+                    <select
+                      name="tipo_dni"
+                      value={formData.tipo_dni}
+                      onChange={handleInputChange}
+                      className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Tipo de documento"
                     >
-                      {emp.nombre} {emp.apellido}
-                    </option>
-                  ))}
-                </select>
+                      <option value="" disabled>{t("create_rental.select_type", "Seleccione tipo")}</option>
+                      <option value="DNI">DNI</option>
+                      <option value="PAS">{t("create_rental.passport", "Pasaporte")}</option>
+                    </select>
+                  </div>
+
+                  {/* Número de documento */}
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <span className="w-4"></span> {t("create_rental.doc_number", "Número de documento")}
+                      </span>
+                    </label>
+                    <input
+                      name="dni"
+                      value={formData.dni}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Documento"
+                    />
+                  </div>
+
+                  {/* Nacionalidad */}
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <Globe size={16} className="text-primary" /> {t("create_rental.nationality", "Nacionalidad")}
+                      </span>
+                    </label>
+                    <input
+                      name="nacionalidad"
+                      value={formData.nacionalidad}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Nacionalidad"
+                    />
+                  </div>
+
+                  {/* Fecha de nacimiento */}
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                        <Calendar size={16} className="text-primary" /> {t("create_rental.birth_date", "Fecha de nacimiento")}
+                      </span>
+                    </label>
+                    <input
+                      type="date"
+                      name="fechaDeNacimiento"
+                      value={formData.fechaDeNacimiento}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Fecha de nacimiento"
+                    />
+                  </div>
+
+                  <div className="divider md:col-span-2 my-0"></div>
+
+                  {/* Empleado */}
+                  <div className="form-control md:col-span-2 bg-base-100/40 p-5 rounded-2xl border border-base-content/10 shadow-sm transition-all hover:shadow-md hover:bg-base-100/60">
+                    <label className="label pb-3">
+                      <span className="label-text font-semibold flex items-center gap-2 text-base-content">
+                        <Briefcase size={18} className="text-primary" /> {t("create_rental.employee", "Empleado responsable")}
+                      </span>
+                    </label>
+                    <select
+                      name="empleado"
+                      value={formData.empleado}
+                      onChange={handleInputChange}
+                      className="select select-bordered select-lg w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      aria-label="Empleado"
+                    >
+                      <option value="" disabled>{t("create_rental.select_employee", "Seleccione un empleado")}</option>
+                      {employees.map((emp) => (
+                        <option
+                          key={emp.id}
+                          value={`${emp.nombre} ${emp.apellido}`}
+                        >
+                          {emp.nombre} {emp.apellido}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                </div>
               </div>
             </div>
           </div>
