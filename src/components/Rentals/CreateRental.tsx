@@ -40,6 +40,8 @@ export default function CreateRental() {
   const [cars, setCars] = useState<CarOption[]>([]);
   const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [countdown, setCountdown] = useState(10);
 
   const maxDateObj = new Date();
   maxDateObj.setFullYear(maxDateObj.getFullYear() - 17);
@@ -57,6 +59,10 @@ export default function CreateRental() {
     fechaFin: "",
     auto: "", // will store car id as string
     costo: 0,
+    tarjetaNumero: "",
+    tarjetaNombre: "",
+    tarjetaExpiracion: "",
+    tarjetaCVV: "",
   });
 
   const dateCalculations = useMemo(() => {
@@ -71,8 +77,21 @@ export default function CreateRental() {
     return { isValid: true, days };
   }, [formData.fechaInicio, formData.fechaFin]);
 
-
-
+  useEffect(() => {
+    if (showSuccessModal) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setLocation("/");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [showSuccessModal, setLocation]);
   useEffect(() => {
     // fetch available cars when dates change
     const fetchCars = async () => {
@@ -192,9 +211,13 @@ export default function CreateRental() {
         !formData.email ||
         !formData.dni ||
         !formData.tipo_dni ||
-        !formData.fechaDeNacimiento
+        !formData.fechaDeNacimiento ||
+        !formData.tarjetaNumero ||
+        !formData.tarjetaNombre ||
+        !formData.tarjetaExpiracion ||
+        !formData.tarjetaCVV
       ) {
-        toast.error(t("create_rental.error_missing_data", "Complete todos los datos personales solicitados"));
+        toast.error(t("create_rental.error_missing_data", "Complete todos los datos personales y de pago solicitados"));
         return;
       }
       setCurrentStep(4);
@@ -235,6 +258,9 @@ export default function CreateRental() {
       if (selectedCar && formData.email) {
         console.log("Intentando enviar correo a:", formData.email);
         try {
+          const qrData = `Reserva: ${selectedCar.marca} ${selectedCar.modelo}\nCliente: ${formData.nombre} ${formData.apellido}\nFechas: ${formData.fechaInicio} a ${formData.fechaFin}`;
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+
           await sendReservationConfirmation({
             to_name: `${formData.nombre} ${formData.apellido}`,
             to_email: formData.email,
@@ -243,6 +269,7 @@ export default function CreateRental() {
             start_date: formData.fechaInicio,
             end_date: formData.fechaFin,
             total_cost: new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(formData.costo),
+            qr_code_url: qrUrl,
           });
         } catch (emailErr) {
           console.error("No se pudo enviar el correo:", emailErr);
@@ -251,7 +278,7 @@ export default function CreateRental() {
       }
 
       toast.success(t("create_rental.success_create", "Alquiler creado"));
-      setLocation("/car-rentals");
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
       toast.error(t("create_rental.error_create", "Error al crear el alquiler"));
@@ -265,7 +292,7 @@ export default function CreateRental() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-3xl font-semibold text-center mt-10 mb-6">
+            <h2 className="text-3xl font-semibold text-center mt-15 mb-6">
               {t("create_rental.step1_title", "Selecciona las fechas")}
             </h2>
             {formData.fechaInicio && formData.fechaFin && (
@@ -347,7 +374,7 @@ export default function CreateRental() {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-center mt-15 mb-6">
+            <h2 className="text-3xl font-semibold text-center mt-15 mb-6">
               {t("create_rental.step2_title", "Selecciona el auto")}
             </h2>
 
@@ -405,9 +432,6 @@ export default function CreateRental() {
                       </div>
                       
                       <div className="flex flex-wrap gap-2 my-4">
-                        <div className="badge badge-neutral badge-lg gap-2 py-3 px-3 shadow-sm font-medium">
-                          <Hash size={14} className="opacity-70" /> {carItem.patente}
-                        </div>
                         {carItem.año && (
                           <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
                             <Calendar size={14} className="opacity-70" /> {carItem.año}
@@ -470,16 +494,25 @@ export default function CreateRental() {
           </div>
         );
 
-      case 3:
+      case 3: {
+        const selectedCar = cars.find((c) => c.id === Number(formData.auto));
+        const senaAmount = formData.costo * 0.2; // Suponemos una seña del 20%
+        
         return (
-          <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-            <h2 className="text-3xl font-semibold text-center mb-8 text-base-content">
-              {t("create_rental.client_data", "Datos del cliente")}
+          <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4">
+            <h2 className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content">
+              {t("create_rental.client_data", "Datos del cliente y Pago")}
             </h2>
 
-            <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
-              <div className="card-body p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              {/* Columna Izquierda: Formularios */}
+              <div className="flex-1 w-full min-w-0 flex flex-col gap-8">
+                
+                {/* Card de Datos Personales */}
+                <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
+                  <div className="card-body p-6 md:p-8">
+                    <h3 className="text-xl font-semibold mb-6 text-base-content/90">Datos Personales</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   
                   {/* Nombre */}
                   <div className="form-control">
@@ -603,11 +636,193 @@ export default function CreateRental() {
                     />
                   </div>
 
+                  </div>
+                </div>
+
+                {/* Card de Datos de Pago */}
+                <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
+                  <div className="card-body p-6 md:p-8">
+                    <h3 className="text-xl font-semibold mb-6 text-base-content/90">{t("create_rental.payment_data", "Datos de Pago (Seña)")}</h3>
+                    
+                    <div className="flex flex-col xl:flex-row gap-8 items-center xl:items-center">
+                    {/* Formulario de Tarjeta */}
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                      {/* Número de Tarjeta */}
+                      <div className="form-control md:col-span-2">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium text-base-content/80">{t("create_rental.card_number", "Número de Tarjeta")}</span>
+                        </label>
+                        <input
+                          name="tarjetaNumero"
+                          value={formData.tarjetaNumero}
+                          onChange={handleInputChange}
+                          maxLength={19}
+                          placeholder="0000 0000 0000 0000"
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 font-mono tracking-widest"
+                        />
+                      </div>
+                      
+                      {/* Nombre en la Tarjeta */}
+                      <div className="form-control md:col-span-2">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium text-base-content/80">{t("create_rental.card_name", "Titular de la Tarjeta")}</span>
+                        </label>
+                        <input
+                          name="tarjetaNombre"
+                          value={formData.tarjetaNombre}
+                          onChange={handleInputChange}
+                          placeholder="VICTOR VON D."
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 uppercase"
+                        />
+                      </div>
+
+                      {/* Expiración */}
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium text-base-content/80">{t("create_rental.card_expiry", "Vencimiento")}</span>
+                        </label>
+                        <input
+                          name="tarjetaExpiracion"
+                          value={formData.tarjetaExpiracion}
+                          onChange={handleInputChange}
+                          maxLength={5}
+                          placeholder="MM/YY"
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 text-center"
+                        />
+                      </div>
+
+                      {/* CVV */}
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium text-base-content/80">CVV</span>
+                        </label>
+                        <input
+                          name="tarjetaCVV"
+                          value={formData.tarjetaCVV}
+                          onChange={handleInputChange}
+                          maxLength={4}
+                          type="password"
+                          placeholder="•••"
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 text-center"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Visualización 3D */}
+                    <div className="flex-none flex justify-center w-full sm:w-auto overflow-visible py-6">
+                      <div className="hover-3d cursor-pointer mx-auto">
+                        <label className={`swap swap-flip ${(formData.tarjetaNumero || formData.tarjetaNombre || formData.tarjetaExpiracion || formData.tarjetaCVV) ? 'swap-active' : ''}`}>
+                          {/* content on (custom card) */}
+                          <div className="swap-on">
+                            <div className="card w-80 sm:w-96 bg-black text-white bg-[radial-gradient(circle_at_bottom_left,#ffffff04_35%,transparent_36%),radial-gradient(circle_at_top_right,#ffffff04_35%,transparent_36%)] bg-size-[4.95em_4.95em] shadow-xl">
+                              <div className="card-body p-6 h-52 flex flex-col justify-between relative z-10">
+                                <div className="flex justify-between mb-6">
+                                  <div className="font-bold tracking-widest text-sm opacity-90">BANK OF LATVERIA</div>
+                                  <div className="text-3xl opacity-20 leading-none">❁</div>
+                                </div>
+                                <div className="text-xl sm:text-2xl font-mono mb-4 opacity-70 tracking-[0.1em] min-h-[32px]">
+                                  {formData.tarjetaNumero || '0210 8820 1150 0222'}
+                                </div>
+                                <div className="flex justify-between items-end">
+                                  <div>
+                                    <div className="text-[10px] opacity-40 mb-1">CARD HOLDER</div>
+                                    <div className="font-semibold text-sm uppercase truncate max-w-[150px] min-h-[20px]">
+                                      {formData.tarjetaNombre || 'VICTOR VON D.'}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-[10px] opacity-40 mb-1">EXPIRES</div>
+                                    <div className="font-mono text-sm min-h-[20px]">
+                                      {formData.tarjetaExpiracion || '29/08'}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* content off (image) */}
+                          <div className="swap-off">
+                            <figure className="w-80 sm:w-96 rounded-2xl overflow-hidden shadow-xl">
+                              <img src="https://img.daisyui.com/images/stock/creditcard.webp" alt="3D card" className="w-full h-52 object-cover" />
+                            </figure>
+                          </div>
+                        </label>
+                        {/* 8 empty divs needed for the 3D effect */}
+                        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+                      </div>
+                    </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              
+              {/* Columna Derecha: Resumen a pagar */}
+              <div className="w-full lg:w-96 flex-none sticky top-24">
+                <div className="card bg-base-100 shadow-xl border border-base-content/10 overflow-hidden">
+                  {selectedCar && (
+                    <figure className="h-48 relative bg-base-300 w-full overflow-hidden">
+                      <img
+                        src={getImageUrl(selectedCar.imagen)}
+                        alt={`${selectedCar.marca} ${selectedCar.modelo}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/images/car-placeholder.jpg";
+                        }}
+                      />
+                      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base-100 to-transparent z-10" />
+                    </figure>
+                  )}
+                  <div className="card-body pt-4">
+                    <h3 className="card-title text-xl mb-4 text-base-content">Resumen a Pagar</h3>
+                    
+                    <div className="space-y-3 text-sm text-base-content/80">
+                      <div className="flex justify-between">
+                        <span>Auto seleccionado</span>
+                        <span className="font-semibold text-base-content">{selectedCar?.marca} {selectedCar?.modelo}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Duración</span>
+                        <span className="font-semibold text-base-content">{dateCalculations.days} días</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Precio por día</span>
+                        <span className="font-semibold text-base-content">
+                          {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format((selectedCar?.costo || 0))}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="divider my-4"></div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-lg">
+                        <span className="text-base-content/80">Total del alquiler</span>
+                        <span className="font-bold text-base-content">
+                          {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(formData.costo)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/20 mt-6">
+                        <div>
+                          <span className="block font-bold text-primary text-lg">Seña a pagar hoy</span>
+                          <span className="text-xs text-primary/70 block mt-1">Monto para reservar (20%)</span>
+                        </div>
+                        <span className="font-black text-2xl text-primary">
+                          {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(senaAmount)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+              </div>
             </div>
-          </div>
+          
         );
+      }
 
       case 4: {
         const sel = cars.find((c) => c.id === selectedCarId) as
@@ -712,6 +927,50 @@ export default function CreateRental() {
           )}
         </div>
       </div>
+
+      {showSuccessModal && (
+        <div className="modal modal-open">
+          <div className="modal-box text-center relative">
+            <div className="flex justify-center mb-4">
+              <CheckCircle size={64} className="text-success" />
+            </div>
+            <h3 className="font-bold text-2xl text-base-content mb-4">{t("create_rental.success_title", "¡Reserva Exitosa!")}</h3>
+            <p className="py-2 text-lg text-base-content/80">
+              Se ha enviado un correo a <strong className="text-primary">{formData.email}</strong> con los detalles de la reserva y un código QR.
+            </p>
+            
+            <div className="bg-base-200 border border-base-300 p-6 rounded-xl my-6 text-left shadow-sm">
+              <p className="font-semibold text-lg text-base-content mb-3">{t("create_rental.next_steps", "Pasos a seguir:")}</p>
+              <ul className="list-disc list-inside space-y-2 text-base-content/80">
+                <li>Revisa tu bandeja de entrada (y la carpeta de spam).</li>
+                <li>Conserva el código QR que recibiste en el correo.</li>
+                <li>Presenta el código QR al momento de retirar el vehículo en nuestras oficinas.</li>
+              </ul>
+            </div>
+            
+            <div className="w-full bg-base-300 rounded-full h-1.5 mb-6 overflow-hidden">
+              <div 
+                className="bg-primary h-1.5 rounded-full transition-all duration-1000 ease-linear" 
+                style={{ width: `${(countdown / 10) * 100}%` }}
+              ></div>
+            </div>
+            
+            <p className="text-sm text-base-content/60 mb-6">
+              Serás redirigido al inicio en <span className="font-bold">{countdown}</span> segundos...
+            </p>
+            
+            <div className="modal-action justify-center">
+              <button 
+                type="button"
+                className="btn btn-primary px-8" 
+                onClick={() => setLocation("/")}
+              >
+                {t("create_rental.go_home_now", "Ir al inicio ahora")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

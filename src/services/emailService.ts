@@ -14,6 +14,7 @@ export interface ReservationEmailParams {
   start_date: string;
   end_date: string;
   total_cost: string;
+  qr_code_url?: string;
 }
 
 export const sendReservationConfirmation = async (params: ReservationEmailParams) => {
@@ -29,6 +30,7 @@ export const sendReservationConfirmation = async (params: ReservationEmailParams
         start_date: params.start_date,
         end_date: params.end_date,
         total_cost: params.total_cost,
+        qr_code_url: params.qr_code_url,
       },
       PUBLIC_KEY
     );
