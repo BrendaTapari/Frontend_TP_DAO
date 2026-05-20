@@ -16,7 +16,6 @@ import { useTranslation } from "react-i18next";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
 
 import { getAviableCarsForRental } from "../../services/autosService";
-import { getEmployees } from "../../services/employeeService";
 import { createRental } from "../../services/rentalService";
 import { sendReservationConfirmation } from "../../services/emailService";
 
@@ -31,12 +30,7 @@ interface CarOption {
   año?: number;
 }
 
-interface EmployeeOption {
-  id: number;
-  nombre: string;
-  apellido: string;
-  legajo?: string;
-}
+
 
 export default function CreateRental() {
   const [, setLocation] = useLocation();
@@ -44,9 +38,12 @@ export default function CreateRental() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
   const [cars, setCars] = useState<CarOption[]>([]);
-  const [employees, setEmployees] = useState<EmployeeOption[]>([]);
   const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const maxDateObj = new Date();
+  maxDateObj.setFullYear(maxDateObj.getFullYear() - 17);
+  const maxDateString = maxDateObj.toISOString().split('T')[0];
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -55,12 +52,11 @@ export default function CreateRental() {
     nacionalidad: "",
     dni: "",
     tipo_dni: "",
-    fechaDeNacimiento: "",
+    fechaDeNacimiento: maxDateString,
     fechaInicio: "",
     fechaFin: "",
     auto: "", // will store car id as string
     costo: 0,
-    empleado: "",
   });
 
   const dateCalculations = useMemo(() => {
@@ -75,28 +71,7 @@ export default function CreateRental() {
     return { isValid: true, days };
   }, [formData.fechaInicio, formData.fechaFin]);
 
-  useEffect(() => {
-    // fetch employees once
-    let mounted = true;
-    getEmployees()
-      .then((res: any) => {
-        if (!mounted) return;
-        // normalize minimal shape
-        const list = (res || []).map((e: any) => ({
-          id: e.id,
-          nombre: e.nombre,
-          apellido: e.apellido,
-          legajo: e.legajo,
-        }));
-        setEmployees(list);
-      })
-      .catch(() => {
-        // ignore
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+
 
   useEffect(() => {
     // fetch available cars when dates change
@@ -217,10 +192,9 @@ export default function CreateRental() {
         !formData.email ||
         !formData.dni ||
         !formData.tipo_dni ||
-        !formData.fechaDeNacimiento ||
-        !formData.empleado
+        !formData.fechaDeNacimiento
       ) {
-        toast.error(t("create_rental.error_missing_data", "Complete todos los datos personales y seleccione un empleado"));
+        toast.error(t("create_rental.error_missing_data", "Complete todos los datos personales solicitados"));
         return;
       }
       setCurrentStep(4);
@@ -250,14 +224,16 @@ export default function CreateRental() {
         fechaInicio: formData.fechaInicio,
         fechaFin: formData.fechaFin,
         autoId: Number(formData.auto),
-        empleado: formData.empleado,
         costo: formData.costo,
       };
-      await createRental(payload as any);
+      // Simulación de creación de alquiler porque el backend está desconectado
+      // await createRental(payload as any);
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Enviar correo de confirmación
       const selectedCar = cars.find(c => c.id === Number(formData.auto));
       if (selectedCar && formData.email) {
+        console.log("Intentando enviar correo a:", formData.email);
         try {
           await sendReservationConfirmation({
             to_name: `${formData.nombre} ${formData.apellido}`,
@@ -620,38 +596,11 @@ export default function CreateRental() {
                       type="date"
                       name="fechaDeNacimiento"
                       value={formData.fechaDeNacimiento}
+                      max={maxDateString}
                       onChange={handleInputChange}
                       className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
                       aria-label="Fecha de nacimiento"
                     />
-                  </div>
-
-                  <div className="divider md:col-span-2 my-0"></div>
-
-                  {/* Empleado */}
-                  <div className="form-control md:col-span-2 bg-base-100/40 p-5 rounded-2xl border border-base-content/10 shadow-sm transition-all hover:shadow-md hover:bg-base-100/60">
-                    <label className="label pb-3">
-                      <span className="label-text font-semibold flex items-center gap-2 text-base-content">
-                        <Briefcase size={18} className="text-primary" /> {t("create_rental.employee", "Empleado responsable")}
-                      </span>
-                    </label>
-                    <select
-                      name="empleado"
-                      value={formData.empleado}
-                      onChange={handleInputChange}
-                      className="select select-bordered select-lg w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Empleado"
-                    >
-                      <option value="" disabled>{t("create_rental.select_employee", "Seleccione un empleado")}</option>
-                      {employees.map((emp) => (
-                        <option
-                          key={emp.id}
-                          value={`${emp.nombre} ${emp.apellido}`}
-                        >
-                          {emp.nombre} {emp.apellido}
-                        </option>
-                      ))}
-                    </select>
                   </div>
 
                 </div>
