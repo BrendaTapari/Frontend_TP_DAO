@@ -29,6 +29,7 @@
     "react-dropzone": "^14.3.8",
     "react-hot-toast": "^2.6.0",
     "react-i18next": "^17.0.7",
+    "react-parallax-tilt": "^1.7.328",
     "recharts": "^3.3.0",
     "tailwindcss": "^4.1.14",
     "wouter": "^3.7.1"

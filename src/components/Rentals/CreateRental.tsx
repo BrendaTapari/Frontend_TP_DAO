@@ -11,12 +11,20 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { es } from "date-fns/locale";
 import toast from "react-hot-toast";
-import { Car, Calendar, Palette, Hash, CheckCircle, User, Globe, IdCard, Briefcase, Mail } from "lucide-react";
+import {
+  Car,
+  Calendar,
+  Palette,
+  CheckCircle,
+  User,
+  Globe,
+  IdCard,
+  Mail,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
-
+import Tilt from "react-parallax-tilt";
 import { getAviableCarsForRental } from "../../services/autosService";
-import { createRental } from "../../services/rentalService";
 import { sendReservationConfirmation } from "../../services/emailService";
 
 interface CarOption {
@@ -29,8 +37,6 @@ interface CarOption {
   color?: string;
   año?: number;
 }
-
-
 
 export default function CreateRental() {
   const [, setLocation] = useLocation();
@@ -45,7 +51,7 @@ export default function CreateRental() {
 
   const maxDateObj = new Date();
   maxDateObj.setFullYear(maxDateObj.getFullYear() - 17);
-  const maxDateString = maxDateObj.toISOString().split('T')[0];
+  const maxDateString = maxDateObj.toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -127,7 +133,12 @@ export default function CreateRental() {
           setFormData((p) => ({ ...p, auto: "" }));
         }
       } catch (err) {
-        toast.error(t("create_rental.error_fetch_cars", "Error al buscar autos disponibles"));
+        toast.error(
+          t(
+            "create_rental.error_fetch_cars",
+            "Error al buscar autos disponibles",
+          ),
+        );
       } finally {
         setIsFetchingCars(false);
       }
@@ -168,9 +179,48 @@ export default function CreateRental() {
     setFormData((p) => ({ ...p, auto: String(id) }));
   }, []);
 
+  const formatCardNumber = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 16);
+    return digits.replace(/(.{4})/g, "$1 ").trim();
+  };
+
+  const formatCardExpiry = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  };
+
+  const isValidCardExpiry = (value: string) => {
+    if (!/^\d{2}\/\d{2}$/.test(value)) return false;
+    const month = Number(value.slice(0, 2));
+    return month >= 1 && month <= 12;
+  };
+
   const handleInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
+      if (name === "tarjetaNumero") {
+        setFormData((p) => ({ ...p, [name]: formatCardNumber(value) }));
+        return;
+      }
+      if (name === "tarjetaExpiracion") {
+        setFormData((p) => ({ ...p, [name]: formatCardExpiry(value) }));
+        return;
+      }
+      if (name === "tarjetaCVV") {
+        setFormData((p) => ({
+          ...p,
+          [name]: value.replace(/\D/g, "").slice(0, 4),
+        }));
+        return;
+      }
+      if (name === "tarjetaNombre") {
+        setFormData((p) => ({
+          ...p,
+          [name]: value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""),
+        }));
+        return;
+      }
       setFormData((p) => ({ ...p, [name]: value }));
     },
     [],
@@ -178,13 +228,23 @@ export default function CreateRental() {
 
   const handleDateValidation = async () => {
     if (!formData.fechaInicio || !formData.fechaFin) {
-      toast.error(t("create_rental.error_select_dates", "Por favor seleccione inicio y fin"));
+      toast.error(
+        t(
+          "create_rental.error_select_dates",
+          "Por favor seleccione inicio y fin",
+        ),
+      );
       return false;
     }
     const start = new Date(formData.fechaInicio);
     const end = new Date(formData.fechaFin);
     if (start >= end) {
-      toast.error(t("create_rental.error_date_order", "La fecha de inicio debe ser anterior a la fecha de fin"));
+      toast.error(
+        t(
+          "create_rental.error_date_order",
+          "La fecha de inicio debe ser anterior a la fecha de fin",
+        ),
+      );
       return false;
     }
     return true;
@@ -198,13 +258,16 @@ export default function CreateRental() {
     }
     if (currentStep === 2) {
       if (!formData.auto) {
-        toast.error(t("create_rental.error_select_car", "Por favor seleccione un auto"));
+        toast.error(
+          t("create_rental.error_select_car", "Por favor seleccione un auto"),
+        );
         return;
       }
       setCurrentStep(3);
       return;
     }
     if (currentStep === 3) {
+      const cardNumberDigits = formData.tarjetaNumero.replace(/\D/g, "");
       if (
         !formData.nombre ||
         !formData.apellido ||
@@ -217,9 +280,45 @@ export default function CreateRental() {
         !formData.tarjetaExpiracion ||
         !formData.tarjetaCVV
       ) {
-        toast.error(t("create_rental.error_missing_data", "Complete todos los datos personales y de pago solicitados"));
+        toast.error(
+          t(
+            "create_rental.error_missing_data",
+            "Complete todos los datos personales y de pago solicitados",
+          ),
+        );
         return;
       }
+
+      if (cardNumberDigits.length !== 16) {
+        toast.error(
+          t(
+            "create_rental.error_card_number",
+            "El número de tarjeta debe tener 16 dígitos",
+          ),
+        );
+        return;
+      }
+
+      if (!isValidCardExpiry(formData.tarjetaExpiracion)) {
+        toast.error(
+          t(
+            "create_rental.error_card_expiry",
+            "La fecha de vencimiento debe tener formato xx/xx",
+          ),
+        );
+        return;
+      }
+
+      if (!/^\d{1,4}$/.test(formData.tarjetaCVV)) {
+        toast.error(
+          t(
+            "create_rental.error_card_cvv",
+            "El código de seguridad debe contener solo números y hasta 4 dígitos",
+          ),
+        );
+        return;
+      }
+
       setCurrentStep(4);
       return;
     }
@@ -233,28 +332,45 @@ export default function CreateRental() {
     e.preventDefault();
     const ok = await handleDateValidation();
     if (!ok) return;
+
+    const cardNumberDigits = formData.tarjetaNumero.replace(/\D/g, "");
+    if (cardNumberDigits.length !== 16) {
+      toast.error(
+        t(
+          "create_rental.error_card_number",
+          "El número de tarjeta debe tener 16 dígitos",
+        ),
+      );
+      return;
+    }
+
+    if (!isValidCardExpiry(formData.tarjetaExpiracion)) {
+      toast.error(
+        t(
+          "create_rental.error_card_expiry",
+          "La fecha de vencimiento debe tener formato xx/xx",
+        ),
+      );
+      return;
+    }
+
+    if (!/^\d{1,4}$/.test(formData.tarjetaCVV)) {
+      toast.error(
+        t(
+          "create_rental.error_card_cvv",
+          "El código de seguridad debe contener solo números y hasta 4 dígitos",
+        ),
+      );
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const payload = {
-        cliente: {
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          nacionalidad: formData.nacionalidad,
-          dni: formData.dni,
-          tipo_dni: formData.tipo_dni,
-          fechaDeNacimiento: formData.fechaDeNacimiento,
-        },
-        fechaInicio: formData.fechaInicio,
-        fechaFin: formData.fechaFin,
-        autoId: Number(formData.auto),
-        costo: formData.costo,
-      };
       // Simulación de creación de alquiler porque el backend está desconectado
-      // await createRental(payload as any);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Enviar correo de confirmación
-      const selectedCar = cars.find(c => c.id === Number(formData.auto));
+      const selectedCar = cars.find((c) => c.id === Number(formData.auto));
       if (selectedCar && formData.email) {
         console.log("Intentando enviar correo a:", formData.email);
         try {
@@ -268,7 +384,11 @@ export default function CreateRental() {
             car_model: selectedCar.modelo,
             start_date: formData.fechaInicio,
             end_date: formData.fechaFin,
-            total_cost: new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(formData.costo),
+            total_cost: new Intl.NumberFormat("es-AR", {
+              style: "currency",
+              currency: "ARS",
+              maximumFractionDigits: 0,
+            }).format(formData.costo),
             qr_code_url: qrUrl,
           });
         } catch (emailErr) {
@@ -281,7 +401,9 @@ export default function CreateRental() {
       setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
-      toast.error(t("create_rental.error_create", "Error al crear el alquiler"));
+      toast.error(
+        t("create_rental.error_create", "Error al crear el alquiler"),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -298,7 +420,9 @@ export default function CreateRental() {
             {formData.fechaInicio && formData.fechaFin && (
               <div className="text-center">
                 <div className="stat bg-base-200  rounded-lg inline-block">
-                  <div className="stat-title text-lg text-gray-50">{t("create_rental.duration", "Duración del alquiler:")}</div>
+                  <div className="stat-title text-lg text-gray-50">
+                    {t("create_rental.duration", "Duración del alquiler:")}
+                  </div>
                   <div className="stat-value text-primary">
                     {dateCalculations.days} {t("create_rental.days", "días")}
                   </div>
@@ -310,7 +434,10 @@ export default function CreateRental() {
               <div className="form-control w-full max-w-4xl">
                 <label className="label justify-center pb-4">
                   <span className="label-text font-medium text-xl text-base-content">
-                    {t("create_rental.select_period", "Seleccione el período de alquiler")}
+                    {t(
+                      "create_rental.select_period",
+                      "Seleccione el período de alquiler",
+                    )}
                   </span>
                 </label>
                 <div className="flex flex-col items-center w-full text-center space-y-4">
@@ -319,18 +446,23 @@ export default function CreateRental() {
                       ? formData.fechaFin
                         ? `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — ${new Date(formData.fechaFin + "T12:00:00").toLocaleDateString()}`
                         : `${new Date(formData.fechaInicio + "T12:00:00").toLocaleDateString()} — ${t("create_rental.select_end", "Seleccione fin")}`
-                      : t("create_rental.start_end_dates", "Fechas de inicio y fin")}
+                      : t(
+                          "create_rental.start_end_dates",
+                          "Fechas de inicio y fin",
+                        )}
                   </div>
 
-                  <div 
+                  <div
                     className="bg-base-200 border border-base-300 rounded-2xl p-4 text-base-content shadow-xl inline-block overflow-hidden"
-                    style={{
-                      "--rdp-accent-color": "oklch(var(--p))",
-                      "--rdp-background-color": "oklch(var(--p) / 0.1)",
-                      "--rdp-accent-color-dark": "oklch(var(--p))",
-                      "--rdp-background-color-dark": "oklch(var(--p) / 0.1)",
-                      "--rdp-outline-color": "oklch(var(--p))"
-                    } as React.CSSProperties}
+                    style={
+                      {
+                        "--rdp-accent-color": "oklch(var(--p))",
+                        "--rdp-background-color": "oklch(var(--p) / 0.1)",
+                        "--rdp-accent-color-dark": "oklch(var(--p))",
+                        "--rdp-background-color-dark": "oklch(var(--p) / 0.1)",
+                        "--rdp-outline-color": "oklch(var(--p))",
+                      } as React.CSSProperties
+                    }
                   >
                     <DayPicker
                       locale={es}
@@ -382,13 +514,19 @@ export default function CreateRental() {
               <div className="text-center">
                 <div className="loading loading-spinner loading-lg"></div>
                 <p className="text-lg text-gray-200 mt-2">
-                  {t("create_rental.searching_cars", "Buscando autos disponibles...")}
+                  {t(
+                    "create_rental.searching_cars",
+                    "Buscando autos disponibles...",
+                  )}
                 </p>
               </div>
             ) : cars.length === 0 ? (
               <div className="text-center">
                 <p className="text-lg text-gray-200">
-                  {t("create_rental.no_cars_available", "No hay autos disponibles para estas fechas")}
+                  {t(
+                    "create_rental.no_cars_available",
+                    "No hay autos disponibles para estas fechas",
+                  )}
                 </p>
               </div>
             ) : (
@@ -430,30 +568,36 @@ export default function CreateRental() {
                           {carItem.modelo}
                         </h2>
                       </div>
-                      
+
                       <div className="flex flex-wrap gap-2 my-4">
                         {carItem.año && (
                           <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                            <Calendar size={14} className="opacity-70" /> {carItem.año}
+                            <Calendar size={14} className="opacity-70" />{" "}
+                            {carItem.año}
                           </div>
                         )}
                         {carItem.color && (
                           <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                            <Palette size={14} className="opacity-70" /> {carItem.color}
+                            <Palette size={14} className="opacity-70" />{" "}
+                            {carItem.color}
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center justify-between mt-auto pt-4 border-t border-base-content/10">
                         <div>
-                          <p className="text-xs text-base-content/60 uppercase tracking-wider mb-1">{t("create_rental.cost_per_day", "Costo por día")}</p>
+                          <p className="text-xs text-base-content/60 uppercase tracking-wider mb-1">
+                            {t("create_rental.cost_per_day", "Costo por día")}
+                          </p>
                           <p className="text-2xl font-black text-success drop-shadow-sm">
                             {new Intl.NumberFormat("es-AR", {
                               style: "currency",
                               currency: "ARS",
-                              maximumFractionDigits: 0
+                              maximumFractionDigits: 0,
                             }).format(carItem.costo)}
-                            <span className="text-sm font-normal text-base-content/60 ml-1">/día</span>
+                            <span className="text-sm font-normal text-base-content/60 ml-1">
+                              /día
+                            </span>
                           </p>
                         </div>
                         <div className="card-actions">
@@ -465,7 +609,9 @@ export default function CreateRental() {
                               handleCarSelection(carItem.id);
                             }}
                           >
-                            {selectedCarId === carItem.id ? t("create_rental.selected", "Seleccionado") : t("create_rental.rent_btn", "Alquilar")}
+                            {selectedCarId === carItem.id
+                              ? t("create_rental.selected", "Seleccionado")
+                              : t("create_rental.rent_btn", "Alquilar")}
                           </button>
                         </div>
                       </div>
@@ -478,7 +624,9 @@ export default function CreateRental() {
             {formData.auto && formData.fechaInicio && formData.fechaFin && (
               <div className="text-center mt-8">
                 <div className="stat bg-base-200 text-gray-100 rounded-lg inline-block">
-                  <div className="stat-title">{t("create_rental.estimated_cost", "Costo total estimado")}</div>
+                  <div className="stat-title">
+                    {t("create_rental.estimated_cost", "Costo total estimado")}
+                  </div>
                   <div className="stat-value text-success">
                     {new Intl.NumberFormat("es-AR", {
                       style: "currency",
@@ -486,7 +634,8 @@ export default function CreateRental() {
                     }).format(formData.costo)}
                   </div>
                   <div className="stat-desc">
-                    {dateCalculations.days} {t("create_rental.rental_days", "días de alquiler")}
+                    {dateCalculations.days}{" "}
+                    {t("create_rental.rental_days", "días de alquiler")}
                   </div>
                 </div>
               </div>
@@ -497,7 +646,7 @@ export default function CreateRental() {
       case 3: {
         const selectedCar = cars.find((c) => c.id === Number(formData.auto));
         const senaAmount = formData.costo * 0.2; // Suponemos una seña del 20%
-        
+
         return (
           <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4">
             <h2 className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content">
@@ -507,258 +656,324 @@ export default function CreateRental() {
             <div className="flex flex-col lg:flex-row gap-8 items-start">
               {/* Columna Izquierda: Formularios */}
               <div className="flex-1 w-full min-w-0 flex flex-col gap-8">
-                
                 {/* Card de Datos Personales */}
                 <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
                   <div className="card-body p-6 md:p-8">
-                    <h3 className="text-xl font-semibold mb-6 text-base-content/90">Datos Personales</h3>
+                    <h3 className="text-xl font-semibold mb-6 text-base-content/90">
+                      Datos Personales
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  
-                  {/* Nombre */}
-                  <div className="form-control">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <User size={16} className="text-primary" /> {t("create_rental.name", "Nombre")}
-                      </span>
-                    </label>
-                    <input
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Nombre"
-                    />
-                  </div>
-
-                  {/* Apellido */}
-                  <div className="form-control">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <User size={16} className="text-primary opacity-0" /> {t("create_rental.last_name", "Apellido")}
-                      </span>
-                    </label>
-                    <input
-                      name="apellido"
-                      value={formData.apellido}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Apellido"
-                    />
-                  </div>
-
-                  {/* Correo Electrónico */}
-                  <div className="form-control md:col-span-2">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <Mail size={16} className="text-primary" /> {t("create_rental.email", "Correo electrónico")}
-                      </span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Email"
-                      placeholder="Ej. cliente@correo.com"
-                    />
-                  </div>
-
-                  <div className="divider md:col-span-2 my-0"></div>
-
-                  {/* Tipo de Documento */}
-                  <div className="form-control">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <IdCard size={16} className="text-primary" /> {t("create_rental.doc_type", "Tipo de documento")}
-                      </span>
-                    </label>
-                    <select
-                      name="tipo_dni"
-                      value={formData.tipo_dni}
-                      onChange={handleInputChange}
-                      className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Tipo de documento"
-                    >
-                      <option value="" disabled>{t("create_rental.select_type", "Seleccione tipo")}</option>
-                      <option value="DNI">DNI</option>
-                      <option value="PAS">{t("create_rental.passport", "Pasaporte")}</option>
-                    </select>
-                  </div>
-
-                  {/* Número de documento */}
-                  <div className="form-control">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <span className="w-4"></span> {t("create_rental.doc_number", "Número de documento")}
-                      </span>
-                    </label>
-                    <input
-                      name="dni"
-                      value={formData.dni}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Documento"
-                    />
-                  </div>
-
-                  {/* Nacionalidad */}
-                  <div className="form-control">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <Globe size={16} className="text-primary" /> {t("create_rental.nationality", "Nacionalidad")}
-                      </span>
-                    </label>
-                    <input
-                      name="nacionalidad"
-                      value={formData.nacionalidad}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Nacionalidad"
-                    />
-                  </div>
-
-                  {/* Fecha de nacimiento */}
-                  <div className="form-control">
-                    <label className="label pb-1">
-                      <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
-                        <Calendar size={16} className="text-primary" /> {t("create_rental.birth_date", "Fecha de nacimiento")}
-                      </span>
-                    </label>
-                    <input
-                      type="date"
-                      name="fechaDeNacimiento"
-                      value={formData.fechaDeNacimiento}
-                      max={maxDateString}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      aria-label="Fecha de nacimiento"
-                    />
-                  </div>
-
-                  </div>
-                </div>
-
-                {/* Card de Datos de Pago */}
-                <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
-                  <div className="card-body p-6 md:p-8">
-                    <h3 className="text-xl font-semibold mb-6 text-base-content/90">{t("create_rental.payment_data", "Datos de Pago (Seña)")}</h3>
-                    
-                    <div className="flex flex-col xl:flex-row gap-8 items-center xl:items-center">
-                    {/* Formulario de Tarjeta */}
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                      {/* Número de Tarjeta */}
-                      <div className="form-control md:col-span-2">
-                        <label className="label pb-1">
-                          <span className="label-text font-medium text-base-content/80">{t("create_rental.card_number", "Número de Tarjeta")}</span>
-                        </label>
-                        <input
-                          name="tarjetaNumero"
-                          value={formData.tarjetaNumero}
-                          onChange={handleInputChange}
-                          maxLength={19}
-                          placeholder="0000 0000 0000 0000"
-                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 font-mono tracking-widest"
-                        />
-                      </div>
-                      
-                      {/* Nombre en la Tarjeta */}
-                      <div className="form-control md:col-span-2">
-                        <label className="label pb-1">
-                          <span className="label-text font-medium text-base-content/80">{t("create_rental.card_name", "Titular de la Tarjeta")}</span>
-                        </label>
-                        <input
-                          name="tarjetaNombre"
-                          value={formData.tarjetaNombre}
-                          onChange={handleInputChange}
-                          placeholder="VICTOR VON D."
-                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 uppercase"
-                        />
-                      </div>
-
-                      {/* Expiración */}
+                      {/* Nombre */}
                       <div className="form-control">
                         <label className="label pb-1">
-                          <span className="label-text font-medium text-base-content/80">{t("create_rental.card_expiry", "Vencimiento")}</span>
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <User size={16} className="text-primary" />{" "}
+                            {t("create_rental.name", "Nombre")}
+                          </span>
                         </label>
                         <input
-                          name="tarjetaExpiracion"
-                          value={formData.tarjetaExpiracion}
+                          name="nombre"
+                          value={formData.nombre}
                           onChange={handleInputChange}
-                          maxLength={5}
-                          placeholder="MM/YY"
-                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 text-center"
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Nombre"
                         />
                       </div>
 
-                      {/* CVV */}
+                      {/* Apellido */}
                       <div className="form-control">
                         <label className="label pb-1">
-                          <span className="label-text font-medium text-base-content/80">CVV</span>
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <User
+                              size={16}
+                              className="text-primary opacity-0"
+                            />{" "}
+                            {t("create_rental.last_name", "Apellido")}
+                          </span>
                         </label>
                         <input
-                          name="tarjetaCVV"
-                          value={formData.tarjetaCVV}
+                          name="apellido"
+                          value={formData.apellido}
                           onChange={handleInputChange}
-                          maxLength={4}
-                          type="password"
-                          placeholder="•••"
-                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 text-center"
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Apellido"
+                        />
+                      </div>
+
+                      {/* Correo Electrónico */}
+                      <div className="form-control md:col-span-2">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <Mail size={16} className="text-primary" />{" "}
+                            {t("create_rental.email", "Correo electrónico")}
+                          </span>
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Email"
+                          placeholder="Ej. cliente@correo.com"
+                        />
+                      </div>
+
+                      <div className="divider md:col-span-2 my-0"></div>
+
+                      {/* Tipo de Documento */}
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <IdCard size={16} className="text-primary" />{" "}
+                            {t("create_rental.doc_type", "Tipo de documento")}
+                          </span>
+                        </label>
+                        <select
+                          name="tipo_dni"
+                          value={formData.tipo_dni}
+                          onChange={handleInputChange}
+                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Tipo de documento"
+                        >
+                          <option value="" disabled>
+                            {t("create_rental.select_type", "Seleccione tipo")}
+                          </option>
+                          <option value="DNI">DNI</option>
+                          <option value="PAS">
+                            {t("create_rental.passport", "Pasaporte")}
+                          </option>
+                        </select>
+                      </div>
+
+                      {/* Número de documento */}
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <span className="w-4"></span>{" "}
+                            {t(
+                              "create_rental.doc_number",
+                              "Número de documento",
+                            )}
+                          </span>
+                        </label>
+                        <input
+                          name="dni"
+                          value={formData.dni}
+                          onChange={handleInputChange}
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Documento"
+                        />
+                      </div>
+
+                      {/* Nacionalidad */}
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <Globe size={16} className="text-primary" />{" "}
+                            {t("create_rental.nationality", "Nacionalidad")}
+                          </span>
+                        </label>
+                        <input
+                          name="nacionalidad"
+                          value={formData.nacionalidad}
+                          onChange={handleInputChange}
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Nacionalidad"
+                        />
+                      </div>
+
+                      {/* Fecha de nacimiento */}
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium flex items-center gap-2 text-base-content/80">
+                            <Calendar size={16} className="text-primary" />{" "}
+                            {t(
+                              "create_rental.birth_date",
+                              "Fecha de nacimiento",
+                            )}
+                          </span>
+                        </label>
+                        <input
+                          type="date"
+                          name="fechaDeNacimiento"
+                          value={formData.fechaDeNacimiento}
+                          max={maxDateString}
+                          onChange={handleInputChange}
+                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          aria-label="Fecha de nacimiento"
                         />
                       </div>
                     </div>
+                  </div>
 
-                    {/* Visualización 3D */}
-                    <div className="flex-none flex justify-center w-full sm:w-auto overflow-visible py-6">
-                      <div className="hover-3d cursor-pointer mx-auto">
-                        <label className={`swap swap-flip ${(formData.tarjetaNumero || formData.tarjetaNombre || formData.tarjetaExpiracion || formData.tarjetaCVV) ? 'swap-active' : ''}`}>
-                          {/* content on (custom card) */}
-                          <div className="swap-on">
-                            <div className="card w-80 sm:w-96 bg-black text-white bg-[radial-gradient(circle_at_bottom_left,#ffffff04_35%,transparent_36%),radial-gradient(circle_at_top_right,#ffffff04_35%,transparent_36%)] bg-size-[4.95em_4.95em] shadow-xl">
-                              <div className="card-body p-6 h-52 flex flex-col justify-between relative z-10">
-                                <div className="flex justify-between mb-6">
-                                  <div className="font-bold tracking-widest text-sm opacity-90">BANK OF LATVERIA</div>
-                                  <div className="text-3xl opacity-20 leading-none">❁</div>
-                                </div>
-                                <div className="text-xl sm:text-2xl font-mono mb-4 opacity-70 tracking-[0.1em] min-h-[32px]">
-                                  {formData.tarjetaNumero || '0210 8820 1150 0222'}
-                                </div>
-                                <div className="flex justify-between items-end">
-                                  <div>
-                                    <div className="text-[10px] opacity-40 mb-1">CARD HOLDER</div>
-                                    <div className="font-semibold text-sm uppercase truncate max-w-[150px] min-h-[20px]">
-                                      {formData.tarjetaNombre || 'VICTOR VON D.'}
+                  {/* Card de Datos de Pago */}
+                  <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
+                    <div className="card-body p-6 md:p-8">
+                      <h3 className="text-xl font-semibold mb-6 text-base-content/90">
+                        {t(
+                          "create_rental.payment_data",
+                          "Datos de Pago (Seña)",
+                        )}
+                      </h3>
+
+                      <div className="flex flex-col xl:flex-row gap-8 items-center xl:items-center">
+                        {/* Formulario de Tarjeta */}
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                          {/* Número de Tarjeta */}
+                          <div className="form-control md:col-span-2">
+                            <label className="label pb-1">
+                              <span className="label-text font-medium text-base-content/80">
+                                {t(
+                                  "create_rental.card_number",
+                                  "Número de Tarjeta",
+                                )}
+                              </span>
+                            </label>
+                            <input
+                              name="tarjetaNumero"
+                              value={formData.tarjetaNumero}
+                              onChange={handleInputChange}
+                              maxLength={19}
+                              placeholder="0000 0000 0000 0000"
+                              inputMode="numeric"
+                              pattern="[0-9 ]*"
+                              className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 font-mono tracking-widest"
+                            />
+                          </div>
+
+                          {/* Nombre en la Tarjeta */}
+                          <div className="form-control md:col-span-2">
+                            <label className="label pb-1">
+                              <span className="label-text font-medium text-base-content/80">
+                                {t(
+                                  "create_rental.card_name",
+                                  "Titular de la Tarjeta",
+                                )}
+                              </span>
+                            </label>
+                            <input
+                              name="tarjetaNombre"
+                              value={formData.tarjetaNombre}
+                              onChange={handleInputChange}
+                              placeholder="VICTOR VON D."
+                              inputMode="text"
+                              pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*"
+                              className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 uppercase"
+                            />
+                          </div>
+
+                          {/* Expiración */}
+                          <div className="form-control">
+                            <label className="label pb-1">
+                              <span className="label-text font-medium text-base-content/80">
+                                {t("create_rental.card_expiry", "Vencimiento")}
+                              </span>
+                            </label>
+                            <input
+                              name="tarjetaExpiracion"
+                              value={formData.tarjetaExpiracion}
+                              onChange={handleInputChange}
+                              maxLength={5}
+                              placeholder="MM/YY"
+                              inputMode="numeric"
+                              pattern="[0-9]{2}/[0-9]{2}"
+                              className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 text-center"
+                            />
+                          </div>
+
+                          {/* CVV */}
+                          <div className="form-control">
+                            <label className="label pb-1">
+                              <span className="label-text font-medium text-base-content/80">
+                                CVV
+                              </span>
+                            </label>
+                            <input
+                              name="tarjetaCVV"
+                              value={formData.tarjetaCVV}
+                              onChange={handleInputChange}
+                              maxLength={4}
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              type="password"
+                              placeholder="•••"
+                              className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50 text-center"
+                            />
+                          </div>
+                        </div>
+                        {/* Visualización 3D */}
+                        <div className="flex-none flex justify-center w-full sm:w-auto overflow-visible py-6">
+                          <Tilt
+                            tiltMaxAngleX={15}
+                            tiltMaxAngleY={15}
+                            perspective={1000}
+                            scale={1.05}
+                            transitionSpeed={400}
+                            className="w-80 sm:w-96 mx-auto cursor-pointer"
+                          >
+                            <label
+                              className={`swap swap-flip w-full h-full ${formData.tarjetaNumero || formData.tarjetaNombre || formData.tarjetaExpiracion || formData.tarjetaCVV ? "swap-active" : ""}`}
+                            >
+                              {/* content on (custom card) */}
+                              <div className="swap-on w-full">
+                                <div className="card w-full h-52 bg-black text-white bg-[radial-gradient(circle_at_bottom_left,#ffffff04_35%,transparent_36%),radial-gradient(circle_at_top_right,#ffffff04_35%,transparent_36%)] bg-size-[4.95em_4.95em] shadow-xl">
+                                  <div className="card-body p-6 h-full flex flex-col justify-between relative z-10">
+                                    <div className="flex justify-between mb-6">
+                                      <div className="font-bold tracking-widest text-sm opacity-90">
+                                        BANK OF LATVERIA
+                                      </div>
+                                      <div className="text-3xl opacity-20 leading-none">
+                                        ❁
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="text-[10px] opacity-40 mb-1">EXPIRES</div>
-                                    <div className="font-mono text-sm min-h-[20px]">
-                                      {formData.tarjetaExpiracion || '29/08'}
+                                    <div className="text-xl sm:text-2xl font-mono mb-4 opacity-70 tracking-[0.1em] min-h-[32px]">
+                                      {formData.tarjetaNumero ||
+                                        "0210 8820 1150 0222"}
+                                    </div>
+                                    <div className="flex justify-between items-end">
+                                      <div>
+                                        <div className="text-[10px] opacity-40 mb-1">
+                                          CARD HOLDER
+                                        </div>
+                                        <div className="font-semibold text-sm uppercase truncate max-w-[150px] min-h-[20px]">
+                                          {formData.tarjetaNombre ||
+                                            "VICTOR VON D."}
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <div className="text-[10px] opacity-40 mb-1">
+                                          EXPIRES
+                                        </div>
+                                        <div className="font-mono text-sm min-h-[20px]">
+                                          {formData.tarjetaExpiracion ||
+                                            "29/08"}
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-                          
-                          {/* content off (image) */}
-                          <div className="swap-off">
-                            <figure className="w-80 sm:w-96 rounded-2xl overflow-hidden shadow-xl">
-                              <img src="https://img.daisyui.com/images/stock/creditcard.webp" alt="3D card" className="w-full h-52 object-cover" />
-                            </figure>
-                          </div>
-                        </label>
-                        {/* 8 empty divs needed for the 3D effect */}
-                        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-                      </div>
-                    </div>
+
+                              {/* content off (image) */}
+                              <div className="swap-off w-full">
+                                <figure className="w-full rounded-2xl overflow-hidden shadow-xl">
+                                  <img
+                                    src="https://img.daisyui.com/images/stock/creditcard.webp"
+                                    alt="3D card"
+                                    className="w-full h-52 object-cover"
+                                  />
+                                </figure>
+                              </div>
+                            </label>
+                          </Tilt>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-
               </div>
-              
+
               {/* Columna Derecha: Resumen a pagar */}
               <div className="w-full lg:w-96 flex-none sticky top-24">
                 <div className="card bg-base-100 shadow-xl border border-base-content/10 overflow-hidden">
@@ -776,21 +991,31 @@ export default function CreateRental() {
                     </figure>
                   )}
                   <div className="card-body pt-4">
-                    <h3 className="card-title text-xl mb-4 text-base-content">Resumen a Pagar</h3>
-                    
+                    <h3 className="card-title text-xl mb-4 text-base-content">
+                      Resumen a Pagar
+                    </h3>
+
                     <div className="space-y-3 text-sm text-base-content/80">
                       <div className="flex justify-between">
                         <span>Auto seleccionado</span>
-                        <span className="font-semibold text-base-content">{selectedCar?.marca} {selectedCar?.modelo}</span>
+                        <span className="font-semibold text-base-content">
+                          {selectedCar?.marca} {selectedCar?.modelo}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Duración</span>
-                        <span className="font-semibold text-base-content">{dateCalculations.days} días</span>
+                        <span className="font-semibold text-base-content">
+                          {dateCalculations.days} días
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Precio por día</span>
                         <span className="font-semibold text-base-content">
-                          {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format((selectedCar?.costo || 0))}
+                          {new Intl.NumberFormat("es-AR", {
+                            style: "currency",
+                            currency: "ARS",
+                            maximumFractionDigits: 0,
+                          }).format(selectedCar?.costo || 0)}
                         </span>
                       </div>
                     </div>
@@ -799,28 +1024,41 @@ export default function CreateRental() {
 
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-lg">
-                        <span className="text-base-content/80">Total del alquiler</span>
+                        <span className="text-base-content/80">
+                          Total del alquiler
+                        </span>
                         <span className="font-bold text-base-content">
-                          {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(formData.costo)}
+                          {new Intl.NumberFormat("es-AR", {
+                            style: "currency",
+                            currency: "ARS",
+                            maximumFractionDigits: 0,
+                          }).format(formData.costo)}
                         </span>
                       </div>
-                      
+
                       <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/20 mt-6">
                         <div>
-                          <span className="block font-bold text-primary text-lg">Seña a pagar hoy</span>
-                          <span className="text-xs text-primary/70 block mt-1">Monto para reservar (20%)</span>
+                          <span className="block font-bold text-primary text-lg">
+                            Seña a pagar hoy
+                          </span>
+                          <span className="text-xs text-primary/70 block mt-1">
+                            Monto para reservar (20%)
+                          </span>
                         </div>
                         <span className="font-black text-2xl text-primary">
-                          {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(senaAmount)}
+                          {new Intl.NumberFormat("es-AR", {
+                            style: "currency",
+                            currency: "ARS",
+                            maximumFractionDigits: 0,
+                          }).format(senaAmount)}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              </div>
             </div>
-          
+          </div>
         );
       }
 
@@ -836,11 +1074,15 @@ export default function CreateRental() {
 
             <div className="card bg-base-200 text-base-content shadow-xl max-w-2xl mx-auto">
               <div className="card-body">
-                <h3 className="card-title">{t("create_rental.summary", "Resumen del alquiler")}</h3>
+                <h3 className="card-title">
+                  {t("create_rental.summary", "Resumen del alquiler")}
+                </h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="font-semibold">{t("create_rental.dates", "Fechas")}:</p>
+                      <p className="font-semibold">
+                        {t("create_rental.dates", "Fechas")}:
+                      </p>
                       <p>
                         {t("create_rental.from", "Desde")}:{" "}
                         {formData.fechaInicio
@@ -855,23 +1097,33 @@ export default function CreateRental() {
                       </p>
                     </div>
                     <div>
-                      <p className="font-semibold">{t("create_rental.car", "Auto")}:</p>
+                      <p className="font-semibold">
+                        {t("create_rental.car", "Auto")}:
+                      </p>
                       <p>{sel ? `${sel.marca} ${sel.modelo}` : "-"}</p>
-                      <p>{t("create_rental.license_plate", "Patente")}: {sel?.patente || "-"}</p>
+                      <p>
+                        {t("create_rental.license_plate", "Patente")}:{" "}
+                        {sel?.patente || "-"}
+                      </p>
                     </div>
                   </div>
 
                   <div className="divider" />
 
                   <div>
-                    <p className="font-semibold">{t("create_rental.client_label", "Cliente")}:</p>
+                    <p className="font-semibold">
+                      {t("create_rental.client_label", "Cliente")}:
+                    </p>
                     <p>
                       {formData.nombre} {formData.apellido}
                     </p>
                     <p>
                       {formData.tipo_dni}: {formData.dni}
                     </p>
-                    <p>{t("create_rental.nationality", "Nacionalidad")}: {formData.nacionalidad}</p>
+                    <p>
+                      {t("create_rental.nationality", "Nacionalidad")}:{" "}
+                      {formData.nacionalidad}
+                    </p>
                   </div>
 
                   <div className="text-center">
@@ -934,35 +1186,45 @@ export default function CreateRental() {
             <div className="flex justify-center mb-4">
               <CheckCircle size={64} className="text-success" />
             </div>
-            <h3 className="font-bold text-2xl text-base-content mb-4">{t("create_rental.success_title", "¡Reserva Exitosa!")}</h3>
+            <h3 className="font-bold text-2xl text-base-content mb-4">
+              {t("create_rental.success_title", "¡Reserva Exitosa!")}
+            </h3>
             <p className="py-2 text-lg text-base-content/80">
-              Se ha enviado un correo a <strong className="text-primary">{formData.email}</strong> con los detalles de la reserva y un código QR.
+              Se ha enviado un correo a{" "}
+              <strong className="text-primary">{formData.email}</strong> con los
+              detalles de la reserva y un código QR.
             </p>
-            
+
             <div className="bg-base-200 border border-base-300 p-6 rounded-xl my-6 text-left shadow-sm">
-              <p className="font-semibold text-lg text-base-content mb-3">{t("create_rental.next_steps", "Pasos a seguir:")}</p>
+              <p className="font-semibold text-lg text-base-content mb-3">
+                {t("create_rental.next_steps", "Pasos a seguir:")}
+              </p>
               <ul className="list-disc list-inside space-y-2 text-base-content/80">
                 <li>Revisa tu bandeja de entrada (y la carpeta de spam).</li>
                 <li>Conserva el código QR que recibiste en el correo.</li>
-                <li>Presenta el código QR al momento de retirar el vehículo en nuestras oficinas.</li>
+                <li>
+                  Presenta el código QR al momento de retirar el vehículo en
+                  nuestras oficinas.
+                </li>
               </ul>
             </div>
-            
+
             <div className="w-full bg-base-300 rounded-full h-1.5 mb-6 overflow-hidden">
-              <div 
-                className="bg-primary h-1.5 rounded-full transition-all duration-1000 ease-linear" 
+              <div
+                className="bg-primary h-1.5 rounded-full transition-all duration-1000 ease-linear"
                 style={{ width: `${(countdown / 10) * 100}%` }}
               ></div>
             </div>
-            
+
             <p className="text-sm text-base-content/60 mb-6">
-              Serás redirigido al inicio en <span className="font-bold">{countdown}</span> segundos...
+              Serás redirigido al inicio en{" "}
+              <span className="font-bold">{countdown}</span> segundos...
             </p>
-            
+
             <div className="modal-action justify-center">
-              <button 
+              <button
                 type="button"
-                className="btn btn-primary px-8" 
+                className="btn btn-primary px-8"
                 onClick={() => setLocation("/")}
               >
                 {t("create_rental.go_home_now", "Ir al inicio ahora")}
