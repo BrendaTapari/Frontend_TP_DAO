@@ -41,6 +41,7 @@ interface CarOption {
 export default function CreateRental() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
+  const chauffeurCostPerDay = 7500;
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
   const [cars, setCars] = useState<CarOption[]>([]);
@@ -65,6 +66,9 @@ export default function CreateRental() {
     fechaFin: "",
     auto: "", // will store car id as string
     costo: 0,
+    retiroTipo: "sucursal",
+    retiroLugar: "",
+    requiereChofer: "no",
     tarjetaNumero: "",
     tarjetaNombre: "",
     tarjetaExpiracion: "",
@@ -82,6 +86,22 @@ export default function CreateRental() {
     const days = Math.ceil((end.getTime() - start.getTime()) / msPerDay);
     return { isValid: true, days };
   }, [formData.fechaInicio, formData.fechaFin]);
+
+  const chauffeurCost = useMemo(() => {
+    if (!dateCalculations.isValid || formData.requiereChofer !== "si") {
+      return 0;
+    }
+    return dateCalculations.days * chauffeurCostPerDay;
+  }, [
+    dateCalculations.days,
+    dateCalculations.isValid,
+    formData.requiereChofer,
+  ]);
+
+  const totalAmount = useMemo(
+    () => formData.costo + chauffeurCost,
+    [formData.costo, chauffeurCost],
+  );
 
   useEffect(() => {
     if (showSuccessModal) {
@@ -267,6 +287,20 @@ export default function CreateRental() {
       return;
     }
     if (currentStep === 3) {
+      if (formData.retiroTipo === "otro" && !formData.retiroLugar.trim()) {
+        toast.error(
+          t(
+            "create_rental.error_pickup_location",
+            "Indique dónde desea retirar el auto",
+          ),
+        );
+        return;
+      }
+
+      setCurrentStep(4);
+      return;
+    }
+    if (currentStep === 4) {
       const cardNumberDigits = formData.tarjetaNumero.replace(/\D/g, "");
       if (
         !formData.nombre ||
@@ -319,7 +353,7 @@ export default function CreateRental() {
         return;
       }
 
-      setCurrentStep(4);
+      setCurrentStep(5);
       return;
     }
   };
@@ -332,6 +366,16 @@ export default function CreateRental() {
     e.preventDefault();
     const ok = await handleDateValidation();
     if (!ok) return;
+
+    if (formData.retiroTipo === "otro" && !formData.retiroLugar.trim()) {
+      toast.error(
+        t(
+          "create_rental.error_pickup_location",
+          "Indique dónde desea retirar el auto",
+        ),
+      );
+      return;
+    }
 
     const cardNumberDigits = formData.tarjetaNumero.replace(/\D/g, "");
     if (cardNumberDigits.length !== 16) {
@@ -388,7 +432,7 @@ export default function CreateRental() {
               style: "currency",
               currency: "ARS",
               maximumFractionDigits: 0,
-            }).format(formData.costo),
+            }).format(totalAmount),
             qr_code_url: qrUrl,
           });
         } catch (emailErr) {
@@ -643,9 +687,199 @@ export default function CreateRental() {
           </div>
         );
 
-      case 3: {
+      case 3:
+        return (
+          <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4">
+            <h2 className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content">
+              {t("create_rental.pickup_data", "Datos de retiro")}
+            </h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
+                <div className="card-body p-6 md:p-8 space-y-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2 text-base-content/90">
+                      {t("create_rental.pickup_method", "¿Dónde lo retiran?")}
+                    </h3>
+                    <p className="text-sm text-base-content/70">
+                      {t(
+                        "create_rental.pickup_method_help",
+                        "Elegí si lo retiran en sucursal o en una ubicación específica.",
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium text-base-content/80">
+                        {t("create_rental.pickup_type", "Lugar de retiro")}
+                      </span>
+                    </label>
+                    <select
+                      name="retiroTipo"
+                      value={formData.retiroTipo}
+                      onChange={handleInputChange}
+                      className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                    >
+                      <option value="sucursal">
+                        {t("create_rental.pickup_branch", "Retiro en sucursal")}
+                      </option>
+                      <option value="otro">
+                        {t(
+                          "create_rental.pickup_other",
+                          "Quiero que lo retiren en otro lugar",
+                        )}
+                      </option>
+                    </select>
+                  </div>
+
+                  {formData.retiroTipo === "otro" && (
+                    <div className="form-control">
+                      <label className="label pb-1">
+                        <span className="label-text font-medium text-base-content/80">
+                          {t(
+                            "create_rental.pickup_location",
+                            "Indique la ubicación",
+                          )}
+                        </span>
+                      </label>
+                      <input
+                        name="retiroLugar"
+                        value={formData.retiroLugar}
+                        onChange={handleInputChange}
+                        placeholder="Aeropuerto de Ezeiza"
+                        className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      />
+                    </div>
+                  )}
+
+                  <div className="divider my-0" />
+
+                  <div className="form-control">
+                    <label className="label pb-1">
+                      <span className="label-text font-medium text-base-content/80">
+                        {t("create_rental.driver_option", "¿Desea chofer?")}
+                      </span>
+                    </label>
+                    <select
+                      name="requiereChofer"
+                      value={formData.requiereChofer}
+                      onChange={handleInputChange}
+                      className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                    >
+                      <option value="no">
+                        {t("create_rental.driver_no", "No, solo el auto")}
+                      </option>
+                      <option value="si">
+                        {t("create_rental.driver_yes", "Sí, con cargo extra")}
+                      </option>
+                    </select>
+                  </div>
+
+                  {formData.requiereChofer === "si" && (
+                    <div className="alert alert-info bg-info/10 text-info-content border border-info/20">
+                      <span>
+                        {t(
+                          "create_rental.driver_note",
+                          "El servicio con chofer se cotiza como cargo adicional.",
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="card bg-base-100 shadow-xl border border-base-content/10 overflow-hidden">
+                <div className="card-body pt-4">
+                  <h3 className="card-title text-xl mb-4 text-base-content">
+                    {t("create_rental.pickup_summary", "Resumen de retiro")}
+                  </h3>
+
+                  <div className="space-y-3 text-sm text-base-content/80">
+                    <div className="flex justify-between gap-4">
+                      <span>{t("create_rental.pickup_method", "Retiro")}</span>
+                      <span className="font-semibold text-base-content text-right">
+                        {formData.retiroTipo === "sucursal"
+                          ? t(
+                              "create_rental.pickup_branch",
+                              "Retiro en sucursal",
+                            )
+                          : formData.retiroLugar || "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span>{t("create_rental.driver_option", "Chofer")}</span>
+                      <span className="font-semibold text-base-content text-right">
+                        {formData.requiereChofer === "si"
+                          ? t("create_rental.driver_yes", "Sí, con cargo extra")
+                          : t("create_rental.driver_no", "No, solo el auto")}
+                      </span>
+                    </div>
+                    {formData.requiereChofer === "si" && (
+                      <>
+                        <div className="flex justify-between gap-4">
+                          <span>
+                            {t(
+                              "create_rental.driver_cost_per_day",
+                              "Chofer por día",
+                            )}
+                          </span>
+                          <span className="font-semibold text-base-content text-right">
+                            {new Intl.NumberFormat("es-AR", {
+                              style: "currency",
+                              currency: "ARS",
+                              maximumFractionDigits: 0,
+                            }).format(chauffeurCostPerDay)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span>
+                            {t(
+                              "create_rental.driver_cost_total",
+                              "Costo del chofer",
+                            )}
+                          </span>
+                          <span className="font-semibold text-base-content text-right">
+                            {new Intl.NumberFormat("es-AR", {
+                              style: "currency",
+                              currency: "ARS",
+                              maximumFractionDigits: 0,
+                            }).format(chauffeurCost)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="flex justify-between gap-4 pt-2 border-t border-base-content/10">
+                      <span className="font-semibold text-base-content">
+                        {t("create_rental.total_rental", "Total del alquiler")}
+                      </span>
+                      <span className="font-bold text-base-content text-right">
+                        {new Intl.NumberFormat("es-AR", {
+                          style: "currency",
+                          currency: "ARS",
+                          maximumFractionDigits: 0,
+                        }).format(totalAmount)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {formData.retiroTipo === "otro" && formData.retiroLugar && (
+                    <div className="mt-4 p-4 rounded-xl bg-base-200 border border-base-content/10 text-sm text-base-content/70">
+                      {t(
+                        "create_rental.pickup_summary_note",
+                        "La entrega se coordinará en la ubicación indicada.",
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4: {
         const selectedCar = cars.find((c) => c.id === Number(formData.auto));
-        const senaAmount = formData.costo * 0.2; // Suponemos una seña del 20%
+        const senaAmount = totalAmount * 0.2; // Suponemos una seña del 20%
 
         return (
           <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4">
@@ -1018,6 +1252,37 @@ export default function CreateRental() {
                           }).format(selectedCar?.costo || 0)}
                         </span>
                       </div>
+                      {formData.requiereChofer === "si" && (
+                        <>
+                          <div className="flex justify-between">
+                            <span>
+                              {t("create_rental.driver_cost", "Chofer por día")}
+                            </span>
+                            <span className="font-semibold text-base-content">
+                              {new Intl.NumberFormat("es-AR", {
+                                style: "currency",
+                                currency: "ARS",
+                                maximumFractionDigits: 0,
+                              }).format(chauffeurCostPerDay)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>
+                              {t(
+                                "create_rental.driver_total_cost",
+                                "Costo del chofer",
+                              )}
+                            </span>
+                            <span className="font-semibold text-base-content">
+                              {new Intl.NumberFormat("es-AR", {
+                                style: "currency",
+                                currency: "ARS",
+                                maximumFractionDigits: 0,
+                              }).format(chauffeurCost)}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="divider my-4"></div>
@@ -1032,7 +1297,7 @@ export default function CreateRental() {
                             style: "currency",
                             currency: "ARS",
                             maximumFractionDigits: 0,
-                          }).format(formData.costo)}
+                          }).format(totalAmount)}
                         </span>
                       </div>
 
@@ -1062,7 +1327,7 @@ export default function CreateRental() {
         );
       }
 
-      case 4: {
+      case 5: {
         const sel = cars.find((c) => c.id === selectedCarId) as
           | CarOption
           | undefined;
@@ -1110,20 +1375,47 @@ export default function CreateRental() {
 
                   <div className="divider" />
 
-                  <div>
-                    <p className="font-semibold">
-                      {t("create_rental.client_label", "Cliente")}:
-                    </p>
-                    <p>
-                      {formData.nombre} {formData.apellido}
-                    </p>
-                    <p>
-                      {formData.tipo_dni}: {formData.dni}
-                    </p>
-                    <p>
-                      {t("create_rental.nationality", "Nacionalidad")}:{" "}
-                      {formData.nacionalidad}
-                    </p>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="font-semibold">
+                        {t("create_rental.pickup_method", "Retiro")}:
+                      </p>
+                      <p>
+                        {formData.retiroTipo === "sucursal"
+                          ? t(
+                              "create_rental.pickup_branch",
+                              "Retiro en sucursal",
+                            )
+                          : formData.retiroLugar || "-"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold">
+                        {t("create_rental.driver_option", "Chofer")}:
+                      </p>
+                      <p>
+                        {formData.requiereChofer === "si"
+                          ? t("create_rental.driver_yes", "Sí, con cargo extra")
+                          : t("create_rental.driver_no", "No, solo el auto")}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold">
+                        {t("create_rental.client_label", "Cliente")}:
+                      </p>
+                      <p>
+                        {formData.nombre} {formData.apellido}
+                      </p>
+                      <p>
+                        {formData.tipo_dni}: {formData.dni}
+                      </p>
+                      <p>
+                        {t("create_rental.nationality", "Nacionalidad")}:{" "}
+                        {formData.nacionalidad}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="text-center">
@@ -1132,7 +1424,7 @@ export default function CreateRental() {
                       {new Intl.NumberFormat("es-AR", {
                         style: "currency",
                         currency: "ARS",
-                      }).format(formData.costo || 0)}
+                      }).format(totalAmount)}
                     </p>
                   </div>
                 </div>
@@ -1147,9 +1439,69 @@ export default function CreateRental() {
     }
   };
 
+  const stepItems = [
+    {
+      step: 1,
+      label: t("create_rental.step_1", "Fechas"),
+    },
+    {
+      step: 2,
+      label: t("create_rental.step_2", "Auto"),
+    },
+    {
+      step: 3,
+      label: t("create_rental.step_3", "Retiro"),
+    },
+    {
+      step: 4,
+      label: t("create_rental.step_4", "Cliente y pago"),
+    },
+    {
+      step: 5,
+      label: t("create_rental.step_5", "Confirmación"),
+    },
+  ];
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8 py-8">
       <div className="container mx-auto px-4">
+        <div className="flex justify-center w-full mb-8 mt-20 px-2 sm:px-0">
+          <ul className="steps steps-vertical lg:steps-horizontal w-full max-w-5xl mx-auto lg:overflow-x-auto lg:pb-2">
+            {stepItems.map(({ step, label }) => {
+              const isActive = currentStep === step;
+              const isCompleted = currentStep > step;
+              const canNavigate = step < currentStep;
+
+              return (
+                <li
+                  key={step}
+                  className={`step ${isActive || isCompleted ? "step-primary" : ""} text-center lg:text-left`}
+                  data-content={isCompleted ? "✓" : step}
+                >
+                  {canNavigate ? (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(step)}
+                      className={`leading-tight ${isActive ? "cursor-default" : "cursor-pointer"}`}
+                      aria-label={label}
+                    >
+                      <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left">
+                        {label}
+                      </span>
+                    </button>
+                  ) : (
+                    <span className="leading-tight">
+                      <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left">
+                        {label}
+                      </span>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
         {renderStepContent()}
 
         <div className="flex justify-between max-w-3xl mx-auto mt-8">
@@ -1161,7 +1513,7 @@ export default function CreateRental() {
           >
             {t("create_rental.back", "Volver")}
           </button>
-          {currentStep < 4 ? (
+          {currentStep < 5 ? (
             <button
               type="button"
               onClick={handleNextStep}
