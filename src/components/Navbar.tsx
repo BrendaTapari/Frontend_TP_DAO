@@ -156,7 +156,6 @@ export default function Navbar() {
                   aria-label="Abrir menú"
                   aria-expanded={mobileOpen}
                   title="Abrir menú"
-
                 />
 
                 <Menu className="swap-off fill-current" />
