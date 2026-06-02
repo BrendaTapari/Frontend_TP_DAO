@@ -47,6 +47,7 @@ export default function Navbar() {
                 className="btn btn-circle border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 aria-label={t("nav.language")}
                 title={t("nav.language")}
+                aria-labelledby="Selección de lenguaje"
               >
                 <Globe size={20} />
               </button>
@@ -154,6 +155,8 @@ export default function Navbar() {
                   onChange={(event) => setMobileOpen(event.target.checked)}
                   aria-label="Abrir menú"
                   aria-expanded={mobileOpen}
+                  title="Abrir menú"
+
                 />
 
                 <Menu className="swap-off fill-current" />
