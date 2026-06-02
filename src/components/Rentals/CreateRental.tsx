@@ -36,7 +36,44 @@ interface CarOption {
   imagen?: string;
   color?: string;
   año?: number;
+  tipoVehiculo: string;
 }
+
+interface CountryOption {
+  code: string;
+  label: string;
+}
+
+const inferVehicleType = (car: {
+  modelo?: string;
+  marca?: string;
+  cant_pasajeros?: number;
+  litros_baul?: number;
+}) => {
+  const model = `${car.marca ?? ""} ${car.modelo ?? ""}`.toLowerCase();
+
+  if (
+    /(suv|cross|tracker|rav4|taos|bronco|compass|tucson|kick|q5|x1|gla)/.test(
+      model,
+    )
+  ) {
+    return "SUV";
+  }
+
+  if (/(corolla|civic|a3|sedan|sedán)/.test(model)) {
+    return "Sedán";
+  }
+
+  if (car.cant_pasajeros && car.cant_pasajeros >= 7) {
+    return "Familiar";
+  }
+
+  if (car.litros_baul && car.litros_baul >= 500) {
+    return "Familiar";
+  }
+
+  return "Compacto";
+};
 
 export default function CreateRental() {
   const [, setLocation] = useLocation();
@@ -47,12 +84,89 @@ export default function CreateRental() {
   const calendarLocale = calendarLocaleMap[i18n.language] ?? es;
   const chauffeurCostPerDay = 7500;
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isMobileCalendar, setIsMobileCalendar] = useState(false);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
+  const [priceFilterMin, setPriceFilterMin] = useState("");
+  const [priceFilterMax, setPriceFilterMax] = useState("");
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState("all");
   const [cars, setCars] = useState<CarOption[]>([]);
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [isLoadingCountries, setIsLoadingCountries] = useState(false);
   const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [countdown, setCountdown] = useState(10);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const updateCalendarLayout = () => {
+      setIsMobileCalendar(mediaQuery.matches);
+    };
+
+    updateCalendarLayout();
+    mediaQuery.addEventListener("change", updateCalendarLayout);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateCalendarLayout);
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadCountries = async () => {
+      setIsLoadingCountries(true);
+
+      try {
+        const response = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,cca2,translations,demonyms",
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar las nacionalidades");
+        }
+
+        const data = await response.json();
+
+        const options = (
+          data as Array<{
+            cca2?: string;
+            name?: { common?: string };
+            translations?: { spa?: { common?: string } };
+          }>
+        )
+          .map((country) => ({
+            code: country.cca2 ?? "",
+            label:
+              country.translations?.spa?.common ?? country.name?.common ?? "",
+          }))
+          .filter((country) => country.code && country.label)
+          .sort((a, b) => a.label.localeCompare(b.label, "es"));
+
+        setCountries(options);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          toast.error(
+            t(
+              "create_rental.error_load_countries",
+              "No se pudieron cargar las nacionalidades",
+            ),
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingCountries(false);
+        }
+      }
+    };
+
+    loadCountries();
+
+    return () => controller.abort();
+  }, [t]);
 
   const maxDateObj = new Date();
   maxDateObj.setFullYear(maxDateObj.getFullYear() - 17);
@@ -107,6 +221,29 @@ export default function CreateRental() {
     [formData.costo, chauffeurCost],
   );
 
+  const availableVehicleTypes = useMemo(() => {
+    return Array.from(new Set(cars.map((car) => car.tipoVehiculo))).sort();
+  }, [cars]);
+
+  const priceThresholds = [45000, 55000, 65000, 80000];
+
+  const filteredCars = useMemo(() => {
+    const minPrice = priceFilterMin ? Number(priceFilterMin) : null;
+    const maxPrice = priceFilterMax ? Number(priceFilterMax) : null;
+
+    return cars.filter((car) => {
+      if (minPrice !== null && car.costo < minPrice) return false;
+      if (maxPrice !== null && car.costo > maxPrice) return false;
+      if (
+        vehicleTypeFilter !== "all" &&
+        car.tipoVehiculo !== vehicleTypeFilter
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [cars, priceFilterMin, priceFilterMax, vehicleTypeFilter]);
+
   useEffect(() => {
     if (showSuccessModal) {
       const timer = setInterval(() => {
@@ -146,6 +283,8 @@ export default function CreateRental() {
           imagen: c.imagen,
           color: c.color,
           año: c.año,
+          tipoVehiculo:
+            c.tipoVehiculo ?? c.tipo_vehiculo ?? inferVehicleType(c),
         }));
         setCars(list);
         // clear selection if not present
@@ -217,7 +356,12 @@ export default function CreateRental() {
   const isValidCardExpiry = (value: string) => {
     if (!/^\d{2}\/\d{2}$/.test(value)) return false;
     const month = Number(value.slice(0, 2));
-    return month >= 1 && month <= 12;
+    const year = Number(`20${value.slice(3, 5)}`);
+
+    if (month < 1 || month > 12 || Number.isNaN(year)) return false;
+
+    const expiryDate = new Date(year, month, 0, 23, 59, 59, 999);
+    return expiryDate > new Date();
   };
 
   const handleInputChange = useCallback(
@@ -368,6 +512,11 @@ export default function CreateRental() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (currentStep !== 5) {
+      setCurrentStep(5);
+      return;
+    }
+
     const ok = await handleDateValidation();
     if (!ok) return;
 
@@ -516,7 +665,7 @@ export default function CreateRental() {
                       locale={calendarLocale}
                       className="react-day-picker"
                       mode="range"
-                      numberOfMonths={2}
+                      numberOfMonths={isMobileCalendar ? 1 : 2}
                       selected={{
                         from: formData.fechaInicio
                           ? new Date(formData.fechaInicio + "T12:00:00")
@@ -578,94 +727,206 @@ export default function CreateRental() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                {cars.map((carItem) => (
-                  <div
-                    key={carItem.id}
-                    className={`card bg-base-100 text-base-content w-full shadow-md cursor-pointer transition-all duration-300 relative overflow-hidden group ${selectedCarId === carItem.id ? "ring-2 ring-primary shadow-xl shadow-primary/20 scale-[1.02]" : "hover:scale-[1.02] hover:shadow-xl"}`}
-                    onClick={() => handleCarSelection(carItem.id)}
-                  >
-                    {selectedCarId === carItem.id && (
-                      <div className="absolute top-4 right-4 z-20 bg-primary text-primary-content rounded-full p-1 shadow-lg">
-                        <CheckCircle size={28} />
-                      </div>
-                    )}
-                    <figure className="h-56 relative bg-base-300 overflow-hidden">
-                      {carItem.imagen ? (
-                        <img
-                          src={getImageUrl(carItem.imagen)}
-                          alt={`${carItem.marca} ${carItem.modelo}`}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          onError={(e) => {
-                            e.currentTarget.src = "/images/car-placeholder.jpg";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-base-200 to-base-300">
-                          <Car size={64} className="text-base-content/30" />
-                        </div>
-                      )}
-                      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-base-100 to-transparent z-10" />
-                    </figure>
-                    <div className="card-body p-6 pt-2 relative z-20">
-                      <div className="mb-2">
-                        <p className="uppercase tracking-widest text-xs font-semibold text-primary mb-1">
-                          {carItem.marca}
-                        </p>
-                        <h2 className="card-title text-2xl font-bold text-base-content">
-                          {carItem.modelo}
-                        </h2>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 my-4">
-                        {carItem.año && (
-                          <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                            <Calendar size={14} className="opacity-70" />{" "}
-                            {carItem.año}
-                          </div>
+              <div className="space-y-6">
+                <div className="bg-base-200/60 border border-base-content/10 rounded-2xl p-4 md:p-5 max-w-6xl mx-auto shadow-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <label className="form-control">
+                      <span className="label-text font-medium text-base-content/80 mb-2">
+                        {t(
+                          "create_rental.filter_min_price",
+                          "Precio mínimo por día",
                         )}
-                        {carItem.color && (
-                          <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                            <Palette size={14} className="opacity-70" />{" "}
-                            {carItem.color}
-                          </div>
-                        )}
-                      </div>
+                      </span>
+                      <select
+                        value={priceFilterMin}
+                        onChange={(e) => setPriceFilterMin(e.target.value)}
+                        className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      >
+                        <option value="">
+                          {t("create_rental.filter_any", "Cualquiera")}
+                        </option>
+                        {priceThresholds.map((threshold) => (
+                          <option key={threshold} value={String(threshold)}>
+                            Desde ARS {threshold.toLocaleString("es-AR")}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
 
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-base-content/10">
-                        <div>
-                          <p className="text-xs text-base-content/60 uppercase tracking-wider mb-1">
-                            {t("create_rental.cost_per_day", "Costo por día")}
-                          </p>
-                          <p className="text-2xl font-black text-success drop-shadow-sm">
-                            {new Intl.NumberFormat("es-AR", {
-                              style: "currency",
-                              currency: "ARS",
-                              maximumFractionDigits: 0,
-                            }).format(carItem.costo)}
-                            <span className="text-sm font-normal text-base-content/60 ml-1">
-                              {t("create_rental.per_day", "/día")}
-                            </span>
-                          </p>
-                        </div>
-                        <div className="card-actions">
-                          <button
-                            type="button"
-                            className={`btn ${selectedCarId === carItem.id ? "btn-primary shadow-lg shadow-primary/40" : "btn-outline border-base-content/20 hover:bg-base-200 hover:text-base-content"}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCarSelection(carItem.id);
-                            }}
-                          >
-                            {selectedCarId === carItem.id
-                              ? t("create_rental.selected", "Seleccionado")
-                              : t("create_rental.rent_btn", "Alquilar")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <label className="form-control">
+                      <span className="label-text font-medium text-base-content/80 mb-2">
+                        {t(
+                          "create_rental.filter_max_price",
+                          "Precio máximo por día",
+                        )}
+                      </span>
+                      <select
+                        value={priceFilterMax}
+                        onChange={(e) => setPriceFilterMax(e.target.value)}
+                        className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      >
+                        <option value="">
+                          {t("create_rental.filter_any", "Cualquiera")}
+                        </option>
+                        {priceThresholds.map((threshold) => (
+                          <option key={threshold} value={String(threshold)}>
+                            Hasta ARS {threshold.toLocaleString("es-AR")}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="form-control">
+                      <span className="label-text font-medium text-base-content/80 mb-2">
+                        {t(
+                          "create_rental.filter_vehicle_type",
+                          "Tipo de vehículo",
+                        )}
+                      </span>
+                      <select
+                        value={vehicleTypeFilter}
+                        onChange={(e) => setVehicleTypeFilter(e.target.value)}
+                        className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      >
+                        <option value="all">
+                          {t("create_rental.filter_all", "Todos")}
+                        </option>
+                        {availableVehicleTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
-                ))}
+
+                  <div className="flex justify-end mt-4">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => {
+                        setPriceFilterMin("");
+                        setPriceFilterMax("");
+                        setVehicleTypeFilter("all");
+                      }}
+                    >
+                      {t("create_rental.clear_filters", "Limpiar filtros")}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-center text-sm text-base-content/70">
+                  {t("create_rental.filtered_results", "Resultados mostrados")}:{" "}
+                  {filteredCars.length}
+                </div>
+
+                {filteredCars.length === 0 ? (
+                  <div className="text-center">
+                    <p className="text-lg text-gray-200">
+                      {t(
+                        "create_rental.no_filtered_cars",
+                        "No hay autos que coincidan con los filtros seleccionados",
+                      )}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {filteredCars.map((carItem) => (
+                      <div
+                        key={carItem.id}
+                        className={`card bg-base-100 text-base-content w-full shadow-md cursor-pointer transition-all duration-300 relative overflow-hidden group ${selectedCarId === carItem.id ? "ring-2 ring-primary shadow-xl shadow-primary/20 scale-[1.02]" : "hover:scale-[1.02] hover:shadow-xl"}`}
+                        onClick={() => handleCarSelection(carItem.id)}
+                      >
+                        {selectedCarId === carItem.id && (
+                          <div className="absolute top-4 right-4 z-20 bg-primary text-primary-content rounded-full p-1 shadow-lg">
+                            <CheckCircle size={28} />
+                          </div>
+                        )}
+                        <figure className="h-36 sm:h-52 lg:h-56 relative bg-base-300  overflow-hidden">
+                          {carItem.imagen ? (
+                            <img
+                              src={getImageUrl(carItem.imagen)}
+                              alt={`${carItem.marca} ${carItem.modelo}`}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  "/images/car-placeholder.jpg";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-base-200 to-base-300">
+                              <Car size={64} className="text-base-content/30" />
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-base-100 to-transparent z-10" />
+                        </figure>
+                        <div className="card-body p-3 sm:p-6 pt-2 relative z-20">
+                          <div className="mb-1 sm:mb-2">
+                            <p className="uppercase tracking-widest text-xs font-semibold text-primary mb-1">
+                              {carItem.marca}
+                            </p>
+                            <h2 className="card-title text-lg sm:text-2xl font-bold text-base-content">
+                              {carItem.modelo}
+                            </h2>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2 my-2.5 sm:my-4">
+                            <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                              {carItem.tipoVehiculo}
+                            </div>
+                            {carItem.año && (
+                              <div className="hidden sm:inline-flex badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                                <Calendar size={14} className="opacity-70" />{" "}
+                                {carItem.año}
+                              </div>
+                            )}
+                            {carItem.color && (
+                              <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                                <Palette size={14} className="opacity-70" />{" "}
+                                {carItem.color}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between mt-auto pt-2.5 sm:pt-4 border-t border-base-content/10">
+                            <div>
+                              <p className="text-xs text-base-content/60 uppercase tracking-wider mb-1">
+                                {t(
+                                  "create_rental.cost_per_day",
+                                  "Costo por día",
+                                )}
+                              </p>
+                              <p className="text-lg sm:text-2xl font-black text-success drop-shadow-sm">
+                                {new Intl.NumberFormat("es-AR", {
+                                  style: "currency",
+                                  currency: "ARS",
+                                  maximumFractionDigits: 0,
+                                }).format(carItem.costo)}
+                                <span className="text-[10px] sm:text-sm font-normal text-base-content/60 ml-1">
+                                  /día
+                                </span>
+                              </p>
+                            </div>
+                            <div className="card-actions">
+                              <button
+                                type="button"
+                                className={`btn ${selectedCarId === carItem.id ? "btn-primary shadow-lg shadow-primary/40" : "btn-outline border-base-content/20 hover:bg-base-200 hover:text-base-content"}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCarSelection(carItem.id);
+                                }}
+                              >
+                                {selectedCarId === carItem.id
+                                  ? t("create_rental.selected", "Seleccionado")
+                                  : t("create_rental.rent_btn", "Alquilar")}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -747,13 +1008,43 @@ export default function CreateRental() {
                           )}
                         </span>
                       </label>
-                      <input
+                      <select
                         name="retiroLugar"
                         value={formData.retiroLugar}
                         onChange={handleInputChange}
-                        placeholder="Aeropuerto de Ezeiza"
                         className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      />
+                      >
+                        <option value="">
+                          {t(
+                            "create_rental.pickup_location_select",
+                            "Seleccione una ubicación",
+                          )}
+                        </option>
+                        <option value="Ezeiza">
+                          {t(
+                            "create_rental.pickup_location_home",
+                            "Aeropuerto Ezeiza",
+                          )}
+                        </option>
+                        <option value="Aeroparque">
+                          {t(
+                            "create_rental.pickup_location_work",
+                            "Aeroparque",
+                          )}
+                        </option>
+                        <option value="Ambrosio Taravella">
+                          {t(
+                            "create_rental.pickup_location_other",
+                            "Aeropuerto Córdoba Ambrosio Taravella",
+                          )}
+                        </option>
+                        <option value="Aeropuerto Rosario">
+                          {t(
+                            "create_rental.pickup_locationRosario",
+                            "Aeropuerto Rosario",
+                          )}
+                        </option>
+                      </select>
                     </div>
                   )}
 
@@ -804,10 +1095,7 @@ export default function CreateRental() {
                       <span>{t("create_rental.pickup_method", "Envío")}</span>
                       <span className="font-semibold text-base-content text-right">
                         {formData.retiroTipo === "sucursal"
-                          ? t(
-                              "create_rental.pickup_branch",
-                              "Envío a sucursal",
-                            )
+                          ? t("create_rental.pickup_branch", "Envío a sucursal")
                           : formData.retiroLugar || "-"}
                       </span>
                     </div>
@@ -1012,13 +1300,31 @@ export default function CreateRental() {
                             {t("create_rental.nationality", "Nacionalidad")}
                           </span>
                         </label>
-                        <input
+                        <select
                           name="nacionalidad"
                           value={formData.nacionalidad}
                           onChange={handleInputChange}
-                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
                           aria-label="Nacionalidad"
-                        />
+                          disabled={isLoadingCountries}
+                        >
+                          <option value="">
+                            {isLoadingCountries
+                              ? t(
+                                  "create_rental.loading_countries",
+                                  "Cargando nacionalidades...",
+                                )
+                              : t(
+                                  "create_rental.select_nationality",
+                                  "Seleccione una nacionalidad",
+                                )}
+                          </option>
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.label}>
+                              {country.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Fecha de nacimiento */}
@@ -1470,40 +1776,42 @@ export default function CreateRental() {
     <form onSubmit={handleSubmit} className="space-y-8 py-8">
       <div className="container mx-auto px-4">
         <div className="flex justify-center w-full mb-8 mt-20 px-2 sm:px-0">
-          <ul className="steps steps-vertical lg:steps-horizontal w-full max-w-5xl mx-auto lg:overflow-x-auto lg:pb-2">
-            {stepItems.map(({ step, label }) => {
-              const isActive = currentStep === step;
-              const isCompleted = currentStep > step;
-              const canNavigate = step < currentStep;
+          <div className="w-full overflow-x-auto pb-2">
+            <ul className="steps steps-horizontal w-max min-w-full lg:w-full lg:max-w-5xl mx-auto lg:justify-between">
+              {stepItems.map(({ step, label }) => {
+                const isActive = currentStep === step;
+                const isCompleted = currentStep > step;
+                const canNavigate = step < currentStep;
 
-              return (
-                <li
-                  key={step}
-                  className={`step ${isActive || isCompleted ? "step-primary" : ""} text-center lg:text-left`}
-                  data-content={isCompleted ? "✓" : step}
-                >
-                  {canNavigate ? (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentStep(step)}
-                      className={`leading-tight ${isActive ? "cursor-default" : "cursor-pointer"}`}
-                      aria-label={label}
-                    >
-                      <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left">
-                        {label}
+                return (
+                  <li
+                    key={step}
+                    className={`step ${isActive || isCompleted ? "step-primary" : ""} text-center lg:text-left whitespace-nowrap`}
+                    data-content={isCompleted ? "✓" : step}
+                  >
+                    {canNavigate ? (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(step)}
+                        className={`leading-tight ${isActive ? "cursor-default" : "cursor-pointer"}`}
+                        aria-label={label}
+                      >
+                        <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left whitespace-nowrap">
+                          {label}
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="leading-tight">
+                        <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left whitespace-nowrap">
+                          {label}
+                        </span>
                       </span>
-                    </button>
-                  ) : (
-                    <span className="leading-tight">
-                      <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left">
-                        {label}
-                      </span>
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
 
         {renderStepContent()}
