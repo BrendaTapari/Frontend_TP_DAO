@@ -510,13 +510,7 @@ export default function CreateRental() {
     if (currentStep > 1) setCurrentStep((s) => s - 1);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (currentStep !== 5) {
-      setCurrentStep(5);
-      return;
-    }
-
+  const handleFinalCreate = async () => {
     const ok = await handleDateValidation();
     if (!ok) return;
 
@@ -1676,10 +1670,6 @@ export default function CreateRental() {
                         {t("create_rental.car", "Auto")}:
                       </p>
                       <p>{sel ? `${sel.marca} ${sel.modelo}` : "-"}</p>
-                      <p>
-                        {t("create_rental.license_plate", "Patente")}:{" "}
-                        {sel?.patente || "-"}
-                      </p>
                     </div>
                   </div>
 
@@ -1773,7 +1763,12 @@ export default function CreateRental() {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 py-8">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+      }}
+      className="space-y-8 py-8"
+    >
       <div className="container mx-auto px-4">
         <div className="flex justify-center w-full mb-8 mt-20 px-2 sm:px-0">
           <div className="w-full overflow-x-auto pb-2">
@@ -1835,7 +1830,8 @@ export default function CreateRental() {
             </button>
           ) : (
             <button
-              type="submit"
+              type="button"
+              onClick={handleFinalCreate}
               className={`btn btn-success ${isLoading ? "loading" : ""}`}
             >
               {t("create_rental.confirm", "Confirmar y crear")}
