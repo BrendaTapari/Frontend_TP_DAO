@@ -119,6 +119,17 @@
     "edit": "Bearbeiten",
     "details": "Details"
   },
+  "about_us": {
+    "title": "Über uns",
+    "subtitle": "Bei LuxDrive bieten wir ein erstklassiges Mieterlebnis, das moderne Fahrzeuge, persönlichen Service und auf jede Reiseart zugeschnittene Lösungen kombiniert.",
+    "trust_title": "Vertrauen",
+    "trust_desc": "Wir arbeiten mit sicheren, gewarteten Fahrzeugen, die bereit sind, ein komfortables und zuverlässiges Erlebnis zu bieten.",
+    "location_title": "Standort",
+    "whatsapp_title": "WhatsApp",
+    "whatsapp_desc": "Persönlicher Support",
+    "closing_title": "Jede Reise verdient ein erstklassiges Erlebnis",
+    "closing_desc": "Wir begleiten Sie von der Fahrzeugwahl bis zum Ende Ihrer Reise, mit Unterstützung und Lösungen, die für Sie gedacht sind."
+  },
   "create_rental": {
     "error_fetch_cars": "Fehler beim Abrufen verfügbarer Autos",
     "error_select_dates": "Bitte Start- und Enddatum auswählen",

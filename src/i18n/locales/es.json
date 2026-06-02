@@ -120,6 +120,17 @@
     "edit": "Editar",
     "details": "Detalles"
   },
+  "about_us": {
+    "title": "Acerca de Nosotros",
+    "subtitle": "En LuxDrive ofrecemos una experiencia de alquiler premium, combinando vehículos modernos, atención personalizada y servicios pensados para cada tipo de viaje.",
+    "trust_title": "Confianza",
+    "trust_desc": "Trabajamos con vehículos seguros, mantenidos y listos para brindar una experiencia cómoda y confiable.",
+    "location_title": "Ubicación",
+    "whatsapp_title": "WhatsApp",
+    "whatsapp_desc": "Atención personalizada",
+    "closing_title": "Cada viaje merece una experiencia premium",
+    "closing_desc": "Te acompañamos desde la elección del vehículo hasta el final de tu recorrido, con asistencia y soluciones pensadas para vos."
+  },
   "create_rental": {
     "error_fetch_cars": "Error al buscar autos disponibles",
     "error_select_dates": "Por favor seleccione inicio y fin",
