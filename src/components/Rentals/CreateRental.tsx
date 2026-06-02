@@ -39,6 +39,11 @@ interface CarOption {
   tipoVehiculo: string;
 }
 
+interface CountryOption {
+  code: string;
+  label: string;
+}
+
 const inferVehicleType = (car: {
   modelo?: string;
   marca?: string;
@@ -81,6 +86,8 @@ export default function CreateRental() {
   const [priceFilterMax, setPriceFilterMax] = useState("");
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState("all");
   const [cars, setCars] = useState<CarOption[]>([]);
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [isLoadingCountries, setIsLoadingCountries] = useState(false);
   const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -100,6 +107,62 @@ export default function CreateRental() {
       mediaQuery.removeEventListener("change", updateCalendarLayout);
     };
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadCountries = async () => {
+      setIsLoadingCountries(true);
+
+      try {
+        const response = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,cca2,translations,demonyms",
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar las nacionalidades");
+        }
+
+        const data = await response.json();
+
+        const options = (
+          data as Array<{
+            cca2?: string;
+            name?: { common?: string };
+            translations?: { spa?: { common?: string } };
+          }>
+        )
+          .map((country) => ({
+            code: country.cca2 ?? "",
+            label:
+              country.translations?.spa?.common ?? country.name?.common ?? "",
+          }))
+          .filter((country) => country.code && country.label)
+          .sort((a, b) => a.label.localeCompare(b.label, "es"));
+
+        setCountries(options);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          toast.error(
+            t(
+              "create_rental.error_load_countries",
+              "No se pudieron cargar las nacionalidades",
+            ),
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingCountries(false);
+        }
+      }
+    };
+
+    loadCountries();
+
+    return () => controller.abort();
+  }, [t]);
 
   const maxDateObj = new Date();
   maxDateObj.setFullYear(maxDateObj.getFullYear() - 17);
@@ -289,7 +352,12 @@ export default function CreateRental() {
   const isValidCardExpiry = (value: string) => {
     if (!/^\d{2}\/\d{2}$/.test(value)) return false;
     const month = Number(value.slice(0, 2));
-    return month >= 1 && month <= 12;
+    const year = Number(`20${value.slice(3, 5)}`);
+
+    if (month < 1 || month > 12 || Number.isNaN(year)) return false;
+
+    const expiryDate = new Date(year, month, 0, 23, 59, 59, 999);
+    return expiryDate > new Date();
   };
 
   const handleInputChange = useCallback(
@@ -440,6 +508,11 @@ export default function CreateRental() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (currentStep !== 5) {
+      setCurrentStep(5);
+      return;
+    }
+
     const ok = await handleDateValidation();
     if (!ok) return;
 
@@ -765,7 +838,7 @@ export default function CreateRental() {
                             <CheckCircle size={28} />
                           </div>
                         )}
-                        <figure className="h-56 relative bg-base-300 overflow-hidden">
+                        <figure className="h-36 sm:h-52 lg:h-56 relative bg-base-300  overflow-hidden">
                           {carItem.imagen ? (
                             <img
                               src={getImageUrl(carItem.imagen)}
@@ -783,35 +856,35 @@ export default function CreateRental() {
                           )}
                           <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-base-100 to-transparent z-10" />
                         </figure>
-                        <div className="card-body p-6 pt-2 relative z-20">
-                          <div className="mb-2">
+                        <div className="card-body p-3 sm:p-6 pt-2 relative z-20">
+                          <div className="mb-1 sm:mb-2">
                             <p className="uppercase tracking-widest text-xs font-semibold text-primary mb-1">
                               {carItem.marca}
                             </p>
-                            <h2 className="card-title text-2xl font-bold text-base-content">
+                            <h2 className="card-title text-lg sm:text-2xl font-bold text-base-content">
                               {carItem.modelo}
                             </h2>
                           </div>
 
-                          <div className="flex flex-wrap gap-2 my-4">
-                            <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2 my-2.5 sm:my-4">
+                            <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
                               {carItem.tipoVehiculo}
                             </div>
                             {carItem.año && (
-                              <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                              <div className="hidden sm:inline-flex badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
                                 <Calendar size={14} className="opacity-70" />{" "}
                                 {carItem.año}
                               </div>
                             )}
                             {carItem.color && (
-                              <div className="badge badge-outline badge-lg gap-2 py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
+                              <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
                                 <Palette size={14} className="opacity-70" />{" "}
                                 {carItem.color}
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-base-content/10">
+                          <div className="flex items-center justify-between mt-auto pt-2.5 sm:pt-4 border-t border-base-content/10">
                             <div>
                               <p className="text-xs text-base-content/60 uppercase tracking-wider mb-1">
                                 {t(
@@ -819,13 +892,13 @@ export default function CreateRental() {
                                   "Costo por día",
                                 )}
                               </p>
-                              <p className="text-2xl font-black text-success drop-shadow-sm">
+                              <p className="text-lg sm:text-2xl font-black text-success drop-shadow-sm">
                                 {new Intl.NumberFormat("es-AR", {
                                   style: "currency",
                                   currency: "ARS",
                                   maximumFractionDigits: 0,
                                 }).format(carItem.costo)}
-                                <span className="text-sm font-normal text-base-content/60 ml-1">
+                                <span className="text-[10px] sm:text-sm font-normal text-base-content/60 ml-1">
                                   /día
                                 </span>
                               </p>
@@ -931,13 +1004,43 @@ export default function CreateRental() {
                           )}
                         </span>
                       </label>
-                      <input
+                      <select
                         name="retiroLugar"
                         value={formData.retiroLugar}
                         onChange={handleInputChange}
-                        placeholder="Aeropuerto de Ezeiza"
                         className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      />
+                      >
+                        <option value="">
+                          {t(
+                            "create_rental.pickup_location_select",
+                            "Seleccione una ubicación",
+                          )}
+                        </option>
+                        <option value="Ezeiza">
+                          {t(
+                            "create_rental.pickup_location_home",
+                            "Aeropuerto Ezeiza",
+                          )}
+                        </option>
+                        <option value="Aeroparque">
+                          {t(
+                            "create_rental.pickup_location_work",
+                            "Aeroparque",
+                          )}
+                        </option>
+                        <option value="Ambrosio Taravella">
+                          {t(
+                            "create_rental.pickup_location_other",
+                            "Aeropuerto Córdoba Ambrosio Taravella",
+                          )}
+                        </option>
+                        <option value="Aeropuerto Rosario">
+                          {t(
+                            "create_rental.pickup_locationRosario",
+                            "Aeropuerto Rosario",
+                          )}
+                        </option>
+                      </select>
                     </div>
                   )}
 
@@ -1193,13 +1296,31 @@ export default function CreateRental() {
                             {t("create_rental.nationality", "Nacionalidad")}
                           </span>
                         </label>
-                        <input
+                        <select
                           name="nacionalidad"
                           value={formData.nacionalidad}
                           onChange={handleInputChange}
-                          className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
                           aria-label="Nacionalidad"
-                        />
+                          disabled={isLoadingCountries}
+                        >
+                          <option value="">
+                            {isLoadingCountries
+                              ? t(
+                                  "create_rental.loading_countries",
+                                  "Cargando nacionalidades...",
+                                )
+                              : t(
+                                  "create_rental.select_nationality",
+                                  "Seleccione una nacionalidad",
+                                )}
+                          </option>
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.label}>
+                              {country.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Fecha de nacimiento */}
