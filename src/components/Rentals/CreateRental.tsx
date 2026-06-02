@@ -727,7 +727,7 @@ export default function CreateRental() {
                       <option value="otro">
                         {t(
                           "create_rental.pickup_other",
-                          "Quiero que lo retiren en otro lugar",
+                          "Quiero que lo envíen",
                         )}
                       </option>
                     </select>
