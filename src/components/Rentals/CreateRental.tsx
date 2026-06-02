@@ -9,7 +9,7 @@ import React, {
 import { useLocation } from "wouter";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
-import { es } from "date-fns/locale";
+import { es, enUS, fr, de, pt, ar as arLocale } from "date-fns/locale";
 import toast from "react-hot-toast";
 import {
   Car,
@@ -40,7 +40,11 @@ interface CarOption {
 
 export default function CreateRental() {
   const [, setLocation] = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const calendarLocaleMap: Record<string, typeof es> = {
+    es, en: enUS, fr, de, pt, ar: arLocale,
+  };
+  const calendarLocale = calendarLocaleMap[i18n.language] ?? es;
   const chauffeurCostPerDay = 7500;
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
@@ -509,7 +513,7 @@ export default function CreateRental() {
                     }
                   >
                     <DayPicker
-                      locale={es}
+                      locale={calendarLocale}
                       className="react-day-picker"
                       mode="range"
                       numberOfMonths={2}
@@ -640,7 +644,7 @@ export default function CreateRental() {
                               maximumFractionDigits: 0,
                             }).format(carItem.costo)}
                             <span className="text-sm font-normal text-base-content/60 ml-1">
-                              /día
+                              {t("create_rental.per_day", "/día")}
                             </span>
                           </p>
                         </div>
@@ -894,7 +898,7 @@ export default function CreateRental() {
                 <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
                   <div className="card-body p-6 md:p-8">
                     <h3 className="text-xl font-semibold mb-6 text-base-content/90">
-                      Datos Personales
+                      {t("create_rental.personal_data", "Datos Personales")}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                       {/* Nombre */}
@@ -1226,24 +1230,24 @@ export default function CreateRental() {
                   )}
                   <div className="card-body pt-4">
                     <h3 className="card-title text-xl mb-4 text-base-content">
-                      Resumen a Pagar
+                      {t("create_rental.payment_summary", "Resumen a Pagar")}
                     </h3>
 
                     <div className="space-y-3 text-sm text-base-content/80">
                       <div className="flex justify-between">
-                        <span>Auto seleccionado</span>
+                        <span>{t("create_rental.selected_car", "Auto seleccionado")}</span>
                         <span className="font-semibold text-base-content">
                           {selectedCar?.marca} {selectedCar?.modelo}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Duración</span>
+                        <span>{t("create_rental.duration_label", "Duración")}</span>
                         <span className="font-semibold text-base-content">
-                          {dateCalculations.days} días
+                          {dateCalculations.days} {t("create_rental.days", "días")}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Precio por día</span>
+                        <span>{t("create_rental.price_per_day", "Precio por día")}</span>
                         <span className="font-semibold text-base-content">
                           {new Intl.NumberFormat("es-AR", {
                             style: "currency",
@@ -1290,7 +1294,7 @@ export default function CreateRental() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-lg">
                         <span className="text-base-content/80">
-                          Total del alquiler
+                          {t("create_rental.total_rental", "Total del alquiler")}
                         </span>
                         <span className="font-bold text-base-content">
                           {new Intl.NumberFormat("es-AR", {
@@ -1304,10 +1308,10 @@ export default function CreateRental() {
                       <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/20 mt-6">
                         <div>
                           <span className="block font-bold text-primary text-lg">
-                            Seña a pagar hoy
+                            {t("create_rental.deposit_today", "Seña a pagar hoy")}
                           </span>
                           <span className="text-xs text-primary/70 block mt-1">
-                            Monto para reservar (20%)
+                            {t("create_rental.deposit_note", "Monto para reservar (20%)")}
                           </span>
                         </div>
                         <span className="font-black text-2xl text-primary">
@@ -1542,9 +1546,9 @@ export default function CreateRental() {
               {t("create_rental.success_title", "¡Reserva Exitosa!")}
             </h3>
             <p className="py-2 text-lg text-base-content/80">
-              Se ha enviado un correo a{" "}
-              <strong className="text-primary">{formData.email}</strong> con los
-              detalles de la reserva y un código QR.
+              {t("create_rental.email_sent_prefix", "Se ha enviado un correo a")}{" "}
+              <strong className="text-primary">{formData.email}</strong>{" "}
+              {t("create_rental.email_sent_suffix", "con los detalles de la reserva y un código QR.")}
             </p>
 
             <div className="bg-base-200 border border-base-300 p-6 rounded-xl my-6 text-left shadow-sm">
@@ -1552,12 +1556,9 @@ export default function CreateRental() {
                 {t("create_rental.next_steps", "Pasos a seguir:")}
               </p>
               <ul className="list-disc list-inside space-y-2 text-base-content/80">
-                <li>Revisa tu bandeja de entrada (y la carpeta de spam).</li>
-                <li>Conserva el código QR que recibiste en el correo.</li>
-                <li>
-                  Presenta el código QR al momento de retirar el vehículo en
-                  nuestras oficinas.
-                </li>
+                <li>{t("create_rental.check_inbox", "Revisa tu bandeja de entrada (y la carpeta de spam).")}</li>
+                <li>{t("create_rental.keep_qr", "Conserva el código QR que recibiste en el correo.")}</li>
+                <li>{t("create_rental.present_qr", "Presenta el código QR al momento de retirar el vehículo en nuestras oficinas.")}</li>
               </ul>
             </div>
 
@@ -1569,8 +1570,9 @@ export default function CreateRental() {
             </div>
 
             <p className="text-sm text-base-content/60 mb-6">
-              Serás redirigido al inicio en{" "}
-              <span className="font-bold">{countdown}</span> segundos...
+              {t("create_rental.redirect_in", "Serás redirigido al inicio en")}{" "}
+              <span className="font-bold">{countdown}</span>{" "}
+              {t("create_rental.redirect_suffix", "segundos...")}
             </p>
 
             <div className="modal-action justify-center">
