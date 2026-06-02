@@ -712,7 +712,7 @@ export default function CreateRental() {
                   <div className="form-control">
                     <label className="label pb-1">
                       <span className="label-text font-medium text-base-content/80">
-                        {t("create_rental.pickup_type", "Lugar de retiro")}
+                        {t("create_rental.pickup_type", "Lugar de envío")}
                       </span>
                     </label>
                     <select
@@ -792,17 +792,17 @@ export default function CreateRental() {
               <div className="card bg-base-100 shadow-xl border border-base-content/10 overflow-hidden">
                 <div className="card-body pt-4">
                   <h3 className="card-title text-xl mb-4 text-base-content">
-                    {t("create_rental.pickup_summary", "Resumen de retiro")}
+                    {t("create_rental.pickup_summary", "Resumen de envío")}
                   </h3>
 
                   <div className="space-y-3 text-sm text-base-content/80">
                     <div className="flex justify-between gap-4">
-                      <span>{t("create_rental.pickup_method", "Retiro")}</span>
+                      <span>{t("create_rental.pickup_method", "Envío")}</span>
                       <span className="font-semibold text-base-content text-right">
                         {formData.retiroTipo === "sucursal"
                           ? t(
                               "create_rental.pickup_branch",
-                              "Retiro en sucursal",
+                              "Envío a sucursal",
                             )
                           : formData.retiroLugar || "-"}
                       </span>
