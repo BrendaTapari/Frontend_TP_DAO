@@ -43,12 +43,28 @@ export default function CreateRental() {
   const { t } = useTranslation();
   const chauffeurCostPerDay = 7500;
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isMobileCalendar, setIsMobileCalendar] = useState(false);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
   const [cars, setCars] = useState<CarOption[]>([]);
   const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [countdown, setCountdown] = useState(10);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const updateCalendarLayout = () => {
+      setIsMobileCalendar(mediaQuery.matches);
+    };
+
+    updateCalendarLayout();
+    mediaQuery.addEventListener("change", updateCalendarLayout);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateCalendarLayout);
+    };
+  }, []);
 
   const maxDateObj = new Date();
   maxDateObj.setFullYear(maxDateObj.getFullYear() - 17);
@@ -512,7 +528,7 @@ export default function CreateRental() {
                       locale={es}
                       className="react-day-picker"
                       mode="range"
-                      numberOfMonths={2}
+                      numberOfMonths={isMobileCalendar ? 1 : 2}
                       selected={{
                         from: formData.fechaInicio
                           ? new Date(formData.fechaInicio + "T12:00:00")
@@ -800,10 +816,7 @@ export default function CreateRental() {
                       <span>{t("create_rental.pickup_method", "Envío")}</span>
                       <span className="font-semibold text-base-content text-right">
                         {formData.retiroTipo === "sucursal"
-                          ? t(
-                              "create_rental.pickup_branch",
-                              "Envío a sucursal",
-                            )
+                          ? t("create_rental.pickup_branch", "Envío a sucursal")
                           : formData.retiroLugar || "-"}
                       </span>
                     </div>
@@ -1466,40 +1479,42 @@ export default function CreateRental() {
     <form onSubmit={handleSubmit} className="space-y-8 py-8">
       <div className="container mx-auto px-4">
         <div className="flex justify-center w-full mb-8 mt-20 px-2 sm:px-0">
-          <ul className="steps steps-vertical lg:steps-horizontal w-full max-w-5xl mx-auto lg:overflow-x-auto lg:pb-2">
-            {stepItems.map(({ step, label }) => {
-              const isActive = currentStep === step;
-              const isCompleted = currentStep > step;
-              const canNavigate = step < currentStep;
+          <div className="w-full overflow-x-auto pb-2">
+            <ul className="steps steps-horizontal w-max min-w-full lg:w-full lg:max-w-5xl mx-auto lg:justify-between">
+              {stepItems.map(({ step, label }) => {
+                const isActive = currentStep === step;
+                const isCompleted = currentStep > step;
+                const canNavigate = step < currentStep;
 
-              return (
-                <li
-                  key={step}
-                  className={`step ${isActive || isCompleted ? "step-primary" : ""} text-center lg:text-left`}
-                  data-content={isCompleted ? "✓" : step}
-                >
-                  {canNavigate ? (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentStep(step)}
-                      className={`leading-tight ${isActive ? "cursor-default" : "cursor-pointer"}`}
-                      aria-label={label}
-                    >
-                      <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left">
-                        {label}
+                return (
+                  <li
+                    key={step}
+                    className={`step ${isActive || isCompleted ? "step-primary" : ""} text-center lg:text-left whitespace-nowrap`}
+                    data-content={isCompleted ? "✓" : step}
+                  >
+                    {canNavigate ? (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(step)}
+                        className={`leading-tight ${isActive ? "cursor-default" : "cursor-pointer"}`}
+                        aria-label={label}
+                      >
+                        <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left whitespace-nowrap">
+                          {label}
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="leading-tight">
+                        <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left whitespace-nowrap">
+                          {label}
+                        </span>
                       </span>
-                    </button>
-                  ) : (
-                    <span className="leading-tight">
-                      <span className="block text-xs sm:text-sm font-semibold text-center lg:text-left">
-                        {label}
-                      </span>
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
 
         {renderStepContent()}
