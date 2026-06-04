@@ -187,23 +187,22 @@ export default function CarFleet() {
                           auto.estado,
                         )}`}
                       >
-                        {auto.estado.charAt(0).toUpperCase() +
-                          auto.estado.slice(1).replace("_", " ")}
+                        {t(`fleet.status_${auto.estado}`, auto.estado.charAt(0).toUpperCase() + auto.estado.slice(1).replace("_", " "))}
                       </span>
                     </div>
 
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Caja
+                        {t("fleet.gearbox", "Caja")}
                       </p>
                       <p className="text-sm font-semibold text-white">
-                        {auto.caja || "-"}
+                        {auto.caja ? t(`fleet.gearbox_${auto.caja.toLowerCase()}`, auto.caja) : "-"}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        Pasajeros
+                        {t("fleet.passengers", "Pasajeros")}
                       </p>
                       <p className="text-sm font-semibold text-white">
                         {auto.cant_pasajeros ?? "-"}

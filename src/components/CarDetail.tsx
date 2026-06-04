@@ -3,6 +3,7 @@ import { ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCarByPatente } from "../services/autosService";
 import mockCars from "../data/mockCars.json";
+import { useTranslation } from "react-i18next";
 
 interface Auto {
   id: number;
@@ -21,6 +22,7 @@ export default function CarDetail() {
   const [match, params] = useRoute("/car-detail/:id");
   const [auto, setAuto] = useState<Auto | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (params?.id) {
@@ -57,7 +59,7 @@ export default function CarDetail() {
     return (
       <div className="min-h-screen bg-base-100 pt-20 flex items-center justify-center">
         <div className="text-xl text-gray-400">
-          Cargando detalles del vehículo...
+          {t("fleet.loading_details", "Cargando detalles del vehículo...")}
         </div>
       </div>
     );
@@ -66,13 +68,13 @@ export default function CarDetail() {
   if (!auto) {
     return (
       <div className="min-h-screen bg-base-100 pt-20 flex flex-col items-center justify-center">
-        <p className="text-2xl text-gray-400 mb-6">Vehículo no encontrado</p>
+        <p className="text-2xl text-gray-400 mb-6">{t("fleet.car_not_found", "Vehículo no encontrado")}</p>
         <button
           onClick={() => setLocation("/car-fleet")}
           className="flex items-center gap-2 text-primary hover:text-accent transition-colors"
         >
           <ArrowLeft size={20} />
-          <span>Volver a la flota</span>
+          <span>{t("fleet.back_to_fleet", "Volver a la flota")}</span>
         </button>
       </div>
     );
@@ -87,7 +89,7 @@ export default function CarDetail() {
           className="flex btn btn-outline items-center gap-2 mt-10 text-gray-300 hover:text-white transition-colors mb-6"
         >
           <ArrowLeft size={20} />
-          <span>Volver al inicio</span>
+          <span>{t("fleet.back_to_home", "Volver al inicio")}</span>
         </button>
       </div>
 
@@ -106,7 +108,7 @@ export default function CarDetail() {
             <div className="mt-6 flex gap-4 w-full">
               {auto.estado === "disponible" && (
                 <button className="flex-1 bg-gradient-to-r from-primary to-accent text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity">
-                  Alquilar Ahora
+                  {t("fleet.rent_now", "Alquilar Ahora")}
                 </button>
               )}
               {auto.estado !== "disponible" && (
@@ -114,7 +116,7 @@ export default function CarDetail() {
                   disabled
                   className="flex-1 bg-gray-600 text-gray-300 font-semibold py-3 rounded-lg cursor-not-allowed opacity-50"
                 >
-                  No disponible
+                  {t("fleet.not_available", "No disponible")}
                 </button>
               )}
             </div>
@@ -139,35 +141,29 @@ export default function CarDetail() {
             {/* Estado */}
             <div className="mb-8">
               <p className="text-gray-500 text-sm uppercase tracking-widest mb-2">
-                Estado
+                {t("fleet.state", "Estado")}
               </p>
               <span
                 className={`inline-block px-4 py-2 rounded-full text-sm font-semibold border ${getEstadoColor(
                   auto.estado,
                 )}`}
               >
-                {auto.estado.charAt(0).toUpperCase() +
-                  auto.estado.slice(1).replace("_", " ")}
+                {t(`fleet.status_${auto.estado}`, auto.estado.charAt(0).toUpperCase() + auto.estado.slice(1).replace("_", " "))}
               </span>
             </div>
 
             {/* Grid de especificaciones */}
             <div className="grid grid-cols-2 gap-6 mb-8">
+            
               <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
                 <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  Patente
-                </p>
-                <p className="text-2xl font-bold text-white">{auto.patente}</p>
-              </div>
-              <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
-                <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  Año
+                  {t("fleet.year", "Año")}
                 </p>
                 <p className="text-2xl font-bold text-white">{auto.año}</p>
               </div>
               <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
                 <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  Costo Diario
+                  {t("fleet.daily_cost", "Costo Diario")}
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   ${auto.costo.toLocaleString()}
@@ -175,28 +171,26 @@ export default function CarDetail() {
               </div>
               <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
                 <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  Mantenimiento
+                  {t("fleet.maintenance_period", "Mantenimiento")}
                 </p>
                 <p className="text-2xl font-bold text-white">
-                  {auto.periodicidad_mantenimiento} meses
+                  {auto.periodicidad_mantenimiento} {t("fleet.months", "meses")}
                 </p>
               </div>
             </div>
 
             {/* Descripción */}
             <div className="bg-base-200 rounded-lg p-6 border border-gray-700/50">
-              <h3 className="text-xl font-bold text-white mb-3">Descripción</h3>
+              <h3 className="text-xl font-bold text-white mb-3">{t("fleet.description_title", "Descripción")}</h3>
               <p className="text-gray-300 leading-relaxed">
-                Vehículo {auto.marca} {auto.modelo} del año {auto.año}. Patente{" "}
-                {auto.patente}. Perfecto para tus viajes alrededor de Córdoba.
-                Disfruta de confort y seguridad en cada kilómetro.
+                {t("fleet.description_text", "Vehículo {{marca}} {{modelo}} del año {{year}}. Patente {{plate}}. Perfecto para tus viajes alrededor de Córdoba. Disfruta de confort y seguridad en cada kilómetro.", { marca: auto.marca, modelo: auto.modelo, year: auto.año, plate: auto.patente })}
               </p>
             </div>
 
             {/* Contacto */}
             <div className="mt-8 pt-8 border-t border-gray-700/50">
               <h3 className="text-xl font-bold text-white mb-4">
-                ¿Preguntas sobre este vehículo?
+                {t("fleet.questions", "¿Preguntas sobre este vehículo?")}
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-gray-300 hover:text-primary transition-colors cursor-pointer">
