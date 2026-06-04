@@ -235,10 +235,10 @@ function App() {
             />
 
             {[
-              "top-5 left-5 border-t border-l",
-              "top-5 right-5 border-t border-r",
-              "bottom-5 left-5 border-b border-l",
-              "bottom-5 right-5 border-b border-r",
+              "top-5 start-5 border-t border-s",
+              "top-5 end-5 border-t border-e",
+              "bottom-5 start-5 border-b border-s",
+              "bottom-5 end-5 border-b border-e",
             ].map((cls, i) => (
               <motion.div
                 key={i}
@@ -278,7 +278,7 @@ function App() {
               <ProgressBar />
 
               <p
-                className="text-primary/40 uppercase tracking-[0.45em] text-[0.6rem] ml-1"
+                className="text-primary/40 uppercase tracking-[0.45em] text-[0.6rem] ms-1"
                 style={{
                   fontFamily: "'Josefin Sans', sans-serif",
                   fontWeight: 200,
@@ -327,10 +327,10 @@ function App() {
 
         <motion.div
           ref={heroRef}
-          className="relative z-10 w-full max-w-4xl px-6 sm:px-10 flex flex-col justify-start pt-[48vh] sm:pt-[52vh] lg:pt-[55vh] pb-2 mx-auto lg:mx-0 lg:ml-20"
+          className="relative z-10 w-full max-w-4xl px-6 sm:px-10 flex flex-col justify-start pt-[48vh] sm:pt-[52vh] lg:pt-[55vh] pb-2 mx-auto lg:mx-0 lg:ms-20"
           style={{ y: heroY, scale: heroScale }}
         >
-          <div className="mb-6 text-center lg:text-left">
+          <div className="mb-6 text-center lg:text-start">
             <div
               style={{
                 fontFamily: "'Playfair Display', serif",
@@ -417,7 +417,7 @@ function App() {
       >
         <div className="max-w-[90rem] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center h-full">
           <ScrollReveal>
-            <div className="flex flex-col justify-center text-center lg:text-left space-y-8 sm:space-y-10 order-2 lg:order-1 mt-6 lg:mt-0 max-w-3xl mx-auto lg:mx-0">
+            <div className="flex flex-col justify-center text-center lg:text-start space-y-8 sm:space-y-10 order-2 lg:order-1 mt-6 lg:mt-0 max-w-3xl mx-auto lg:mx-0">
               <div className="space-y-5 sm:space-y-6">
                 <motion.h2
                   id="fleet-heading"

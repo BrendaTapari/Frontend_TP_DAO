@@ -1,5 +1,5 @@
 import { Menu, X, Globe } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 
@@ -7,6 +7,11 @@ export default function Navbar() {
   const [, setLocation] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    document.documentElement.dir = i18n.dir();
+    document.documentElement.lang = i18n.language;
+  }, [i18n, i18n.language]);
 
   const handleBackHome = () => {
     setLocation("/");
@@ -24,7 +29,7 @@ export default function Navbar() {
   return (
     <>
       <div className="navbar absolute top-0 z-50 flex w-full justify-center bg-gradient-to-b from-black/90 via-black/50 to-transparent pt-4 pb-8">
-        <div className="relative flex w-full max-w-7xl items-center px-4 sm:px-6">
+        <div className="relative flex w-full max-w-8xl items-center px-4 sm:px-6">
           <button
             type="button"
             onClick={handleBackHome}
@@ -34,15 +39,15 @@ export default function Navbar() {
               fontSize: "clamp(1.4rem, 3vw, 2.2rem)",
               fontWeight: 300,
               letterSpacing: "0.25em",
-              marginLeft: "0.25em",
+              marginInlineStart: "0.25em",
             }}
           >
             {t("landing.logo")}
           </button>
 
-          <div className="ml-auto flex shrink-0 gap-3 items-center">
+          <div className="ms-auto flex shrink-0 gap-3 items-center">
             <div className="dropdown dropdown-end">
-              <button
+              <div
                 tabIndex={0}
                 className="btn btn-circle border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
                 aria-label={t("nav.language")}
@@ -50,7 +55,7 @@ export default function Navbar() {
                 aria-labelledby="Selección de lenguaje"
               >
                 <Globe size={20} />
-              </button>
+              </div>
 
               <ul
                 tabIndex={0}

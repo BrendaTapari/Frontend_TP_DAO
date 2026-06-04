@@ -52,11 +52,11 @@
     "services_title": "Servicios Premium Incluidos",
     "service1_title": "Seguro Premium Todo Riesgo",
     "service1_desc": "Cobertura total sin sorpresas. Asistencia en carretera 24/7.",
-    "service2_title": "Concierge Delivery",
-    "service2_desc": "Entrega directa a tu hotel, domicilio o aeropuerto con trato VIP.",
+    "service2_title": "Envío de vehículos",
+    "service2_desc": "Entrega directa otras ubicaciones seleccionadas",
     "service3_title": "Asistencia 24/7",
     "service3_desc": "Soporte exclusivo en carretera a cualquier hora del día.",
-    "service4_title": "Pet Friendly",
+    "service4_title": "Aceptamos mascotas",
     "service4_desc": "Tu fiel compañero viaja contigo con todas las comodidades.",
     "cta_text": "Vive la experiencia de lujo que mereces",
     "reserve_now": "Reserva Ahora"
@@ -70,7 +70,7 @@
     "vehicle_stats": "Lista de vehículos disponibles",
     "year": "Año",
     "cost": "Costo",
-    "maintenance": "Mantenimiento",
+    "maintenance": "En Mantenimiento",
     "state": "Estado",
     "months": "meses",
     "view_details": "Ver Detalles",
@@ -78,7 +78,6 @@
     "total_vehicles": "Total de Autos",
     "available": "Disponibles",
     "renting": "Reservado",
-    "maintenance": "En Mantenimiento",
     "statistics": "Estadísticas de la flota",
     "fleet_stats": "Estadísticas de la flota"
   },
@@ -139,7 +138,7 @@
     "error_missing_data": "Complete todos los datos personales y seleccione un empleado",
     "success_create": "Alquiler creado",
     "error_create": "Error al crear el alquiler",
-    "step1_title": "Selecciona las fechas",
+    "step1_title": "Selecciona el periodo de alquiler",
     "duration": "Duración del alquiler",
     "days": "días",
     "select_period": "Seleccione el período de alquiler",
@@ -176,7 +175,7 @@
     "total": "Total",
     "back": "Volver",
     "next": "Siguiente",
-    "confirm": "Confirmar y crear",
+    "confirm": "Confirmar reserva",
     "email": "Correo electrónico",
     "cost_per_day": "Costo por día",
     "per_day": "/día",
@@ -227,6 +226,32 @@
     "present_qr": "Presenta el código QR al momento de retirar el vehículo en nuestras oficinas.",
     "redirect_in": "Serás redirigido al inicio en",
     "redirect_suffix": "segundos...",
-    "go_home_now": "Ir al inicio ahora"
+    "go_home_now": "Ir al inicio ahora",
+    "special_needs_notice": "En caso de necesitar una adaptación especial, llevar mascotas o necesitar sillas especiales para niños, por favor póngase en contacto con la agencia indicando su número de reserva luego de terminar el trámite de alquiler.",
+    "filter_min_price": "Precio mínimo por día",
+    "filter_max_price": "Precio máximo por día",
+    "filter_any": "Cualquiera",
+    "filter_vehicle_type": "Tipo de vehículo",
+    "filter_all": "Todos",
+    "clear_filters": "Limpiar filtros",
+    "filtered_results": "Resultados mostrados",
+    "no_filtered_cars": "No hay autos que coincidan con los filtros seleccionados",
+    "from_ars": "Desde ARS",
+    "to_ars": "Hasta ARS",
+    "email_placeholder": "Ej. cliente@correo.com"
+  },
+  "vehicle_types": {
+    "SUV": "SUV",
+    "Sedán": "Sedán",
+    "Familiar": "Familiar",
+    "Compacto": "Compacto"
+  },
+  "colors": {
+    "Blanco": "Blanco",
+    "Negro": "Negro",
+    "Gris": "Gris",
+    "Plata": "Plata",
+    "Rojo": "Rojo",
+    "Azul": "Azul"
   }
 }

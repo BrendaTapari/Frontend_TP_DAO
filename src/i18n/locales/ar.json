@@ -69,7 +69,7 @@
     "vehicle_stats": "قائمة المركبات المتاحة",
     "year": "السنة",
     "cost": "التكلفة",
-    "maintenance": "الصيانة",
+    "maintenance": "قيد الصيانة",
     "state": "الحالة",
     "months": "أشهر",
     "view_details": "عرض التفاصيل",
@@ -77,7 +77,6 @@
     "total_vehicles": "إجمالي السيارات",
     "available": "متاحة",
     "renting": "قيد الإيجار",
-    "maintenance": "قيد الصيانة",
     "statistics": "إحصاءات الأسطول",
     "fleet_stats": "إحصاءات الأسطول"
   },
@@ -226,6 +225,32 @@
     "present_qr": "قدّم رمز QR عند استلام المركبة من مكاتبنا.",
     "redirect_in": "ستتم إعادة توجيهك إلى الصفحة الرئيسية خلال",
     "redirect_suffix": "ثوانٍ...",
-    "go_home_now": "اذهب إلى الصفحة الرئيسية الآن"
+    "go_home_now": "اذهب إلى الصفحة الرئيسية الآن",
+    "filter_min_price": "الحد الأدنى للسعر في اليوم",
+    "filter_max_price": "الحد الأقصى للسعر في اليوم",
+    "filter_any": "أي",
+    "filter_vehicle_type": "نوع المركبة",
+    "filter_all": "الكل",
+    "clear_filters": "مسح الفلاتر",
+    "filtered_results": "النتائج المعروضة",
+    "no_filtered_cars": "لا توجد سيارات تطابق الفلاتر المحددة",
+    "from_ars": "من ARS",
+    "to_ars": "حتى ARS",
+    "special_needs_notice": "في حالة الحاجة إلى تكييف خاص، أو اصطحاب حيوانات أليفة، أو الحاجة إلى مقاعد خاصة للأطفال، يرجى الاتصال بالوكالة للإشارة إلى رقم الحجز الخاص بك بعد الانتهاء من عملية التأجير.",
+    "email_placeholder": "مثل. client@email.com"
+  },
+  "vehicle_types": {
+    "SUV": "دفع رباعي",
+    "Sedán": "سيدان",
+    "Familiar": "عائلي",
+    "Compacto": "مدمج"
+  },
+  "colors": {
+    "Blanco": "أبيض",
+    "Negro": "أسود",
+    "Gris": "رمادي",
+    "Plata": "فضي",
+    "Rojo": "أحمر",
+    "Azul": "أزرق"
   }
 }

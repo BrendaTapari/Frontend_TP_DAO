@@ -70,7 +70,7 @@
     "vehicle_stats": "List of available vehicles",
     "year": "Year",
     "cost": "Cost",
-    "maintenance": "Maintenance",
+    "maintenance": "In Maintenance",
     "state": "Status",
     "months": "months",
     "view_details": "View Details",
@@ -78,7 +78,6 @@
     "total_vehicles": "Total Vehicles",
     "available": "Available",
     "renting": "Renting",
-    "maintenance": "In Maintenance",
     "statistics": "Fleet Statistics",
     "fleet_stats": "Fleet Statistics"
   },
@@ -227,6 +226,32 @@
     "present_qr": "Present the QR code when picking up the vehicle at our offices.",
     "redirect_in": "You will be redirected to the home in",
     "redirect_suffix": "seconds...",
-    "go_home_now": "Go to home now"
+    "go_home_now": "Go to home now",
+    "filter_min_price": "Min price per day",
+    "filter_max_price": "Max price per day",
+    "filter_any": "Any",
+    "filter_vehicle_type": "Vehicle type",
+    "filter_all": "All",
+    "clear_filters": "Clear filters",
+    "filtered_results": "Results shown",
+    "no_filtered_cars": "No cars match the selected filters",
+    "from_ars": "From ARS",
+    "to_ars": "Up to ARS",
+    "special_needs_notice": "If you need special adaptation, carry pets or need special child seats, please contact the agency indicating your reservation number after completing the rental process.",
+    "email_placeholder": "e.g. client@email.com"
+  },
+  "vehicle_types": {
+    "SUV": "SUV",
+    "Sedán": "Sedan",
+    "Familiar": "Family",
+    "Compacto": "Compact"
+  },
+  "colors": {
+    "Blanco": "White",
+    "Negro": "Black",
+    "Gris": "Grey",
+    "Plata": "Silver",
+    "Rojo": "Red",
+    "Azul": "Blue"
   }
 }

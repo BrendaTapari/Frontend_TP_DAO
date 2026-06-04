@@ -20,6 +20,7 @@ import {
   Globe,
   IdCard,
   Mail,
+  Info,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
@@ -75,14 +76,86 @@ const inferVehicleType = (car: {
   return "Compacto";
 };
 
+const pickupLocations: Record<string, string[]> = {
+  "Buenos Aires": [
+    "Aeropuerto Internacional de San Fernando",
+    "Aeropuerto Internacional Ministro Pistarini (Ezeiza)",
+    "Aeroparque Internacional Jorge Newbery",
+    "Terminal de Cruceros Quinquela Martín",
+    "Palacio Duhau - Park Hyatt Buenos Aires",
+    "Four Seasons Hotel Buenos Aires",
+    "Alvear Palace Hotel",
+    "Faena Hotel Buenos Aires",
+    "Alvear Icon Hotel & Residences",
+    "Sofitel Buenos Aires Recoleta"
+  ],
+  "Córdoba": [
+    "Aeropuerto Internacional Ingeniero Aeronáutico Ambrosio Taravella",
+    "Aeroclub La Cumbre",
+    "Aeroclub Alta Gracia",
+    "Azur Real Hotel Boutique",
+    "Windsor Hotel & Tower",
+    "Quinto Centenario Hotel",
+    "Estancia La Paz Hotel, Golf & Polo",
+    "El Colibrí - Estancia de Charme",
+    "Pueblo Nativo Resort Golf & Spa"
+  ],
+  "Mendoza": [
+    "Aeropuerto Internacional Gobernador Francisco Gabrielli",
+    "Aeroclub Mendoza",
+    "Cavas Wine Lodge",
+    "The Vines Resort & Spa",
+    "Casa de Uco Vineyards & Wine Resort",
+    "SB Winemaker's House & Spa Suites",
+    "Park Hyatt Mendoza Hotel, Casino & Spa"
+  ],
+  "Río Negro y Neuquén": [
+    "Aeropuerto Internacional Teniente Luis Candelaria",
+    "Aeropuerto Aviador Carlos Campos",
+    "Llao Llao Resort, Golf & Spa",
+    "Arelauquen Lodge, a Tribute Portfolio Hotel",
+    "Correntoso Lake & River Hotel",
+    "Las Balsas Relais & Châteaux",
+    "Loi Suites Chapelco Hotel"
+  ],
+  "Entre Ríos": [
+    "Aeropuerto General Justo José de Urquiza",
+    "Aeropuerto Comodoro Pierrestegui",
+    "Los Ombúes Lodge",
+    "Estancia Santa Rosa",
+    "River Plate Wingshooting & Big Game Lodges",
+    "Estancia La Pelada"
+  ],
+  "Salta": [
+    "Aeropuerto Internacional Martín Miguel de Güemes",
+    "Grace Cafayate",
+    "House of Jasmines Relais & Châteaux",
+    "Estancia Colomé",
+    "Alejandro 1º Hotel"
+  ],
+  "Tierra del Fuego": [
+    "Aeropuerto Internacional Malvinas Argentinas",
+    "Arakur Ushuaia Resort & Spa",
+    "Los Cauquenes Resort & Spa",
+    "Las Hayas Ushuaia Resort"
+  ]
+};
+
 export default function CreateRental() {
   const [, setLocation] = useLocation();
   const { t, i18n } = useTranslation();
+  const customArLocale = {
+    ...arLocale,
+    options: {
+      ...arLocale.options,
+      weekStartsOn: 1,
+    },
+  };
   const calendarLocaleMap: Record<string, typeof es> = {
-    es, en: enUS, fr, de, pt, ar: arLocale,
+    es, en: enUS, fr, de, pt, ar: customArLocale as typeof es,
   };
   const calendarLocale = calendarLocaleMap[i18n.language] ?? es;
-  const chauffeurCostPerDay = 7500;
+  const chauffeurCostPerDay = 150000;
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isMobileCalendar, setIsMobileCalendar] = useState(false);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
@@ -185,6 +258,7 @@ export default function CreateRental() {
     auto: "", // will store car id as string
     costo: 0,
     retiroTipo: "sucursal",
+    retiroProvincia: "",
     retiroLugar: "",
     requiereChofer: "no",
     tarjetaNumero: "",
@@ -225,7 +299,7 @@ export default function CreateRental() {
     return Array.from(new Set(cars.map((car) => car.tipoVehiculo))).sort();
   }, [cars]);
 
-  const priceThresholds = [45000, 55000, 65000, 80000];
+  const priceThresholds = [80000, 100000, 120000, 150000];
 
   const filteredCars = useMemo(() => {
     const minPrice = priceFilterMin ? Number(priceFilterMin) : null;
@@ -367,6 +441,10 @@ export default function CreateRental() {
   const handleInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
+      if (name === "retiroProvincia") {
+        setFormData((p) => ({ ...p, [name]: value, retiroLugar: "" }));
+        return;
+      }
       if (name === "tarjetaNumero") {
         setFormData((p) => ({ ...p, [name]: formatCardNumber(value) }));
         return;
@@ -382,16 +460,22 @@ export default function CreateRental() {
         }));
         return;
       }
-      if (name === "tarjetaNombre") {
+      if (name === "nombre" || name === "apellido" || name === "tarjetaNombre") {
+        let filteredValue = value;
+        if (i18n.language === "ar") {
+          filteredValue = value.replace(/[^\u0600-\u06FF\s]/g, "");
+        } else {
+          filteredValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙäëïöüÄËÏÖÜ\s]/g, "");
+        }
         setFormData((p) => ({
           ...p,
-          [name]: value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""),
+          [name]: filteredValue,
         }));
         return;
       }
       setFormData((p) => ({ ...p, [name]: value }));
     },
-    [],
+    [i18n.language],
   );
 
   const handleDateValidation = async () => {
@@ -435,7 +519,7 @@ export default function CreateRental() {
       return;
     }
     if (currentStep === 3) {
-      if (formData.retiroTipo === "otro" && !formData.retiroLugar.trim()) {
+      if (formData.retiroTipo === "otro" && (!formData.retiroProvincia.trim() || !formData.retiroLugar.trim())) {
         toast.error(
           t(
             "create_rental.error_pickup_location",
@@ -514,7 +598,7 @@ export default function CreateRental() {
     const ok = await handleDateValidation();
     if (!ok) return;
 
-    if (formData.retiroTipo === "otro" && !formData.retiroLugar.trim()) {
+    if (formData.retiroTipo === "otro" && (!formData.retiroProvincia.trim() || !formData.retiroLugar.trim())) {
       toast.error(
         t(
           "create_rental.error_pickup_location",
@@ -606,7 +690,7 @@ export default function CreateRental() {
         return (
           <div className="space-y-6">
             <h2 className="text-3xl font-semibold text-center mt-15 mb-6">
-              {t("create_rental.step1_title", "Selecciona las fechas")}
+              {t("create_rental.step1_title", "Selecciona el periodo de alquiler")}
             </h2>
             {formData.fechaInicio && formData.fechaFin && (
               <div className="text-center">
@@ -623,14 +707,6 @@ export default function CreateRental() {
 
             <div className="flex justify-center w-full">
               <div className="form-control w-full max-w-4xl">
-                <label className="label justify-center pb-4">
-                  <span className="label-text font-medium text-xl text-base-content">
-                    {t(
-                      "create_rental.select_period",
-                      "Seleccione el período de alquiler",
-                    )}
-                  </span>
-                </label>
                 <div className="flex flex-col items-center w-full text-center space-y-4">
                   <div className="bg-base-200 border border-base-300 rounded-2xl p-4 text-base-content w-full max-w-xl font-medium text-lg shadow-sm">
                     {formData.fechaInicio
@@ -656,6 +732,7 @@ export default function CreateRental() {
                     }
                   >
                     <DayPicker
+                      dir={i18n.language === "ar" ? "rtl" : "ltr"}
                       locale={calendarLocale}
                       className="react-day-picker"
                       mode="range"
@@ -741,7 +818,7 @@ export default function CreateRental() {
                         </option>
                         {priceThresholds.map((threshold) => (
                           <option key={threshold} value={String(threshold)}>
-                            Desde ARS {threshold.toLocaleString("es-AR")}
+                            {t("create_rental.from_ars", "Desde ARS")} {threshold.toLocaleString("es-AR")}
                           </option>
                         ))}
                       </select>
@@ -764,7 +841,7 @@ export default function CreateRental() {
                         </option>
                         {priceThresholds.map((threshold) => (
                           <option key={threshold} value={String(threshold)}>
-                            Hasta ARS {threshold.toLocaleString("es-AR")}
+                            {t("create_rental.to_ars", "Hasta ARS")} {threshold.toLocaleString("es-AR")}
                           </option>
                         ))}
                       </select>
@@ -787,7 +864,7 @@ export default function CreateRental() {
                         </option>
                         {availableVehicleTypes.map((type) => (
                           <option key={type} value={type}>
-                            {type}
+                            {t(`vehicle_types.${type}`, type)}
                           </option>
                         ))}
                       </select>
@@ -866,7 +943,7 @@ export default function CreateRental() {
 
                           <div className="flex flex-wrap gap-1.5 sm:gap-2 my-2.5 sm:my-4">
                             <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                              {carItem.tipoVehiculo}
+                              {t(`vehicle_types.${carItem.tipoVehiculo}`, carItem.tipoVehiculo)}
                             </div>
                             {carItem.año && (
                               <div className="hidden sm:inline-flex badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
@@ -877,7 +954,7 @@ export default function CreateRental() {
                             {carItem.color && (
                               <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
                                 <Palette size={14} className="opacity-70" />{" "}
-                                {carItem.color}
+                                {t(`colors.${carItem.color}`, carItem.color)}
                               </div>
                             )}
                           </div>
@@ -897,7 +974,7 @@ export default function CreateRental() {
                                   maximumFractionDigits: 0,
                                 }).format(carItem.costo)}
                                 <span className="text-[10px] sm:text-sm font-normal text-base-content/60 ml-1">
-                                  /día
+                                  {t("create_rental.per_day", "/día")}
                                 </span>
                               </p>
                             </div>
@@ -953,6 +1030,16 @@ export default function CreateRental() {
               {t("create_rental.pickup_data", "Datos de retiro")}
             </h2>
 
+            <div className="alert alert-info bg-info/10 text-info-content border border-info/20 shadow-sm mb-6 flex items-start gap-3">
+              <Info className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              <span>
+                {t(
+                  "create_rental.special_needs_notice",
+                  "En caso de necesitar una adaptación especial, llevar mascotas o necesitar sillas especiales para niños, por favor póngase en contacto con la agencia indicando su número de reserva luego de terminar el trámite de alquiler."
+                )}
+              </span>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               <div className="card bg-base-200/60 backdrop-blur-sm shadow-xl border border-base-content/5 overflow-visible">
                 <div className="card-body p-6 md:p-8 space-y-6">
@@ -993,53 +1080,67 @@ export default function CreateRental() {
                   </div>
 
                   {formData.retiroTipo === "otro" && (
-                    <div className="form-control">
-                      <label className="label pb-1">
-                        <span className="label-text font-medium text-base-content/80">
-                          {t(
-                            "create_rental.pickup_location",
-                            "Indique la ubicación",
-                          )}
-                        </span>
-                      </label>
-                      <select
-                        name="retiroLugar"
-                        value={formData.retiroLugar}
-                        onChange={handleInputChange}
-                        className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
-                      >
-                        <option value="">
-                          {t(
-                            "create_rental.pickup_location_select",
-                            "Seleccione una ubicación",
-                          )}
-                        </option>
-                        <option value="Ezeiza">
-                          {t(
-                            "create_rental.pickup_location_home",
-                            "Aeropuerto Ezeiza",
-                          )}
-                        </option>
-                        <option value="Aeroparque">
-                          {t(
-                            "create_rental.pickup_location_work",
-                            "Aeroparque",
-                          )}
-                        </option>
-                        <option value="Ambrosio Taravella">
-                          {t(
-                            "create_rental.pickup_location_other",
-                            "Aeropuerto Córdoba Ambrosio Taravella",
-                          )}
-                        </option>
-                        <option value="Aeropuerto Rosario">
-                          {t(
-                            "create_rental.pickup_locationRosario",
-                            "Aeropuerto Rosario",
-                          )}
-                        </option>
-                      </select>
-                    </div>
+                    <>
+                      <div className="form-control mb-4">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium text-base-content/80">
+                            {t(
+                              "create_rental.pickup_province",
+                              "Provincia o Región",
+                            )}
+                          </span>
+                        </label>
+                        <select
+                          name="retiroProvincia"
+                          value={formData.retiroProvincia}
+                          onChange={handleInputChange}
+                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                        >
+                          <option value="">
+                            {t(
+                              "create_rental.pickup_province_select",
+                              "Seleccione una provincia",
+                            )}
+                          </option>
+                          {Object.keys(pickupLocations).map((prov) => (
+                            <option key={prov} value={prov}>
+                              {prov}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-control">
+                        <label className="label pb-1">
+                          <span className="label-text font-medium text-base-content/80">
+                            {t(
+                              "create_rental.pickup_location",
+                              "Indique la ubicación",
+                            )}
+                          </span>
+                        </label>
+                        <select
+                          name="retiroLugar"
+                          value={formData.retiroLugar}
+                          onChange={handleInputChange}
+                          disabled={!formData.retiroProvincia}
+                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                        >
+                          <option value="">
+                            {t(
+                              "create_rental.pickup_location_select",
+                              "Seleccione una ubicación",
+                            )}
+                          </option>
+                          {formData.retiroProvincia &&
+                            pickupLocations[formData.retiroProvincia]?.map((loc) => (
+                              <option key={loc} value={loc}>
+                                {loc}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    </>
                   )}
 
                   <div className="divider my-0" />
@@ -1090,7 +1191,9 @@ export default function CreateRental() {
                       <span className="font-semibold text-base-content text-right">
                         {formData.retiroTipo === "sucursal"
                           ? t("create_rental.pickup_branch", "Envío a sucursal")
-                          : formData.retiroLugar || "-"}
+                          : formData.retiroProvincia && formData.retiroLugar
+                            ? `${formData.retiroProvincia} - ${formData.retiroLugar}`
+                            : "-"}
                       </span>
                     </div>
                     <div className="flex justify-between gap-4">
@@ -1235,7 +1338,7 @@ export default function CreateRental() {
                           onChange={handleInputChange}
                           className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
                           aria-label="Email"
-                          placeholder="Ej. cliente@correo.com"
+                          placeholder={t("create_rental.email_placeholder", "Ej. cliente@correo.com")}
                         />
                       </div>
 
@@ -1337,6 +1440,7 @@ export default function CreateRental() {
                           name="fechaDeNacimiento"
                           value={formData.fechaDeNacimiento}
                           max={maxDateString}
+                          lang={i18n.language}
                           onChange={handleInputChange}
                           className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
                           aria-label="Fecha de nacimiento"
@@ -1706,10 +1810,10 @@ export default function CreateRental() {
                         {t("create_rental.client_label", "Cliente")}:
                       </p>
                       <p>
-                        {formData.nombre} {formData.apellido}
+                        <span className="opacity-80">{t("create_rental.name", "Nombre")}:</span> {formData.nombre} {formData.apellido}
                       </p>
                       <p>
-                        {formData.tipo_dni}: {formData.dni}
+                        <span className="opacity-80">{t("create_rental.doc_type", "Tipo de documento")}:</span> {formData.tipo_dni === "PAS" ? t("create_rental.passport", "Pasaporte") : formData.tipo_dni} - {formData.dni}
                       </p>
                       <p>
                         {t("create_rental.nationality", "Nacionalidad")}:{" "}
@@ -1834,7 +1938,7 @@ export default function CreateRental() {
               onClick={handleFinalCreate}
               className={`btn btn-success ${isLoading ? "loading" : ""}`}
             >
-              {t("create_rental.confirm", "Confirmar y crear")}
+              {t("create_rental.confirm", "Confirmar reserva")}
             </button>
           )}
         </div>

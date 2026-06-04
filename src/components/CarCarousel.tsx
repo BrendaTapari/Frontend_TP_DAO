@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import mockCars from "../data/mockCars.json";
+import { useTranslation } from "react-i18next";
 
 // Filtrar solo autos disponibles y transformar al formato del carrusel
 const availableCars = mockCars.filter((car) => car.estado === "disponible");
@@ -15,6 +16,7 @@ export default function CarCarousel() {
   const [, setLocation] = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 1023px)");
@@ -182,6 +184,7 @@ export default function CarCarousel() {
         className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 sm:px-6 lg:px-10 z-50 pointer-events-none"
         role="group"
         aria-label="Controles del carrusel"
+        dir="ltr"
       >
         <button
           onClick={prevCar}
@@ -244,12 +247,12 @@ export default function CarCarousel() {
               className="inline-block px-5 sm:px-6 py-2 border border-primary/30 rounded-full text-primary text-sm sm:text-base mt-2 font-semibold hover:bg-primary/10 transition-all cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-primary"
               aria-label={`Ver detalles del ${cars[activeIndex].name}`}
             >
-              Ver Detalles
+              {t("carousel.view_details")}
             </button>
           </>
         ) : (
           <p className="text-lg text-gray-300">
-            No hay vehículos disponibles en este momento
+            {t("carousel.no_available")}
           </p>
         )}
       </div>
@@ -259,6 +262,7 @@ export default function CarCarousel() {
         className="flex gap-2 sm:gap-3 mt-4 sm:mt-6"
         role="group"
         aria-label="Indicadores del carrusel"
+        dir="ltr"
       >
         {cars.map((_, idx) => (
           <button

@@ -69,7 +69,7 @@
     "vehicle_stats": "Liste verfügbarer Fahrzeuge",
     "year": "Jahr",
     "cost": "Kosten",
-    "maintenance": "Wartung",
+    "maintenance": "In Wartung",
     "state": "Status",
     "months": "Monate",
     "view_details": "Details anzeigen",
@@ -77,7 +77,6 @@
     "total_vehicles": "Fahrzeuge insgesamt",
     "available": "Verfügbar",
     "renting": "In Vermietung",
-    "maintenance": "In Wartung",
     "statistics": "Flottenstatistik",
     "fleet_stats": "Flottenstatistik"
   },
@@ -226,6 +225,32 @@
     "present_qr": "Zeigen Sie den QR-Code bei der Fahrzeugabholung in unserem Büro vor.",
     "redirect_in": "Sie werden in",
     "redirect_suffix": "Sekunden zur Startseite weitergeleitet...",
-    "go_home_now": "Jetzt zur Startseite"
+    "go_home_now": "Jetzt zur Startseite",
+    "filter_min_price": "Min. Preis pro Tag",
+    "filter_max_price": "Max. Preis pro Tag",
+    "filter_any": "Beliebig",
+    "filter_vehicle_type": "Fahrzeugtyp",
+    "filter_all": "Alle",
+    "clear_filters": "Filter löschen",
+    "filtered_results": "Angezeigte Ergebnisse",
+    "no_filtered_cars": "Keine Autos entsprechen den gewählten Filtern",
+    "from_ars": "Ab ARS",
+    "to_ars": "Bis ARS",
+    "special_needs_notice": "Wenn Sie eine spezielle Anpassung benötigen, Haustiere mitnehmen oder spezielle Kindersitze benötigen, wenden Sie sich bitte nach Abschluss des Mietvorgangs an die Agentur und geben Sie Ihre Reservierungsnummer an.",
+    "email_placeholder": "Z.B. client@email.com"
+  },
+  "vehicle_types": {
+    "SUV": "SUV",
+    "Sedán": "Limousine",
+    "Familiar": "Kombi",
+    "Compacto": "Kompaktwagen"
+  },
+  "colors": {
+    "Blanco": "Weiß",
+    "Negro": "Schwarz",
+    "Gris": "Grau",
+    "Plata": "Silber",
+    "Rojo": "Rot",
+    "Azul": "Blau"
   }
 }

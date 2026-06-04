@@ -69,7 +69,7 @@
     "vehicle_stats": "Lista de veículos disponíveis",
     "year": "Ano",
     "cost": "Custo",
-    "maintenance": "Manutenção",
+    "maintenance": "Em manutenção",
     "state": "Status",
     "months": "meses",
     "view_details": "Ver detalhes",
@@ -77,7 +77,6 @@
     "total_vehicles": "Total de carros",
     "available": "Disponíveis",
     "renting": "Em aluguel",
-    "maintenance": "Em manutenção",
     "statistics": "Estatísticas da frota",
     "fleet_stats": "Estatísticas da frota"
   },
@@ -226,6 +225,32 @@
     "present_qr": "Apresente o código QR ao retirar o veículo em nossas filiais.",
     "redirect_in": "Você será redirecionado ao início em",
     "redirect_suffix": "segundos...",
-    "go_home_now": "Ir para o início agora"
+    "go_home_now": "Ir para o início agora",
+    "filter_min_price": "Preço mínimo por dia",
+    "filter_max_price": "Preço máximo por dia",
+    "filter_any": "Qualquer",
+    "filter_vehicle_type": "Tipo de veículo",
+    "filter_all": "Todos",
+    "clear_filters": "Limpar filtros",
+    "filtered_results": "Resultados mostrados",
+    "no_filtered_cars": "Nenhum carro corresponde aos filtros selecionados",
+    "from_ars": "De ARS",
+    "to_ars": "Até ARS",
+    "special_needs_notice": "Caso necessite de adaptação especial, leve animais de estimação ou necessite de cadeiras de criança especiais, por favor contacte a agência indicando o seu número de reserva após concluir o processo de aluguer.",
+    "email_placeholder": "Ex. cliente@email.com"
+  },
+  "vehicle_types": {
+    "SUV": "SUV",
+    "Sedán": "Sedã",
+    "Familiar": "Familiar",
+    "Compacto": "Compacto"
+  },
+  "colors": {
+    "Blanco": "Branco",
+    "Negro": "Preto",
+    "Gris": "Cinza",
+    "Plata": "Prata",
+    "Rojo": "Vermelho",
+    "Azul": "Azul"
   }
 }

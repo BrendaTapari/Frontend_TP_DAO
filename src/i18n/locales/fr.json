@@ -69,7 +69,7 @@
     "vehicle_stats": "Liste des véhicules disponibles",
     "year": "Année",
     "cost": "Coût",
-    "maintenance": "Entretien",
+    "maintenance": "En maintenance",
     "state": "État",
     "months": "mois",
     "view_details": "Voir les détails",
@@ -77,7 +77,6 @@
     "total_vehicles": "Véhicules totaux",
     "available": "Disponibles",
     "renting": "En location",
-    "maintenance": "En maintenance",
     "statistics": "Statistiques de la flotte",
     "fleet_stats": "Statistiques de la flotte"
   },
@@ -226,6 +225,32 @@
     "present_qr": "Présentez le code QR lors du retrait du véhicule dans nos bureaux.",
     "redirect_in": "Vous serez redirigé vers l'accueil dans",
     "redirect_suffix": "secondes...",
-    "go_home_now": "Aller à l'accueil maintenant"
+    "go_home_now": "Aller à l'accueil maintenant",
+    "filter_min_price": "Prix min par jour",
+    "filter_max_price": "Prix max par jour",
+    "filter_any": "N'importe quel",
+    "filter_vehicle_type": "Type de véhicule",
+    "filter_all": "Tous",
+    "clear_filters": "Effacer les filtres",
+    "filtered_results": "Résultats affichés",
+    "no_filtered_cars": "Aucune voiture ne correspond aux filtres",
+    "from_ars": "À partir de ARS",
+    "to_ars": "Jusqu'à ARS",
+    "special_needs_notice": "Si vous avez besoin d'une adaptation spéciale, si vous transportez des animaux de compagnie ou si vous avez besoin de sièges enfants spéciaux, veuillez contacter l'agence en indiquant votre numéro de réservation après avoir terminé le processus de location.",
+    "email_placeholder": "Ex. client@email.com"
+  },
+  "vehicle_types": {
+    "SUV": "SUV",
+    "Sedán": "Berline",
+    "Familiar": "Familiale",
+    "Compacto": "Compacte"
+  },
+  "colors": {
+    "Blanco": "Blanc",
+    "Negro": "Noir",
+    "Gris": "Gris",
+    "Plata": "Argent",
+    "Rojo": "Rouge",
+    "Azul": "Bleu"
   }
 }
