@@ -24,7 +24,7 @@ import {
   Settings2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
+import CoveredCarImage from "../../images/CoveredCar.jpg";
 import Tilt from "react-parallax-tilt";
 import { getAviableCarsForRental } from "../../services/autosService";
 import { sendReservationConfirmation } from "../../services/emailService";
