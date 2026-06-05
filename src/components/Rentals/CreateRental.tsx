@@ -24,7 +24,7 @@ import {
   Settings2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import CoveredCarImage from "../../images/CoveredCar.jpg";
+
 import Tilt from "react-parallax-tilt";
 import { getAviableCarsForRental } from "../../services/autosService";
 import { sendReservationConfirmation } from "../../services/emailService";
@@ -91,9 +91,9 @@ const pickupLocations: Record<string, string[]> = {
     "Alvear Palace Hotel",
     "Faena Hotel Buenos Aires",
     "Alvear Icon Hotel & Residences",
-    "Sofitel Buenos Aires Recoleta"
+    "Sofitel Buenos Aires Recoleta",
   ],
-  "Córdoba": [
+  Córdoba: [
     "Aeropuerto Internacional Ingeniero Aeronáutico Ambrosio Taravella",
     "Aeroclub La Cumbre",
     "Aeroclub Alta Gracia",
@@ -102,16 +102,16 @@ const pickupLocations: Record<string, string[]> = {
     "Quinto Centenario Hotel",
     "Estancia La Paz Hotel, Golf & Polo",
     "El Colibrí - Estancia de Charme",
-    "Pueblo Nativo Resort Golf & Spa"
+    "Pueblo Nativo Resort Golf & Spa",
   ],
-  "Mendoza": [
+  Mendoza: [
     "Aeropuerto Internacional Gobernador Francisco Gabrielli",
     "Aeroclub Mendoza",
     "Cavas Wine Lodge",
     "The Vines Resort & Spa",
     "Casa de Uco Vineyards & Wine Resort",
     "SB Winemaker's House & Spa Suites",
-    "Park Hyatt Mendoza Hotel, Casino & Spa"
+    "Park Hyatt Mendoza Hotel, Casino & Spa",
   ],
   "Río Negro y Neuquén": [
     "Aeropuerto Internacional Teniente Luis Candelaria",
@@ -120,7 +120,7 @@ const pickupLocations: Record<string, string[]> = {
     "Arelauquen Lodge, a Tribute Portfolio Hotel",
     "Correntoso Lake & River Hotel",
     "Las Balsas Relais & Châteaux",
-    "Loi Suites Chapelco Hotel"
+    "Loi Suites Chapelco Hotel",
   ],
   "Entre Ríos": [
     "Aeropuerto General Justo José de Urquiza",
@@ -128,21 +128,21 @@ const pickupLocations: Record<string, string[]> = {
     "Los Ombúes Lodge",
     "Estancia Santa Rosa",
     "River Plate Wingshooting & Big Game Lodges",
-    "Estancia La Pelada"
+    "Estancia La Pelada",
   ],
-  "Salta": [
+  Salta: [
     "Aeropuerto Internacional Martín Miguel de Güemes",
     "Grace Cafayate",
     "House of Jasmines Relais & Châteaux",
     "Estancia Colomé",
-    "Alejandro 1º Hotel"
+    "Alejandro 1º Hotel",
   ],
   "Tierra del Fuego": [
     "Aeropuerto Internacional Malvinas Argentinas",
     "Arakur Ushuaia Resort & Spa",
     "Los Cauquenes Resort & Spa",
-    "Las Hayas Ushuaia Resort"
-  ]
+    "Las Hayas Ushuaia Resort",
+  ],
 };
 
 export default function CreateRental() {
@@ -156,7 +156,12 @@ export default function CreateRental() {
     },
   };
   const calendarLocaleMap: Record<string, typeof es> = {
-    es, en: enUS, fr, de, pt, ar: customArLocale as typeof es,
+    es,
+    en: enUS,
+    fr,
+    de,
+    pt,
+    ar: customArLocale as typeof es,
   };
   const calendarLocale = calendarLocaleMap[i18n.language] ?? es;
   const chauffeurCostPerDay = 150000;
@@ -467,12 +472,19 @@ export default function CreateRental() {
         }));
         return;
       }
-      if (name === "nombre" || name === "apellido" || name === "tarjetaNombre") {
+      if (
+        name === "nombre" ||
+        name === "apellido" ||
+        name === "tarjetaNombre"
+      ) {
         let filteredValue = value;
         if (i18n.language === "ar") {
           filteredValue = value.replace(/[^\u0600-\u06FF\s]/g, "");
         } else {
-          filteredValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙäëïöüÄËÏÖÜ\s]/g, "");
+          filteredValue = value.replace(
+            /[^a-zA-ZáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙäëïöüÄËÏÖÜ\s]/g,
+            "",
+          );
         }
         setFormData((p) => ({
           ...p,
@@ -526,7 +538,10 @@ export default function CreateRental() {
       return;
     }
     if (currentStep === 3) {
-      if (formData.retiroTipo === "otro" && (!formData.retiroProvincia.trim() || !formData.retiroLugar.trim())) {
+      if (
+        formData.retiroTipo === "otro" &&
+        (!formData.retiroProvincia.trim() || !formData.retiroLugar.trim())
+      ) {
         toast.error(
           t(
             "create_rental.error_pickup_location",
@@ -605,7 +620,10 @@ export default function CreateRental() {
     const ok = await handleDateValidation();
     if (!ok) return;
 
-    if (formData.retiroTipo === "otro" && (!formData.retiroProvincia.trim() || !formData.retiroLugar.trim())) {
+    if (
+      formData.retiroTipo === "otro" &&
+      (!formData.retiroProvincia.trim() || !formData.retiroLugar.trim())
+    ) {
       toast.error(
         t(
           "create_rental.error_pickup_location",
@@ -697,7 +715,10 @@ export default function CreateRental() {
         return (
           <div className="space-y-6">
             <h2 className="text-3xl font-semibold text-center mt-15 mb-6">
-              {t("create_rental.step1_title", "Selecciona el periodo de alquiler")}
+              {t(
+                "create_rental.step1_title",
+                "Selecciona el periodo de alquiler",
+              )}
             </h2>
             {formData.fechaInicio && formData.fechaFin && (
               <div className="text-center">
@@ -825,7 +846,8 @@ export default function CreateRental() {
                         </option>
                         {priceThresholds.map((threshold) => (
                           <option key={threshold} value={String(threshold)}>
-                            {t("create_rental.from_ars", "Desde ARS")} {threshold.toLocaleString("es-AR")}
+                            {t("create_rental.from_ars", "Desde ARS")}{" "}
+                            {threshold.toLocaleString("es-AR")}
                           </option>
                         ))}
                       </select>
@@ -848,7 +870,8 @@ export default function CreateRental() {
                         </option>
                         {priceThresholds.map((threshold) => (
                           <option key={threshold} value={String(threshold)}>
-                            {t("create_rental.to_ars", "Hasta ARS")} {threshold.toLocaleString("es-AR")}
+                            {t("create_rental.to_ars", "Hasta ARS")}{" "}
+                            {threshold.toLocaleString("es-AR")}
                           </option>
                         ))}
                       </select>
@@ -928,7 +951,7 @@ export default function CreateRental() {
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               onError={(e) => {
                                 e.currentTarget.src =
-                                  "/images/car-placeholder.jpg";
+                                  "/images/car-placeholder.webp";
                               }}
                             />
                           ) : (
@@ -949,18 +972,48 @@ export default function CreateRental() {
                           </div>
 
                           <div className="flex flex-wrap items-center gap-3 sm:gap-4 my-2.5 sm:my-4 text-xs sm:text-sm text-base-content/70">
-                            <div className="flex items-center gap-1.5" title={t("fleet.gearbox", "Caja")}>
-                              <Settings2 size={16} className="text-base-content/40" />
-                              <span className="font-medium text-base-content">{carItem.caja ? t(`fleet.gearbox_${carItem.caja.toLowerCase()}`, carItem.caja) : "-"}</span>
+                            <div
+                              className="flex items-center gap-1.5"
+                              title={t("fleet.gearbox", "Caja")}
+                            >
+                              <Settings2
+                                size={16}
+                                className="text-base-content/40"
+                              />
+                              <span className="font-medium text-base-content">
+                                {carItem.caja
+                                  ? t(
+                                      `fleet.gearbox_${carItem.caja.toLowerCase()}`,
+                                      carItem.caja,
+                                    )
+                                  : "-"}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-1.5" title={t("fleet.passengers", "Pasajeros")}>
-                              <Users size={16} className="text-base-content/40" />
-                              <span className="font-medium text-base-content">{carItem.cant_pasajeros} {t("fleet.people", "pasajeros")}</span>
+                            <div
+                              className="flex items-center gap-1.5"
+                              title={t("fleet.passengers", "Pasajeros")}
+                            >
+                              <Users
+                                size={16}
+                                className="text-base-content/40"
+                              />
+                              <span className="font-medium text-base-content">
+                                {carItem.cant_pasajeros}{" "}
+                                {t("fleet.people", "pasajeros")}
+                              </span>
                             </div>
                             {carItem.litros_baul && (
-                              <div className="flex items-center gap-1.5" title={t("fleet.trunk", "Baúl")}>
-                                <Briefcase size={16} className="text-base-content/40" />
-                                <span className="font-medium text-base-content">{carItem.litros_baul} L</span>
+                              <div
+                                className="flex items-center gap-1.5"
+                                title={t("fleet.trunk", "Baúl")}
+                              >
+                                <Briefcase
+                                  size={16}
+                                  className="text-base-content/40"
+                                />
+                                <span className="font-medium text-base-content">
+                                  {carItem.litros_baul} L
+                                </span>
                               </div>
                             )}
                           </div>
@@ -998,7 +1051,10 @@ export default function CreateRental() {
                                 }}
                               >
                                 {selectedCarId === carItem.id
-                                  ? t("create_rental.next_step", "Siguiente paso")
+                                  ? t(
+                                      "create_rental.next_step",
+                                      "Siguiente paso",
+                                    )
                                   : t("create_rental.rent_btn", "Alquilar")}
                               </button>
                             </div>
@@ -1045,7 +1101,7 @@ export default function CreateRental() {
               <span>
                 {t(
                   "create_rental.special_needs_notice",
-                  "En caso de necesitar una adaptación especial, llevar mascotas o necesitar sillas especiales para niños, por favor póngase en contacto con la agencia indicando su número de reserva luego de terminar el trámite de alquiler."
+                  "En caso de necesitar una adaptación especial, llevar mascotas o necesitar sillas especiales para niños, por favor póngase en contacto con la agencia indicando su número de reserva luego de terminar el trámite de alquiler.",
                 )}
               </span>
             </div>
@@ -1143,11 +1199,13 @@ export default function CreateRental() {
                             )}
                           </option>
                           {formData.retiroProvincia &&
-                            pickupLocations[formData.retiroProvincia]?.map((loc) => (
-                              <option key={loc} value={loc}>
-                                {loc}
-                              </option>
-                            ))}
+                            pickupLocations[formData.retiroProvincia]?.map(
+                              (loc) => (
+                                <option key={loc} value={loc}>
+                                  {loc}
+                                </option>
+                              ),
+                            )}
                         </select>
                       </div>
                     </>
@@ -1348,7 +1406,10 @@ export default function CreateRental() {
                           onChange={handleInputChange}
                           className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
                           aria-label="Email"
-                          placeholder={t("create_rental.email_placeholder", "Ej. cliente@correo.com")}
+                          placeholder={t(
+                            "create_rental.email_placeholder",
+                            "Ej. cliente@correo.com",
+                          )}
                         />
                       </div>
 
@@ -1636,7 +1697,7 @@ export default function CreateRental() {
                         alt={`${selectedCar.marca} ${selectedCar.modelo}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = "/images/car-placeholder.jpg";
+                          e.currentTarget.src = "/images/car-placeholder.webp";
                         }}
                       />
                       <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base-100 to-transparent z-10" />
@@ -1649,19 +1710,26 @@ export default function CreateRental() {
 
                     <div className="space-y-3 text-sm text-base-content/80">
                       <div className="flex justify-between">
-                        <span>{t("create_rental.selected_car", "Auto seleccionado")}</span>
+                        <span>
+                          {t("create_rental.selected_car", "Auto seleccionado")}
+                        </span>
                         <span className="font-semibold text-base-content">
                           {selectedCar?.marca} {selectedCar?.modelo}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>{t("create_rental.duration_label", "Duración")}</span>
+                        <span>
+                          {t("create_rental.duration_label", "Duración")}
+                        </span>
                         <span className="font-semibold text-base-content">
-                          {dateCalculations.days} {t("create_rental.days", "días")}
+                          {dateCalculations.days}{" "}
+                          {t("create_rental.days", "días")}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>{t("create_rental.price_per_day", "Precio por día")}</span>
+                        <span>
+                          {t("create_rental.price_per_day", "Precio por día")}
+                        </span>
                         <span className="font-semibold text-base-content">
                           {new Intl.NumberFormat("es-AR", {
                             style: "currency",
@@ -1708,7 +1776,10 @@ export default function CreateRental() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-lg">
                         <span className="text-base-content/80">
-                          {t("create_rental.total_rental", "Total del alquiler")}
+                          {t(
+                            "create_rental.total_rental",
+                            "Total del alquiler",
+                          )}
                         </span>
                         <span className="font-bold text-base-content">
                           {new Intl.NumberFormat("es-AR", {
@@ -1722,10 +1793,16 @@ export default function CreateRental() {
                       <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/20 mt-6">
                         <div>
                           <span className="block font-bold text-primary text-lg">
-                            {t("create_rental.deposit_today", "Seña a pagar hoy")}
+                            {t(
+                              "create_rental.deposit_today",
+                              "Seña a pagar hoy",
+                            )}
                           </span>
                           <span className="text-xs text-primary/70 block mt-1">
-                            {t("create_rental.deposit_note", "Monto para reservar (20%)")}
+                            {t(
+                              "create_rental.deposit_note",
+                              "Monto para reservar (20%)",
+                            )}
                           </span>
                         </div>
                         <span className="font-black text-2xl text-primary">
@@ -1820,10 +1897,19 @@ export default function CreateRental() {
                         {t("create_rental.client_label", "Cliente")}:
                       </p>
                       <p>
-                        <span className="opacity-80">{t("create_rental.name", "Nombre")}:</span> {formData.nombre} {formData.apellido}
+                        <span className="opacity-80">
+                          {t("create_rental.name", "Nombre")}:
+                        </span>{" "}
+                        {formData.nombre} {formData.apellido}
                       </p>
                       <p>
-                        <span className="opacity-80">{t("create_rental.doc_type", "Tipo de documento")}:</span> {formData.tipo_dni === "PAS" ? t("create_rental.passport", "Pasaporte") : formData.tipo_dni} - {formData.dni}
+                        <span className="opacity-80">
+                          {t("create_rental.doc_type", "Tipo de documento")}:
+                        </span>{" "}
+                        {formData.tipo_dni === "PAS"
+                          ? t("create_rental.passport", "Pasaporte")
+                          : formData.tipo_dni}{" "}
+                        - {formData.dni}
                       </p>
                       <p>
                         {t("create_rental.nationality", "Nacionalidad")}:{" "}
@@ -1964,9 +2050,15 @@ export default function CreateRental() {
               {t("create_rental.success_title", "¡Reserva Exitosa!")}
             </h3>
             <p className="py-2 text-lg text-base-content/80">
-              {t("create_rental.email_sent_prefix", "Se ha enviado un correo a")}{" "}
+              {t(
+                "create_rental.email_sent_prefix",
+                "Se ha enviado un correo a",
+              )}{" "}
               <strong className="text-primary">{formData.email}</strong>{" "}
-              {t("create_rental.email_sent_suffix", "con los detalles de la reserva y un código QR.")}
+              {t(
+                "create_rental.email_sent_suffix",
+                "con los detalles de la reserva y un código QR.",
+              )}
             </p>
 
             <div className="bg-base-200 border border-base-300 p-6 rounded-xl my-6 text-left shadow-sm">
@@ -1974,9 +2066,24 @@ export default function CreateRental() {
                 {t("create_rental.next_steps", "Pasos a seguir:")}
               </p>
               <ul className="list-disc list-inside space-y-2 text-base-content/80">
-                <li>{t("create_rental.check_inbox", "Revisa tu bandeja de entrada (y la carpeta de spam).")}</li>
-                <li>{t("create_rental.keep_qr", "Conserva el código QR que recibiste en el correo.")}</li>
-                <li>{t("create_rental.present_qr", "Presenta el código QR al momento de retirar el vehículo en nuestras oficinas.")}</li>
+                <li>
+                  {t(
+                    "create_rental.check_inbox",
+                    "Revisa tu bandeja de entrada (y la carpeta de spam).",
+                  )}
+                </li>
+                <li>
+                  {t(
+                    "create_rental.keep_qr",
+                    "Conserva el código QR que recibiste en el correo.",
+                  )}
+                </li>
+                <li>
+                  {t(
+                    "create_rental.present_qr",
+                    "Presenta el código QR al momento de retirar el vehículo en nuestras oficinas.",
+                  )}
+                </li>
               </ul>
             </div>
 

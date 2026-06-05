@@ -15,17 +15,17 @@ export default function PremiumFeatures() {
 
   const detailImages = [
     {
-      src: "/Images/landing/niños_en_auto.jpg",
+      src: "/Images/landing/niños_en_auto.webp",
       alt: t("premium_features.feature1_title"),
       objectPosition: "bottom",
     },
     {
-      src: "/Images/landing/gps.jpg",
+      src: "/Images/landing/gps.webp",
       alt: t("premium_features.feature2_title"),
       objectPosition: "center",
     },
     {
-      src: "/Images/landing/autos_discapacitados.jpg",
+      src: "/Images/landing/autos_discapacitados.webp",
       alt: t("premium_features.feature3_title"),
       objectPosition: "center",
     },
@@ -211,7 +211,10 @@ export default function PremiumFeatures() {
                       src={detailImages[index]?.src}
                       alt={detailImages[index]?.alt}
                       className="w-full h-full object-cover"
-                      style={{ objectPosition: detailImages[index]?.objectPosition || 'center' }}
+                      style={{
+                        objectPosition:
+                          detailImages[index]?.objectPosition || "center",
+                      }}
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.7 }}
                     />
