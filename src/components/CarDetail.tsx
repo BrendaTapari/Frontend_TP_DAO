@@ -42,7 +42,7 @@ export default function CarDetail() {
   };
 
   const handleBtnAlquilar = () => {
-    if (auto.estado === 'disponible') {
+    if (auto?.estado === 'disponible') {
       setLocation(`/add-rental`);
     }
   };
