@@ -93,13 +93,18 @@
     "daily_cost": "التكلفة اليومية",
     "description_title": "الوصف",
     "questions": "أسئلة حول هذه المركبة؟",
+    "gearbox_automática": "أوتوماتيكي",
     "gearbox_automático": "أوتوماتيكي",
     "gearbox_manual": "يدوي",
     "description_text": "مركبة {{marca}} {{modelo}} لعام {{year}}. لوحة الترخيص {{plate}}. مثالية لرحلاتك حول كوردوبا. استمتع بالراحة والأمان في كل كيلومتر.",
     "daily_cost_inclusive": "التكلفة اليومية. تشمل الضرائب.",
     "extreme_performance": "عائلة من سيارات الأداء الفائق",
     "maintenance_period": "صيانة",
-    "location": "قرطبة، الأرجنتين"
+    "location": "قرطبة، الأرجنتين",
+    "or_similar": "أو ما شابه",
+    "people": "أشخاص",
+    "trunk": "صندوق السيارة",
+    "select": "اختيار"
   },
   "rentals": {
     "title": "إدارة الإيجارات",

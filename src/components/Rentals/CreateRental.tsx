@@ -984,11 +984,15 @@ export default function CreateRental() {
                                 className={`btn ${selectedCarId === carItem.id ? "btn-primary shadow-lg shadow-primary/40" : "btn-outline border-base-content/20 hover:bg-base-200 hover:text-base-content"}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleCarSelection(carItem.id);
+                                  if (selectedCarId === carItem.id) {
+                                    handleNextStep();
+                                  } else {
+                                    handleCarSelection(carItem.id);
+                                  }
                                 }}
                               >
                                 {selectedCarId === carItem.id
-                                  ? t("create_rental.selected", "Seleccionado")
+                                  ? t("create_rental.next_step", "Siguiente paso")
                                   : t("create_rental.rent_btn", "Alquilar")}
                               </button>
                             </div>

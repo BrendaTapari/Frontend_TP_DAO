@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Users, Briefcase, Settings2, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getAutos } from "../services/autosService";
 import { useVisibleFocus } from "../hooks/useVisibleFocus";
@@ -24,7 +24,7 @@ export default function CarFleet() {
   const [, setLocation] = useLocation();
   const [autos, setAutos] = useState<Auto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { t, i18n } = useTranslation();
@@ -69,12 +69,12 @@ export default function CarFleet() {
   const handleListKeyDown = (e: React.KeyboardEvent) => {
     if (!autos.length) return;
 
-    if (e.key === "ArrowRight") {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();
-      setFocusedIndex((prev) => (prev + 1) % autos.length);
-    } else if (e.key === "ArrowLeft") {
+      setFocusedIndex((prev) => prev === -1 ? 0 : (prev + 1) % autos.length);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       e.preventDefault();
-      setFocusedIndex((prev) => (prev - 1 + autos.length) % autos.length);
+      setFocusedIndex((prev) => prev === -1 ? autos.length - 1 : (prev - 1 + autos.length) % autos.length);
     }
   };
 
@@ -124,10 +124,10 @@ export default function CarFleet() {
           <div className="text-xl text-gray-400">{t("fleet.loading")}</div>
         </div>
       ) : (
-        <main className="px-4 lg:px-12">
+        <main className="px-4 lg:px-12 max-w-[1600px] mx-auto">
           {/* Lista de Autos */}
           <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16"
+            className="flex flex-col gap-4 max-w-5xl mx-auto"
             role="list"
             ref={listRef}
             onKeyDown={handleListKeyDown}
@@ -137,89 +137,77 @@ export default function CarFleet() {
               <article
                 key={auto.id}
                 role="listitem"
-                className={`group bg-base-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-gray-700/50 focus-within:shadow-2xl focus-within:shadow-primary/40 focus-within:ring-2 focus-within:ring-primary ${
+                className={`group bg-base-200/40 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 border border-white/5 p-4 md:p-6 flex flex-col md:flex-row items-center gap-6 md:gap-8 focus-within:ring-2 focus-within:ring-primary ${
                   focusedIndex === index ? "ring-2 ring-primary" : ""
                 }`}
                 aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
               >
-                {/* Image Container */}
-                <div className="relative h-56 p-16 bg-base-300 overflow-hidden flex items-center justify-center">
+                {/* Image */}
+                <div className="w-full md:w-64 h-48 md:h-32 flex-shrink-0 flex items-center justify-center bg-white/5 rounded-lg p-4 group-hover:bg-white/10 transition-colors">
                   <img
                     src={auto.imagen}
                     alt={`${auto.marca} ${auto.modelo}`}
-                    className=" object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-2xl font-bold text-white mb-1">
+                {/* Info (Title, Subtitle, Features) */}
+                <div className="flex-1 w-full flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl md:text-2xl font-bold text-white">
                       {auto.marca} {auto.modelo}
                     </h3>
+                    <Info size={16} className="text-gray-500 cursor-pointer hover:text-white transition-colors" />
                   </div>
-
-                  {/* Details Grid */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.year")}
-                      </p>
-                      <p className="text-lg font-semibold text-white">
-                        {auto.año}
-                      </p>
+                  <p className="text-sm text-gray-400">
+                    {auto.marca} {auto.modelo} ({auto.año}) {t("fleet.or_similar", "o similar")}
+                  </p>
+                  
+                  {/* Features */}
+                  <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-3 text-sm text-gray-300">
+                    <div className="flex items-center gap-2" title={t("fleet.gearbox", "Caja")}>
+                       <Settings2 size={16} className="text-gray-500"/>
+                       <span>{auto.caja ? t(`fleet.gearbox_${auto.caja.toLowerCase()}`, auto.caja) : "-"}</span>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.cost")}
-                      </p>
-                      <p className="text-lg font-semibold text-primary">
-                        ${auto.costo.toLocaleString()}
-                      </p>
+                    <div className="flex items-center gap-2" title={t("fleet.passengers", "Pasajeros")}>
+                       <Users size={16} className="text-gray-500"/>
+                       <span>{auto.cant_pasajeros} {t("fleet.people", "pasajeros")}</span>
                     </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.state")}
-                      </p>
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getEstadoColor(
-                          auto.estado,
-                        )}`}
-                      >
-                        {t(`fleet.status_${auto.estado}`, auto.estado.charAt(0).toUpperCase() + auto.estado.slice(1).replace("_", " "))}
-                      </span>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.gearbox", "Caja")}
-                      </p>
-                      <p className="text-sm font-semibold text-white">
-                        {auto.caja ? t(`fleet.gearbox_${auto.caja.toLowerCase()}`, auto.caja) : "-"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                        {t("fleet.passengers", "Pasajeros")}
-                      </p>
-                      <p className="text-sm font-semibold text-white">
-                        {auto.cant_pasajeros ?? "-"}
-                      </p>
-                    </div>
-
+                    {auto.litros_baul && (
+                      <div className="flex items-center gap-2" title={t("fleet.trunk", "Baúl")}>
+                         <Briefcase size={16} className="text-gray-500"/>
+                         <span>{auto.litros_baul} L</span>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  {/* Action Button */}
-                  <button
+                {/* Price and Action */}
+                <div className="w-full md:w-auto flex flex-col sm:flex-row items-center md:justify-end gap-6 md:gap-10 md:ps-8 md:border-s border-white/10">
+                   {/* Prices & Status */}
+                   <div className="flex items-center justify-between w-full sm:w-auto gap-6 md:gap-8">
+                     <div className="flex flex-col items-start sm:items-end md:items-center">
+                       <span className="text-xl md:text-2xl font-bold text-white">${auto.costo.toLocaleString()}</span>
+                       <span className="text-xs text-gray-400">{t("fleet.per_day", "Por día")}</span>
+                     </div>
+                     <div className="w-[1px] h-10 bg-white/10 hidden sm:block"></div>
+                     <div className="flex flex-col items-end sm:items-start md:items-center">
+                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-semibold border ${getEstadoColor(auto.estado)}`}>
+                         {t(`fleet.status_${auto.estado}`, auto.estado.replace("_", " "))}
+                        </span>
+                       <span className="text-[10px] uppercase tracking-widest text-gray-500 mt-2">{t("fleet.state", "Estado")}</span>
+                     </div>
+                   </div>
+                   
+                   {/* Button */}
+                   <button
                     onClick={() => setLocation(`/car-detail/${auto.id}`)}
                     onKeyDown={(e) => handleKeyDown(e, auto)}
-                    className="w-full btn btn-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-                    aria-label={`${t("fleet.view_details")} ${auto.marca} ${auto.modelo}`}
-                  >
-                    {t("fleet.view_details")}
-                  </button>
+                    className="w-full sm:w-auto btn btn-primary text-black font-semibold rounded-lg px-8 hover:opacity-90"
+                    aria-label={`${t("fleet.select")} ${auto.marca} ${auto.modelo}`}
+                   >
+                     Ver detalles
+                   </button>
                 </div>
               </article>
             ))}

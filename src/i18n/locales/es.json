@@ -94,13 +94,18 @@
     "daily_cost": "Costo Diario",
     "description_title": "Descripción",
     "questions": "¿Preguntas sobre este vehículo?",
+    "gearbox_automática": "Automática",
     "gearbox_automático": "Automático",
     "gearbox_manual": "Manual",
     "description_text": "Vehículo {{marca}} {{modelo}} del año {{year}}. Patente {{plate}}. Perfecto para tus viajes alrededor de Córdoba. Disfruta de confort y seguridad en cada kilómetro.",
     "daily_cost_inclusive": "Costo diario. Impuestos incluidos.",
     "extreme_performance": "Una familia de vehículos de rendimiento extremo",
     "maintenance_period": "Mantenimiento",
-    "location": "Córdoba, Argentina"
+    "location": "Córdoba, Argentina",
+    "or_similar": "o similar",
+    "people": "pasajeros",
+    "trunk": "Baúl",
+    "select": "Seleccionar"
   },
   "rentals": {
     "title": "Gestión de Alquileres",
@@ -196,6 +201,7 @@
     "total": "Total",
     "back": "Volver",
     "next": "Siguiente",
+    "next_step": "Siguiente paso",
     "confirm": "Confirmar reserva",
     "email": "Correo electrónico",
     "cost_per_day": "Costo por día",
