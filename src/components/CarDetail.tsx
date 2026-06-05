@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 interface Auto {
   id: number;
-  patente: string;
+  patente?: string;
   marca: string;
   modelo: string;
   año: number;

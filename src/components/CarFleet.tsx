@@ -2,8 +2,8 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Users, Briefcase, Settings2, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getAutos } from "../services/autosService";
-import { useVisibleFocus } from "../hooks/useVisibleFocus";
 import { useTranslation } from "react-i18next";
+import { useVisibleFocus } from "../hooks/useVisibleFocus";
 
 interface Auto {
   id: number;

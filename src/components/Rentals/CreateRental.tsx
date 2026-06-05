@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
-  type FormEvent,
   type ChangeEvent,
 } from "react";
 import { useLocation } from "wouter";
@@ -14,7 +13,6 @@ import toast from "react-hot-toast";
 import {
   Car,
   Calendar,
-  Palette,
   CheckCircle,
   User,
   Globe,

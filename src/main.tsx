@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 import App from "./App.tsx";
 import Navbar from "./components/Navbar.tsx";
 import { Route, Router } from "wouter";
-import CarRentals from "./components/CarRentals.tsx";
+
 import CarFleet from "./components/CarFleet.tsx";
 import CarDetail from "./components/CarDetail.tsx";
 
@@ -57,7 +57,6 @@ createRoot(document.getElementById("root")!).render(
       <Navbar />
       <Router>
         <Route path="/" component={App} />
-        <Route path="/car-rentals" component={CarRentals} />
         <Route path="/car-fleet" component={CarFleet} />{" "}
         <Route path="/car-detail/:id" component={CarDetail} />{" "}
         <Route path="/add-rental" component={CreateRental} />
