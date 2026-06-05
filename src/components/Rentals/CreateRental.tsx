@@ -21,6 +21,9 @@ import {
   IdCard,
   Mail,
   Info,
+  Users,
+  Briefcase,
+  Settings2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CoveredCarImage from "../../images/CoveredCar.jpg";
@@ -38,6 +41,9 @@ interface CarOption {
   color?: string;
   año?: number;
   tipoVehiculo: string;
+  caja?: string;
+  cant_pasajeros?: number;
+  litros_baul?: number;
 }
 
 interface CountryOption {
@@ -357,6 +363,9 @@ export default function CreateRental() {
           imagen: c.imagen,
           color: c.color,
           año: c.año,
+          caja: c.caja,
+          cant_pasajeros: c.cant_pasajeros,
+          litros_baul: c.litros_baul,
           tipoVehiculo:
             c.tipoVehiculo ?? c.tipo_vehiculo ?? inferVehicleType(c),
         }));
@@ -941,20 +950,19 @@ export default function CreateRental() {
                             </h2>
                           </div>
 
-                          <div className="flex flex-wrap gap-1.5 sm:gap-2 my-2.5 sm:my-4">
-                            <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                              {t(`vehicle_types.${carItem.tipoVehiculo}`, carItem.tipoVehiculo)}
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 my-2.5 sm:my-4 text-xs sm:text-sm text-base-content/70">
+                            <div className="flex items-center gap-1.5" title={t("fleet.gearbox", "Caja")}>
+                              <Settings2 size={16} className="text-base-content/40" />
+                              <span className="font-medium text-base-content">{carItem.caja ? t(`fleet.gearbox_${carItem.caja.toLowerCase()}`, carItem.caja) : "-"}</span>
                             </div>
-                            {carItem.año && (
-                              <div className="hidden sm:inline-flex badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                                <Calendar size={14} className="opacity-70" />{" "}
-                                {carItem.año}
-                              </div>
-                            )}
-                            {carItem.color && (
-                              <div className="badge badge-outline badge-md sm:badge-lg gap-2 py-2 sm:py-3 px-3 shadow-sm border-base-content/20 text-base-content font-medium">
-                                <Palette size={14} className="opacity-70" />{" "}
-                                {t(`colors.${carItem.color}`, carItem.color)}
+                            <div className="flex items-center gap-1.5" title={t("fleet.passengers", "Pasajeros")}>
+                              <Users size={16} className="text-base-content/40" />
+                              <span className="font-medium text-base-content">{carItem.cant_pasajeros} {t("fleet.people", "pasajeros")}</span>
+                            </div>
+                            {carItem.litros_baul && (
+                              <div className="flex items-center gap-1.5" title={t("fleet.trunk", "Baúl")}>
+                                <Briefcase size={16} className="text-base-content/40" />
+                                <span className="font-medium text-base-content">{carItem.litros_baul} L</span>
                               </div>
                             )}
                           </div>

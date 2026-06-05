@@ -2,7 +2,6 @@ import { useLocation } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { getActiveRentals, getRentals } from "../services/rentalService";
 import { ArrowLeft, Plus } from "lucide-react";
-import SpecificRental from "./Modals/SpecificRental";
 import { useVisibleFocus } from "../hooks/useVisibleFocus";
 import { useTranslation } from "react-i18next";
 
@@ -514,13 +513,7 @@ export default function CarRentals() {
       
       
       </div>
-      <SpecificRental
-        rental={selectedRental}
-        isOpen={isSpecificRentalOpen}
-        onClose={handleCloseModal}
-        onUpdate={handleRentalUpdate}
-        />
-
+    
     </div>
   );
 }

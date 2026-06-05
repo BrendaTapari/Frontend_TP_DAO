@@ -18,7 +18,7 @@ interface Auto {
 
 export default function CarDetail() {
   const [, setLocation] = useLocation();
-  const [match, params] = useRoute("/car-detail/:id");
+  const [, params] = useRoute("/car-detail/:id");
   const [auto, setAuto] = useState<Auto | null>(null);
   const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
