@@ -1,5 +1,5 @@
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, Phone, Mail, MapPin, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import mockCars from "../data/mockCars.json";
 import { useTranslation } from "react-i18next";

@@ -143,11 +143,11 @@ export default function CarFleet() {
                 aria-label={`${auto.marca} ${auto.modelo}, ${t("fleet.state")}: ${auto.estado.replace("_", " ")}`}
               >
                 {/* Image */}
-                <div className="w-full md:w-64 h-48 md:h-32 flex-shrink-0 flex items-center justify-center bg-white/5 rounded-lg p-4 group-hover:bg-white/10 transition-colors">
+                <div className="w-full md:w-64 aspect-[16/9] flex-shrink-0 overflow-hidden rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
                   <img
                     src={auto.imagen}
                     alt={`${auto.marca} ${auto.modelo}`}
-                    className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-500 ease-out"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 </div>
 

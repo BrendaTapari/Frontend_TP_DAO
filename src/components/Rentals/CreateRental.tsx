@@ -920,7 +920,7 @@ export default function CreateRental() {
                             <CheckCircle size={28} />
                           </div>
                         )}
-                        <figure className="h-36 sm:h-52 lg:h-56 relative bg-base-300  overflow-hidden">
+                        <figure className="aspect-[16/9] w-full relative bg-base-300 overflow-hidden">
                           {carItem.imagen ? (
                             <img
                               src={getImageUrl(carItem.imagen)}
