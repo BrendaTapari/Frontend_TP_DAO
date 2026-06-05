@@ -1,5 +1,5 @@
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MapPin, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import mockCars from "../data/mockCars.json";
 import { useTranslation } from "react-i18next";
@@ -77,37 +77,35 @@ export default function CarDetail() {
       {/* Background Glow */}
       <div className="absolute bottom-0 start-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px] -translate-x-1/3 rtl:translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
 
-      {/* Navigation */}
-      <div className="relative z-20 px-6 py-8 md:px-12 flex mt-20 justify-between items-center">
-        <button
-          onClick={() => setLocation("/car-fleet")}
-          data-tip={t("fleet.back_to_fleet", "Volver a la flota")}
-          className="flex btn btn-circle border border-white/10 bg-black/20 tooltip tooltip-right rtl:tooltip-left text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 items-center gap-3 text-white/50 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={24} className="rtl:rotate-180" />
-        </button>
 
-      </div>
 
-      <div className="relative z-10 max-w-[1600px] mx-auto px-6 md:px-12 pt-4">
+      <div className="relative z-10 max-w-[1600px] mx-auto md:mt-20 px-6 md:px-12 pt-4">
         {/* Header Section: Title & Price */}
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-12 gap-8">
           {/* Title */}
           <div className="flex items-baseline flex-wrap gap-x-4 gap-y-2">
+            <div>
+              <div className="flex items-baseline gap-x-4 mt-20 items-center gap-y-2">
+              <button
+                onClick={() => setLocation("/car-fleet")}
+                data-tip={t("fleet.back_to_fleet", "Volver a la flota")}
+                className="flex btn btn-circle border border-white/10 bg-black/20 tooltip tooltip-left  rtl:tooltip-left text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 items-center gap-3 text-white/50 hover:text-white transition-colors"
+              >
+                <ArrowRight size={28} style={{ transform: "scaleX(-1)" }}   className="rtl:rotate-180 font-bold" />
+              </button>
+
             <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter leading-none">
               {auto.marca}
             </h1>
-            <div className="relative flex items-baseline">
               <h2 
                 className="text-5xl md:text-7xl lg:text-[5.5rem] font-medium tracking-tighter leading-none text-transparent" 
                 style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.6)' }}
-              >
+                >
                 {auto.modelo}
               </h2>
-              <span className="absolute -top-4 md:-top-6 -end-12 md:-end-16 text-lg md:text-xl text-gray-400 font-light">
-                {auto.año}
-              </span>
-            </div>
+                </div>
+          </div>
+            
           </div>
           
           {/* Price & Action */}
@@ -117,7 +115,7 @@ export default function CarDetail() {
                  <span className="text-xl mt-1.5 me-1 text-gray-400 font-light">$</span>
                  <span className="text-4xl md:text-5xl font-semibold tracking-tight">{auto.costo.toLocaleString()}</span>
                </div>
-               <p className="text-xs text-gray-500 mt-1 tracking-widest">{t("fleet.daily_cost_inclusive", "Costo diario. Impuestos incluidos.")}</p>
+               <p className="text-sm text-gray-300 mt-1 tracking-widest">{t("fleet.daily_cost_inclusive", "Costo diario. Impuestos incluidos.")}</p>
              
              </div>
           </div>
@@ -147,7 +145,7 @@ export default function CarDetail() {
         {/* Bottom Section */}
         <div className="w-full flex justify-end">
           <button 
-                className="border btn btn-outline btn-lg btn-primary mt-4 border-white/30 px-8 py-3 transition-all duration-300 tracking-widest text-xs uppercase font-medium disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-not-allowed"
+                className="border btn btn-outline btn-lg btn-primary mt-4 md:mb-0 mb-4 border-white/30 px-8 py-3 transition-all duration-300 tracking-widest text-xs uppercase font-medium disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-not-allowed"
                 disabled={auto.estado !== 'disponible'}
                onClick={handleBtnAlquilar}
              >

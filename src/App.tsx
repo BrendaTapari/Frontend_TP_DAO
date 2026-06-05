@@ -327,7 +327,7 @@ function App() {
 
         <motion.div
           ref={heroRef}
-          className="relative z-10 w-full max-w-4xl px-6 sm:px-10 flex flex-col justify-start pt-[48vh] sm:pt-[52vh] lg:pt-[55vh] pb-2 mx-auto lg:mx-0 lg:ms-20"
+          className="relative z-10 w-full max-w-4xl px-6 sm:px-10 flex flex-col justify-start pt-[63vh] sm:pt-[52vh] lg:pt-[55vh] pb-2 mx-auto lg:mx-0 lg:ms-20"
           style={{ y: heroY, scale: heroScale }}
         >
           <div className="mb-6 text-center lg:text-start">

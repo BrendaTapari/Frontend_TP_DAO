@@ -17,17 +17,17 @@ export default function PremiumFeatures() {
     {
       src: "/Images/landing/niños_en_auto.jpg",
       alt: t("premium_features.feature1_title"),
-      position: "left",
+      objectPosition: "bottom",
     },
     {
       src: "/Images/landing/gps.jpg",
       alt: t("premium_features.feature2_title"),
-      position: "right",
+      objectPosition: "center",
     },
     {
       src: "/Images/landing/autos_discapacitados.jpg",
       alt: t("premium_features.feature3_title"),
-      position: "left",
+      objectPosition: "center",
     },
   ];
 
@@ -204,13 +204,14 @@ export default function PremiumFeatures() {
                     transition={{ duration: 4, repeat: Infinity }}
                   ></motion.div>
                   <motion.div
-                    className="relative overflow-hidden rounded-3xl border border-white/10 group-hover:border-white/20 transition-all duration-500 max-h-[250px] sm:max-h-[350px] lg:max-h-[450px]"
+                    className="relative overflow-hidden rounded-3xl border border-white/10 group-hover:border-white/20 transition-all duration-500 h-[250px] sm:h-[350px] lg:h-[450px] w-full"
                     whileHover={{ borderColor: "rgba(255,255,255,0.4)" }}
                   >
                     <motion.img
                       src={detailImages[index]?.src}
                       alt={detailImages[index]?.alt}
                       className="w-full h-full object-cover"
+                      style={{ objectPosition: detailImages[index]?.objectPosition || 'center' }}
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.7 }}
                     />
