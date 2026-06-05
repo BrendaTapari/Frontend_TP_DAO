@@ -9,6 +9,7 @@ import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
 import { useVisibleFocus } from "./hooks/useVisibleFocus";
 import { useTranslation } from "react-i18next";
+import mockCars from "./data/mockCars.json";
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -25,6 +26,7 @@ function App() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasPreloadedAssetsRef = useRef(false);
 
   const { t } = useTranslation();
 
@@ -42,6 +44,26 @@ function App() {
   );
 
   useEffect(() => {
+    if (showWelcome && !hasPreloadedAssetsRef.current) {
+      const assetPaths = [
+        "/Images/logo/logo-lux-drive.svg",
+        "/Images/landing/niños_en_auto.webp",
+        "/Images/landing/gps.webp",
+        "/Images/landing/autos_discapacitados.webp",
+        ...mockCars.map((car) => car.imagen),
+      ];
+
+      const uniqueAssetPaths = [...new Set(assetPaths)];
+
+      uniqueAssetPaths.forEach((src) => {
+        const image = new Image();
+        image.decoding = "async";
+        image.src = src;
+      });
+
+      hasPreloadedAssetsRef.current = true;
+    }
+
     if (heroRef.current) {
       gsap.fromTo(
         heroRef.current,
