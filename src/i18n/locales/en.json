@@ -96,7 +96,11 @@
     "questions": "Questions about this vehicle?",
     "gearbox_automático": "Automatic",
     "gearbox_manual": "Manual",
-    "description_text": "{{marca}} {{modelo}} from {{year}}. License plate {{plate}}. Perfect for your trips around Córdoba. Enjoy comfort and safety in every kilometer."
+    "description_text": "{{marca}} {{modelo}} from {{year}}. License plate {{plate}}. Perfect for your trips around Córdoba. Enjoy comfort and safety in every kilometer.",
+    "daily_cost_inclusive": "Daily cost. Taxes included.",
+    "extreme_performance": "A family of extreme performance vehicles",
+    "maintenance_period": "Maintenance",
+    "location": "Córdoba, Argentina"
   },
   "rentals": {
     "title": "Rental Management",

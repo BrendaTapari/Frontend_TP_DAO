@@ -1,7 +1,6 @@
 import { useLocation, useRoute } from "wouter";
 import { ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getCarByPatente } from "../services/autosService";
 import mockCars from "../data/mockCars.json";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +21,7 @@ export default function CarDetail() {
   const [match, params] = useRoute("/car-detail/:id");
   const [auto, setAuto] = useState<Auto | null>(null);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     if (params?.id) {
@@ -42,24 +41,17 @@ export default function CarDetail() {
     }
   };
 
-  const getEstadoColor = (estado: string) => {
-    switch (estado) {
-      case "disponible":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "en_alquiler":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "en_mantenimiento":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+  const handleBtnAlquilar = () => {
+    if (auto.estado === 'disponible') {
+      setLocation(`/add-rental`);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-100 pt-20 flex items-center justify-center">
-        <div className="text-xl text-gray-400">
-          {t("fleet.loading_details", "Cargando detalles del vehículo...")}
+      <div className="min-h-screen bg-[#0a0a0a] pt-20 flex items-center justify-center">
+        <div className="text-xl text-gray-500 uppercase tracking-widest animate-pulse">
+          {t("fleet.loading_details", "Cargando detalles...")}
         </div>
       </div>
     );
@@ -67,13 +59,13 @@ export default function CarDetail() {
 
   if (!auto) {
     return (
-      <div className="min-h-screen bg-base-100 pt-20 flex flex-col items-center justify-center">
-        <p className="text-2xl text-gray-400 mb-6">{t("fleet.car_not_found", "Vehículo no encontrado")}</p>
+      <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#0a0a0a] pt-20 flex flex-col items-center justify-center">
+        <p className="text-2xl text-gray-500 mb-6 uppercase tracking-widest">{t("fleet.car_not_found", "Vehículo no encontrado")}</p>
         <button
           onClick={() => setLocation("/car-fleet")}
-          className="flex items-center gap-2 text-primary hover:text-accent transition-colors"
+          className="flex items-center gap-3 text-white/70 hover:text-white transition-colors  uppercase tracking-widest text-sm"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={20} className="rtl:rotate-180" />
           <span>{t("fleet.back_to_fleet", "Volver a la flota")}</span>
         </button>
       </div>
@@ -81,134 +73,129 @@ export default function CarDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-base-100 pt-20 pb-12">
-      {/* Header */}
-      <div className="px-4 lg:px-12 mb-8">
+    <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden relative selection:bg-red-500/30 font-sans">
+      {/* Background Glow */}
+      <div className="absolute bottom-0 start-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px] -translate-x-1/3 rtl:translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+
+      {/* Navigation */}
+      <div className="relative z-20 px-6 py-8 md:px-12 flex mt-20 justify-between items-center">
         <button
-          onClick={() => setLocation("/")}
-          className="flex btn btn-outline items-center gap-2 mt-10 text-gray-300 hover:text-white transition-colors mb-6"
+          onClick={() => setLocation("/car-fleet")}
+          data-tip={t("fleet.back_to_fleet", "Volver a la flota")}
+          className="flex btn btn-circle border border-white/10 bg-black/20 tooltip tooltip-right rtl:tooltip-left text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 items-center gap-3 text-white/50 hover:text-white transition-colors"
         >
-          <ArrowLeft size={20} />
-          <span>{t("fleet.back_to_home", "Volver al inicio")}</span>
+          <ArrowLeft size={24} className="rtl:rotate-180" />
         </button>
+
       </div>
 
-      {/* Main Content */}
-      <div className="px-4 lg:px-12 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Imagen grande del vehículo */}
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-full bg-base-200 rounded-2xl p-8 flex items-center justify-center min-h-[500px] border border-gray-700/50">
-              <img
-                src={auto.imagen}
-                alt={`${auto.marca} ${auto.modelo}`}
-                className="max-w-full max-h-96 object-contain"
-              />
-            </div>
-            <div className="mt-6 flex gap-4 w-full">
-              {auto.estado === "disponible" && (
-                <button className="flex-1 bg-gradient-to-r from-primary to-accent text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity">
-                  {t("fleet.rent_now", "Alquilar Ahora")}
-                </button>
-              )}
-              {auto.estado !== "disponible" && (
-                <button
-                  disabled
-                  className="flex-1 bg-gray-600 text-gray-300 font-semibold py-3 rounded-lg cursor-not-allowed opacity-50"
-                >
-                  {t("fleet.not_available", "No disponible")}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Información del vehículo */}
-          <div className="flex flex-col justify-start">
-            {/* Título */}
-            <div className="mb-8">
-              <h1
-                className="text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-xl"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+      <div className="relative z-10 max-w-[1600px] mx-auto px-6 md:px-12 pt-4">
+        {/* Header Section: Title & Price */}
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-12 gap-8">
+          {/* Title */}
+          <div className="flex items-baseline flex-wrap gap-x-4 gap-y-2">
+            <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter leading-none">
+              {auto.marca}
+            </h1>
+            <div className="relative flex items-baseline">
+              <h2 
+                className="text-5xl md:text-7xl lg:text-[5.5rem] font-medium tracking-tighter leading-none text-transparent" 
+                style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.6)' }}
               >
-                {auto.marca}
-              </h1>
-              <h2 className="text-3xl lg:text-4xl text-gray-300 mb-4">
                 {auto.modelo}
               </h2>
-              <div className="h-[2px] w-20 bg-gradient-to-r from-primary to-accent mb-6"></div>
-            </div>
-
-            {/* Estado */}
-            <div className="mb-8">
-              <p className="text-gray-500 text-sm uppercase tracking-widest mb-2">
-                {t("fleet.state", "Estado")}
-              </p>
-              <span
-                className={`inline-block px-4 py-2 rounded-full text-sm font-semibold border ${getEstadoColor(
-                  auto.estado,
-                )}`}
-              >
-                {t(`fleet.status_${auto.estado}`, auto.estado.charAt(0).toUpperCase() + auto.estado.slice(1).replace("_", " "))}
+              <span className="absolute -top-4 md:-top-6 -end-12 md:-end-16 text-lg md:text-xl text-gray-400 font-light">
+                {auto.año}
               </span>
             </div>
-
-            {/* Grid de especificaciones */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-            
-              <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
-                <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  {t("fleet.year", "Año")}
-                </p>
-                <p className="text-2xl font-bold text-white">{auto.año}</p>
-              </div>
-              <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
-                <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  {t("fleet.daily_cost", "Costo Diario")}
-                </p>
-                <p className="text-2xl font-bold text-primary">
-                  ${auto.costo.toLocaleString()}
-                </p>
-              </div>
-              <div className="bg-base-200 rounded-lg p-4 border border-gray-700/50">
-                <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">
-                  {t("fleet.maintenance_period", "Mantenimiento")}
-                </p>
-                <p className="text-2xl font-bold text-white">
-                  {auto.periodicidad_mantenimiento} {t("fleet.months", "meses")}
-                </p>
-              </div>
-            </div>
-
-            {/* Descripción */}
-            <div className="bg-base-200 rounded-lg p-6 border border-gray-700/50">
-              <h3 className="text-xl font-bold text-white mb-3">{t("fleet.description_title", "Descripción")}</h3>
-              <p className="text-gray-300 leading-relaxed">
-                {t("fleet.description_text", "Vehículo {{marca}} {{modelo}} del año {{year}}. Patente {{plate}}. Perfecto para tus viajes alrededor de Córdoba. Disfruta de confort y seguridad en cada kilómetro.", { marca: auto.marca, modelo: auto.modelo, year: auto.año, plate: auto.patente })}
-              </p>
-            </div>
-
-            {/* Contacto */}
-            <div className="mt-8 pt-8 border-t border-gray-700/50">
-              <h3 className="text-xl font-bold text-white mb-4">
-                {t("fleet.questions", "¿Preguntas sobre este vehículo?")}
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-gray-300 hover:text-primary transition-colors cursor-pointer">
-                  <Phone size={20} />
-                  <span>+54 (351) 123-4567</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-300 hover:text-primary transition-colors cursor-pointer">
-                  <Mail size={20} />
-                  <span>info@luxdrive .com</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-300">
-                  <MapPin size={20} />
-                  <span>Córdoba, Argentina</span>
-                </div>
-              </div>
-            </div>
+          </div>
+          
+          {/* Price & Action */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10">
+             <div className="text-start sm:text-end">
+               <div className="flex items-start justify-start sm:justify-end">
+                 <span className="text-xl mt-1.5 me-1 text-gray-400 font-light">$</span>
+                 <span className="text-4xl md:text-5xl font-semibold tracking-tight">{auto.costo.toLocaleString()}</span>
+               </div>
+               <p className="text-xs text-gray-500 mt-1 tracking-widest">{t("fleet.daily_cost_inclusive", "Costo diario. Impuestos incluidos.")}</p>
+             
+             </div>
           </div>
         </div>
+
+        {/* Car Image Area */}
+        <div className="relative w-full h-[35vh] md:h-[45vh] lg:h-[55vh] flex items-center justify-center mt-16 md:mt-15 mb-5 md:mb-15 group">
+            <img 
+              src={auto.imagen} 
+              alt={`${auto.marca} ${auto.modelo}`}
+              className="relative z-10 w-full max-w-[1100px] h-full object-contain drop-shadow-2xl scale-110 group-hover:scale-105 transition-transform duration-1000 ease-out"
+            />
+            {/* Reflection */}
+            <div className="absolute top-[70%] start-0 w-full h-full flex justify-center opacity-50 pointer-events-none">
+              <img 
+                src={auto.imagen} 
+                alt="Reflection"
+                className="w-full max-w-[1100px] h-full object-contain scale-y-[-1]"
+                style={{ 
+                  maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 40%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 40%)' 
+                }}
+              />
+            </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="w-full flex justify-end">
+          <button 
+                className="border btn btn-outline btn-lg btn-primary mt-4 border-white/30 px-8 py-3 transition-all duration-300 tracking-widest text-xs uppercase font-medium disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-white disabled:cursor-not-allowed"
+                disabled={auto.estado !== 'disponible'}
+               onClick={handleBtnAlquilar}
+             >
+               {auto.estado === 'disponible' ? t("fleet.rent_now", "Contact Seller") : t("fleet.not_available", "No disponible")}
+             </button>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center pb-12 gap-12 relative z-10 w-full">
+          <div className="w-full lg:max-w-xl">
+            <h3 className="text-2xl md:text-3xl font-light tracking-tight mb-4 leading-tight">
+              {t("fleet.extreme_performance", "Una familia de vehículos de rendimiento extremo")}
+            </h3>
+            <p className="text-gray-400 font-light mb-8 lg:mb-0 line-clamp-2 md:line-clamp-none">
+              {t("fleet.description_text", "Vehículo {{marca}} {{modelo}} del año {{year}}. Patente {{plate}}. Perfecto para tus viajes. Disfruta de confort y seguridad en cada kilómetro.", { marca: auto.marca, modelo: auto.modelo, year: auto.año, plate: auto.patente })}
+            </p>  
+          </div>
+
+          <div className="flex flex-col lg:flex-row items-start lg:items-center lg:justify-end gap-12 w-full">
+             <div className="flex gap-10 text-sm text-gray-500 uppercase tracking-widest font-light">
+                <div>
+                  <span className="block text-white font-medium text-lg capitalize mb-1">{t(`fleet.status_${auto.estado}`, auto.estado.replace("_", " "))}</span>
+                  {t("fleet.state", "Estado")}
+                </div>
+                <div>
+                  <span className="block text-white font-medium text-lg mb-1">{auto.periodicidad_mantenimiento} {t("fleet.months", "meses")}</span>
+                  {t("fleet.maintenance_period", "Mantenimiento")}
+                </div>
+            </div>
+
+             <div className="flex items-center gap-4 text-white/50 mt-8 lg:mt-0 w-full lg:w-auto">
+               <span className="text-sm font-medium">01</span>
+               <div className="w-full lg:w-48 h-[1px] bg-white/20">
+                 <div className="w-1/3 h-full bg-white"></div>
+               </div>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Side Elements (Social / Info) */}
+      <div className="hidden xl:flex absolute end-12 top-1/2 -translate-y-1/2 flex-col gap-6 text-white/40 z-20">
+         <a href="mailto:luxdrive.cor@gmail.com" className="hover:text-white transition-colors p-2"><Mail size={18}/></a>
+         <a href="tel:+543511234567" className="hover:text-white transition-colors p-2"><Phone size={18}/></a>
+         <div className="hover:text-white transition-colors p-2 cursor-pointer" title={t("fleet.location", "Córdoba, Argentina")}><MapPin size={18}/></div>
+         
+         <div className="mt-8 flex flex-col items-center gap-4 text-xs tracking-widest" style={{ writingMode: 'vertical-rl' }}>
+            
+            <div className="w-[1px] h-12 bg-white/30"></div>
+         </div>
       </div>
     </div>
   );
