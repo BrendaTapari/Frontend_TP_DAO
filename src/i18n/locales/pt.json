@@ -94,7 +94,12 @@
     "description_title": "Descrição",
     "questions": "Perguntas sobre este veículo?",
     "gearbox_automático": "Automático",
+    "gearbox_automática": "Automático",
     "gearbox_manual": "Manual",
+    "people": "passageiros",
+    "trunk": "Porta-malas",
+    "or_similar": "ou similar",
+    "select": "Selecionar",
     "description_text": "Veículo {{marca}} {{modelo}} do ano {{year}}. Placa {{plate}}. Perfeito para suas viagens ao redor de Córdoba. Desfrute de conforto e segurança em cada quilômetro."
   },
   "rentals": {
@@ -191,6 +196,7 @@
     "total": "Total",
     "back": "Voltar",
     "next": "Próximo",
+    "next_step": "Próximo passo",
     "confirm": "Confirmar e Criar",
     "email": "Endereço de e-mail",
     "cost_per_day": "Custo por dia",

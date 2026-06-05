@@ -29,11 +29,11 @@ export default function Navbar() {
   return (
     <>
       <div className="navbar absolute top-0 z-50 flex w-full justify-center bg-gradient-to-b from-black/90 via-black/50 to-transparent pt-4 pb-8">
-        <div className="relative flex w-full max-w-8xl items-center px-4 sm:px-6">
+        <div className="relative flex w-full max-w-8xl justify-between items-center px-4 sm:px-6">
           <button
             type="button"
             onClick={handleBackHome}
-            className="absolute left-1/2 -translate-x-1/2 text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-white to-zinc-400 transition-all duration-700 hover:cursor-pointer hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+            className="md:absolute static md:left-1/2 md:-translate-x-1/2 text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-white to-zinc-400 transition-all duration-700 hover:cursor-pointer hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
             style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: "clamp(1.4rem, 3vw, 2.2rem)",
