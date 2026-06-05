@@ -83,9 +83,9 @@ export default function CarDetail() {
         {/* Header Section: Title & Price */}
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-12 gap-8">
           {/* Title */}
-          <div className="flex items-baseline flex-wrap gap-x-4 gap-y-2">
+          <div className="flex items-baseline flex-wrap md:mt-0 mt-20 gap-x-4 gap-y-2">
             <div>
-              <div className="flex items-baseline gap-x-4 mt-20 items-center gap-y-2">
+              <div className="flex  gap-x-4  items-center gap-y-2">
               <button
                 onClick={() => setLocation("/car-fleet")}
                 data-tip={t("fleet.back_to_fleet", "Volver a la flota")}

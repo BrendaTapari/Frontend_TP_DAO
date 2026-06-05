@@ -71,10 +71,14 @@ export default function CarFleet() {
 
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();
-      setFocusedIndex((prev) => prev === -1 ? 0 : (prev + 1) % autos.length);
+      setFocusedIndex((prev) => (prev === -1 ? 0 : (prev + 1) % autos.length));
     } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       e.preventDefault();
-      setFocusedIndex((prev) => prev === -1 ? autos.length - 1 : (prev - 1 + autos.length) % autos.length);
+      setFocusedIndex((prev) =>
+        prev === -1
+          ? autos.length - 1
+          : (prev - 1 + autos.length) % autos.length,
+      );
     }
   };
 
@@ -94,11 +98,15 @@ export default function CarFleet() {
           >
             {isRtl ? (
               <>
-                <ArrowLeft size={28} className="font-bold" style={{ transform: "scaleX(-1)" }} />
+                <ArrowLeft
+                  size={28}
+                  className="font-bold"
+                  style={{ transform: "scaleX(-1)" }}
+                />
               </>
             ) : (
               <>
-                <ArrowLeft size={28} className="font-bold"/>
+                <ArrowLeft size={28} className="font-bold" />
               </>
             )}
           </button>
@@ -157,26 +165,48 @@ export default function CarFleet() {
                     <h3 className="text-xl md:text-2xl font-bold text-white">
                       {auto.marca} {auto.modelo}
                     </h3>
-                    <Info size={16} className="text-gray-500 cursor-pointer hover:text-white transition-colors" />
+                    <Info
+                      size={16}
+                      className="text-gray-500 cursor-pointer hover:text-white transition-colors"
+                    />
                   </div>
                   <p className="text-sm text-gray-400">
-                    {auto.marca} {auto.modelo} ({auto.año}) {t("fleet.or_similar", "o similar")}
+                    {auto.marca} {auto.modelo} ({auto.año}){" "}
+                    {t("fleet.or_similar", "o similar")}
                   </p>
-                  
+
                   {/* Features */}
                   <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-3 text-sm text-gray-300">
-                    <div className="flex items-center gap-2" title={t("fleet.gearbox", "Caja")}>
-                       <Settings2 size={16} className="text-gray-500"/>
-                       <span>{auto.caja ? t(`fleet.gearbox_${auto.caja.toLowerCase()}`, auto.caja) : "-"}</span>
+                    <div
+                      className="flex items-center gap-2"
+                      title={t("fleet.gearbox", "Caja")}
+                    >
+                      <Settings2 size={16} className="text-gray-500" />
+                      <span>
+                        {auto.caja
+                          ? t(
+                              `fleet.gearbox_${auto.caja.toLowerCase()}`,
+                              auto.caja,
+                            )
+                          : "-"}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2" title={t("fleet.passengers", "Pasajeros")}>
-                       <Users size={16} className="text-gray-500"/>
-                       <span>{auto.cant_pasajeros} {t("fleet.people", "pasajeros")}</span>
+                    <div
+                      className="flex items-center gap-2"
+                      title={t("fleet.passengers", "Pasajeros")}
+                    >
+                      <Users size={16} className="text-gray-500" />
+                      <span>
+                        {auto.cant_pasajeros} {t("fleet.people", "pasajeros")}
+                      </span>
                     </div>
                     {auto.litros_baul && (
-                      <div className="flex items-center gap-2" title={t("fleet.trunk", "Baúl")}>
-                         <Briefcase size={16} className="text-gray-500"/>
-                         <span>{auto.litros_baul} L</span>
+                      <div
+                        className="flex items-center gap-2"
+                        title={t("fleet.trunk", "Baúl")}
+                      >
+                        <Briefcase size={16} className="text-gray-500" />
+                        <span>{auto.litros_baul} L</span>
                       </div>
                     )}
                   </div>
@@ -184,30 +214,41 @@ export default function CarFleet() {
 
                 {/* Price and Action */}
                 <div className="w-full md:w-auto flex flex-col sm:flex-row items-center md:justify-end gap-6 md:gap-10 md:ps-8 md:border-s border-white/10">
-                   {/* Prices & Status */}
-                   <div className="flex items-center justify-between w-full sm:w-auto gap-6 md:gap-8">
-                     <div className="flex flex-col items-start sm:items-end md:items-center">
-                       <span className="text-xl md:text-2xl font-bold text-white">${auto.costo.toLocaleString()}</span>
-                       <span className="text-xs text-gray-400">{t("fleet.per_day", "Por día")}</span>
-                     </div>
-                     <div className="w-[1px] h-10 bg-white/10 hidden sm:block"></div>
-                     <div className="flex flex-col items-end sm:items-start md:items-center">
-                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-semibold border ${getEstadoColor(auto.estado)}`}>
-                         {t(`fleet.status_${auto.estado}`, auto.estado.replace("_", " "))}
-                        </span>
-                       <span className="text-[10px] uppercase tracking-widest text-gray-500 mt-2">{t("fleet.state", "Estado")}</span>
-                     </div>
-                   </div>
-                   
-                   {/* Button */}
-                   <button
+                  {/* Prices & Status */}
+                  <div className="flex items-center justify-between w-full sm:w-auto gap-6 md:gap-8">
+                    <div className="flex flex-col items-start sm:items-end md:items-center">
+                      <span className="text-xl md:text-2xl font-bold text-white">
+                        ${auto.costo.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {t("fleet.per_day", "Por día")}
+                      </span>
+                    </div>
+                    <div className="w-[1px] h-10 bg-white/10 hidden sm:block"></div>
+                    <div className="flex flex-col items-end sm:items-start md:items-center">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-semibold border ${getEstadoColor(auto.estado)}`}
+                      >
+                        {t(
+                          `fleet.status_${auto.estado}`,
+                          auto.estado.replace("_", " "),
+                        )}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-widest text-gray-500 mt-2">
+                        {t("fleet.state", "Estado")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Button */}
+                  <button
                     onClick={() => setLocation(`/car-detail/${auto.id}`)}
                     onKeyDown={(e) => handleKeyDown(e, auto)}
-                    className="w-full sm:w-auto btn btn-primary text-black font-semibold rounded-lg px-8 hover:opacity-90"
+                    className="w-full sm:w-auto btn btn-primary btn-outline font-semibold rounded-lg px-8 hover:opacity-90"
                     aria-label={`${t("fleet.select")} ${auto.marca} ${auto.modelo}`}
-                   >
-                     Ver detalles
-                   </button>
+                  >
+                    {t("fleet.view_details")}
+                  </button>
                 </div>
               </article>
             ))}

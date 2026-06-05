@@ -17,7 +17,7 @@ export default function PremiumFeatures() {
     {
       src: "/Images/landing/niños_en_auto.webp",
       alt: t("premium_features.feature1_title"),
-      objectPosition: "bottom",
+      objectPosition: "center 60%",
     },
     {
       src: "/Images/landing/gps.webp",
