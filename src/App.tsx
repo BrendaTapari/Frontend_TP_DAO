@@ -201,11 +201,11 @@ function App() {
   );
 
   return (
-    <div ref={appRef}>
+    <div ref={appRef} className="overflow-x-clip">
       {showWelcome && (
         <AnimatePresence>
           <motion.div
-            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-10"
+            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-10 overflow-hidden"
             initial={{ opacity: 1 }}
             exit={{
               opacity: 0,
