@@ -93,6 +93,7 @@ export default function PremiumFeatures() {
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
         style={{ y: backgroundY }}
+        aria-hidden="true"
       >
         <motion.div
           className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
@@ -110,6 +111,7 @@ export default function PremiumFeatures() {
       <motion.div
         className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-base-100 to-transparent pointer-events-none"
         style={{ opacity: useTransform(scrollYProgress, [0, 0.5], [1, 0]) }}
+        aria-hidden="true"
       ></motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
@@ -144,9 +146,9 @@ export default function PremiumFeatures() {
         </motion.div>
 
         {/* Luxury Features with Images */}
-        <motion.div className="space-y-16 sm:space-y-20 lg:space-y-24">
+        <motion.ul className="space-y-16 sm:space-y-20 lg:space-y-24">
           {luxuryFeatures.map((feature, index) => (
-            <motion.div
+            <motion.li
               key={index}
               className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center ${index % 2 === 1 ? "lg:grid-cols-2 lg:direction-rtl" : ""}`}
               initial={{ opacity: 0, y: 80 }}
@@ -168,6 +170,7 @@ export default function PremiumFeatures() {
                       className={`p-3 rounded-lg bg-gradient-to-br ${feature.gradient}`}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
+                      aria-hidden="true"
                     >
                       <div className="text-primary flex items-center justify-center">
                         {feature.icon}
@@ -229,9 +232,9 @@ export default function PremiumFeatures() {
                   </motion.div>
                 </motion.div>
               </motion.div>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ul>
 
         {/* Services Grid */}
         <motion.div
@@ -252,9 +255,10 @@ export default function PremiumFeatures() {
             {t("premium_features.services_title")}
           </motion.h3>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
-            initial="hidden"
+        {/* Services Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+          initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={{
@@ -290,6 +294,7 @@ export default function PremiumFeatures() {
                     className="mb-4 p-3 w-fit rounded-lg bg-primary/10 mx-auto lg:mx-0"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     whileTap={{ scale: 0.95 }}
+                    aria-hidden="true"
                   >
                     {service.icon}
                   </motion.div>

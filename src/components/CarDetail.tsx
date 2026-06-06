@@ -14,6 +14,9 @@ interface Auto {
   costo: number;
   periodicidad_mantenimiento: number;
   imagen: string;
+  caja?: string;
+  cant_pasajeros?: number;
+  litros_baul?: number;
 }
 
 export default function CarDetail() {
@@ -94,15 +97,17 @@ export default function CarDetail() {
                 <ArrowRight size={28} style={{ transform: "scaleX(-1)" }}   className="rtl:rotate-180 font-bold" />
               </button>
 
-            <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter leading-none">
-              {auto.marca}
-            </h1>
-              <h2 
+            <h1 className="flex flex-col gap-y-2 md:gap-y-0">
+              <span className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter leading-none">
+                {auto.marca}
+              </span>
+              <span 
                 className="text-5xl md:text-7xl lg:text-[5.5rem] font-medium tracking-tighter leading-none text-transparent" 
                 style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.6)' }}
-                >
+              >
                 {auto.modelo}
-              </h2>
+              </span>
+            </h1>
                 </div>
           </div>
             
@@ -132,7 +137,8 @@ export default function CarDetail() {
             <div className="absolute top-[70%] start-0 w-full h-full flex justify-center opacity-50 pointer-events-none">
               <img 
                 src={auto.imagen} 
-                alt="Reflection"
+                alt=""
+                aria-hidden="true"
                 className="w-full max-w-[1100px] h-full object-contain scale-y-[-1]"
                 style={{ 
                   maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 40%)',
@@ -163,7 +169,7 @@ export default function CarDetail() {
           </div>
 
           <div className="flex flex-col lg:flex-row items-start lg:items-center lg:justify-end gap-12 w-full">
-             <div className="flex gap-10 text-sm text-gray-500 uppercase tracking-widest font-light">
+             <div className="flex flex-wrap gap-10 text-sm text-gray-500 uppercase tracking-widest font-light">
                 <div>
                   <span className="block text-white font-medium text-lg capitalize mb-1">{t(`fleet.status_${auto.estado}`, auto.estado.replace("_", " "))}</span>
                   {t("fleet.state", "Estado")}
@@ -172,9 +178,27 @@ export default function CarDetail() {
                   <span className="block text-white font-medium text-lg mb-1">{auto.periodicidad_mantenimiento} {t("fleet.months", "meses")}</span>
                   {t("fleet.maintenance_period", "Mantenimiento")}
                 </div>
+                {auto.caja && (
+                  <div>
+                    <span className="block text-white font-medium text-lg mb-1">{t(`fleet.gearbox_${auto.caja.toLowerCase()}`, auto.caja)}</span>
+                    {t("fleet.gearbox", "Caja")}
+                  </div>
+                )}
+                {auto.cant_pasajeros && (
+                  <div>
+                    <span className="block text-white font-medium text-lg mb-1">{auto.cant_pasajeros}</span>
+                    {t("fleet.passengers", "Pasajeros")}
+                  </div>
+                )}
+                {auto.litros_baul && (
+                  <div>
+                    <span className="block text-white font-medium text-lg mb-1">{auto.litros_baul} L</span>
+                    {t("fleet.trunk", "Baúl")}
+                  </div>
+                )}
             </div>
 
-             <div className="flex items-center gap-4 text-white/50 mt-8 lg:mt-0 w-full lg:w-auto">
+             <div className="flex items-center gap-4 text-white/50 mt-8 lg:mt-0 w-full lg:w-auto" aria-hidden="true">
                <span className="text-sm font-medium">01</span>
                <div className="w-full lg:w-48 h-[1px] bg-white/20">
                  <div className="w-1/3 h-full bg-white"></div>
@@ -186,9 +210,9 @@ export default function CarDetail() {
 
       {/* Floating Side Elements (Social / Info) */}
       <div className="hidden xl:flex absolute end-12 top-1/2 -translate-y-1/2 flex-col gap-6 text-white/40 z-20">
-         <a href="mailto:luxdrive.cor@gmail.com" className="hover:text-white transition-colors p-2"><Mail size={18}/></a>
-         <a href="tel:+543511234567" className="hover:text-white transition-colors p-2"><Phone size={18}/></a>
-         <div className="hover:text-white transition-colors p-2 cursor-pointer" title={t("fleet.location", "Córdoba, Argentina")}><MapPin size={18}/></div>
+         <a href="mailto:luxdrive.cor@gmail.com" aria-label={t("fleet.email_contact", "Contacto por correo")} className="hover:text-white transition-colors p-2"><Mail size={18}/></a>
+         <a href="tel:+543511234567" aria-label={t("fleet.phone_contact", "Contacto por teléfono")} className="hover:text-white transition-colors p-2"><Phone size={18}/></a>
+         <div className="hover:text-white transition-colors p-2 cursor-pointer" title={t("fleet.location", "Córdoba, Argentina")} aria-label={t("fleet.location", "Córdoba, Argentina")}><MapPin size={18}/></div>
          
          <div className="mt-8 flex flex-col items-center gap-4 text-xs tracking-widest" style={{ writingMode: 'vertical-rl' }}>
             

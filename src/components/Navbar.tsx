@@ -24,6 +24,10 @@ export default function Navbar() {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    const details = document.getElementById("lang-dropdown") as HTMLDetailsElement;
+    if (details) {
+      details.removeAttribute("open");
+    }
   };
 
   return (
@@ -46,19 +50,15 @@ export default function Navbar() {
           </button>
 
           <div className="ms-auto flex shrink-0 gap-3 items-center">
-            <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                className="btn btn-circle border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-                aria-label={t("nav.language")}
+            <details id="lang-dropdown" className="dropdown dropdown-end">
+              <summary
+                className="btn btn-circle border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-primary marker:content-none"
                 title={t("nav.language")}
-                aria-labelledby="Selección de lenguaje"
               >
                 <Globe size={20} />
-              </div>
+              </summary>
 
               <ul
-                tabIndex={0}
                 role="menu"
                 className="dropdown-content z-[100] menu mt-2 max-h-80 w-44 overflow-y-auto rounded-2xl border border-white/10 bg-black/85 p-2 shadow-2xl backdrop-blur-md"
               >
@@ -146,7 +146,7 @@ export default function Navbar() {
                   </button>
                 </li>
               </ul>
-            </div>
+            </details>
 
             <div
               className={`dropdown dropdown-end ${
@@ -154,12 +154,18 @@ export default function Navbar() {
               }`}
             >
               <label className="btn btn-circle swap swap-rotate border border-white/10 bg-black/20 text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10">
+                <span className="sr-only">Abrir menú</span>
                 <input
                   type="checkbox"
                   checked={mobileOpen}
                   onChange={(event) => setMobileOpen(event.target.checked)}
-                  aria-label="Abrir menú"
-                  aria-expanded={mobileOpen}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setMobileOpen(!mobileOpen);
+                    }
+                  }}
+                  
                   title="Abrir menú"
                 />
 
@@ -168,17 +174,19 @@ export default function Navbar() {
               </label>
 
               <ul
-                tabIndex={0}
+                tabIndex={mobileOpen ? 0 : -1}
+                aria-hidden={!mobileOpen}
                 role="menu"
                 className={`dropdown-content z-[100] menu mt-4 w-56 rounded-2xl border border-white/10 bg-black/85 p-3 shadow-2xl backdrop-blur-md transition-all duration-200 ${
                   mobileOpen
-                    ? "pointer-events-auto opacity-100 translate-y-0"
-                    : "pointer-events-none opacity-0 -translate-y-2"
+                    ? "pointer-events-auto opacity-100 translate-y-0 visible"
+                    : "pointer-events-none opacity-0 -translate-y-2 invisible"
                 }`}
               >
                 <li>
                   <button
                     role="menuitem"
+                    tabIndex={mobileOpen ? 0 : -1}
                     onClick={() => goTo("/car-fleet")}
                     className="text-zinc-100 text-base"
                   >
@@ -189,6 +197,7 @@ export default function Navbar() {
                 <li>
                   <button
                     role="menuitem"
+                    tabIndex={mobileOpen ? 0 : -1}
                     onClick={() => goTo("/about-us")}
                     className="text-zinc-100 text-base"
                   >
@@ -199,6 +208,7 @@ export default function Navbar() {
                 <li>
                   <button
                     role="menuitem"
+                    tabIndex={mobileOpen ? 0 : -1}
                     onClick={() => goTo("/add-rental")}
                     className="text-base text-black bg-amber-500 hover:bg-amber-400"
                   >

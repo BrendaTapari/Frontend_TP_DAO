@@ -3,8 +3,6 @@ import { ArrowLeft, Users, Briefcase, Settings2, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getAutos } from "../services/autosService";
 import { useTranslation } from "react-i18next";
-import { useVisibleFocus } from "../hooks/useVisibleFocus";
-
 interface Auto {
   id: number;
   marca: string;
@@ -30,8 +28,7 @@ export default function CarFleet() {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.dir() === "rtl";
 
-  // Activar navegación TAB solo en elementos visibles
-  useVisibleFocus(containerRef, "button, a, article, [role='listitem']");
+  // Navegación nativa con TAB activada (eliminado useVisibleFocus)
 
   useEffect(() => {
     fetchAutos();
@@ -168,6 +165,7 @@ export default function CarFleet() {
                     <Info
                       size={16}
                       className="text-gray-500 cursor-pointer hover:text-white transition-colors"
+                      aria-hidden="true"
                     />
                   </div>
                   <p className="text-sm text-gray-400">
@@ -181,7 +179,7 @@ export default function CarFleet() {
                       className="flex items-center gap-2"
                       title={t("fleet.gearbox", "Caja")}
                     >
-                      <Settings2 size={16} className="text-gray-500" />
+                      <Settings2 size={16} className="text-gray-500" aria-hidden="true" />
                       <span>
                         {auto.caja
                           ? t(
@@ -195,7 +193,7 @@ export default function CarFleet() {
                       className="flex items-center gap-2"
                       title={t("fleet.passengers", "Pasajeros")}
                     >
-                      <Users size={16} className="text-gray-500" />
+                      <Users size={16} className="text-gray-500" aria-hidden="true" />
                       <span>
                         {auto.cant_pasajeros} {t("fleet.people", "pasajeros")}
                       </span>
@@ -205,7 +203,7 @@ export default function CarFleet() {
                         className="flex items-center gap-2"
                         title={t("fleet.trunk", "Baúl")}
                       >
-                        <Briefcase size={16} className="text-gray-500" />
+                        <Briefcase size={16} className="text-gray-500" aria-hidden="true" />
                         <span>{auto.litros_baul} L</span>
                       </div>
                     )}
@@ -224,7 +222,7 @@ export default function CarFleet() {
                         {t("fleet.per_day", "Por día")}
                       </span>
                     </div>
-                    <div className="w-[1px] h-10 bg-white/10 hidden sm:block"></div>
+                    <div className="w-[1px] h-10 bg-white/10 hidden sm:block" aria-hidden="true"></div>
                     <div className="flex flex-col items-end sm:items-start md:items-center">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-semibold border ${getEstadoColor(auto.estado)}`}

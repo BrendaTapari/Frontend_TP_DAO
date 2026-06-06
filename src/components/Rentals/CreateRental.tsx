@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   type ChangeEvent,
 } from "react";
 import { useLocation } from "wouter";
@@ -165,6 +166,7 @@ export default function CreateRental() {
   };
   const calendarLocale = calendarLocaleMap[i18n.language] ?? es;
   const chauffeurCostPerDay = 150000;
+  const stepTitleRef = useRef<HTMLHeadingElement>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isMobileCalendar, setIsMobileCalendar] = useState(false);
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
@@ -194,6 +196,12 @@ export default function CreateRental() {
       mediaQuery.removeEventListener("change", updateCalendarLayout);
     };
   }, []);
+
+  useEffect(() => {
+    if (stepTitleRef.current) {
+      stepTitleRef.current.focus();
+    }
+  }, [currentStep]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -728,8 +736,11 @@ export default function CreateRental() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-3xl font-semibold text-center mt-15 mb-6">
-
+            <h2 
+              ref={stepTitleRef} 
+              className="text-3xl font-semibold text-center mt-15 mb-6 focus:outline-none" 
+              tabIndex={-1}
+            >
               {t(
                 "create_rental.step1_title",
                 "Selecciona el periodo de alquiler",
@@ -844,17 +855,20 @@ export default function CreateRental() {
               <div className="space-y-6">
                 <div className="bg-base-200/60 border border-base-content/10 rounded-2xl p-4 md:p-5 max-w-6xl mx-auto shadow-lg">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <label className="form-control">
-                      <span className="label-text font-medium text-base-content/80 mb-2">
-                        {t(
-                          "create_rental.filter_min_price",
-                          "Precio mínimo por día",
-                        )}
-                      </span>
+                    <div className="form-control">
+                      <label htmlFor="priceFilterMin" className="label pb-1">
+                        <span className="label-text font-medium text-base-content/80 mb-2">
+                          {t(
+                            "create_rental.filter_min_price",
+                            "Precio mínimo por día",
+                          )}
+                        </span>
+                      </label>
                       <select
+                        id="priceFilterMin"
                         value={priceFilterMin}
                         onChange={(e) => setPriceFilterMin(e.target.value)}
-                        className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                        className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
                       >
                         <option value="">
                           {t("create_rental.filter_any", "Cualquiera")}
@@ -866,19 +880,22 @@ export default function CreateRental() {
                           </option>
                         ))}
                       </select>
-                    </label>
+                    </div>
 
-                    <label className="form-control">
-                      <span className="label-text font-medium text-base-content/80 mb-2">
-                        {t(
-                          "create_rental.filter_max_price",
-                          "Precio máximo por día",
-                        )}
-                      </span>
+                    <div className="form-control">
+                      <label htmlFor="priceFilterMax" className="label pb-1">
+                        <span className="label-text font-medium text-base-content/80 mb-2">
+                          {t(
+                            "create_rental.filter_max_price",
+                            "Precio máximo por día",
+                          )}
+                        </span>
+                      </label>
                       <select
+                        id="priceFilterMax"
                         value={priceFilterMax}
                         onChange={(e) => setPriceFilterMax(e.target.value)}
-                        className="input input-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                        className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
                       >
                         <option value="">
                           {t("create_rental.filter_any", "Cualquiera")}
@@ -890,19 +907,22 @@ export default function CreateRental() {
                           </option>
                         ))}
                       </select>
-                    </label>
+                    </div>
 
-                    <label className="form-control">
-                      <span className="label-text font-medium text-base-content/80 mb-2">
-                        {t(
-                          "create_rental.filter_vehicle_type",
-                          "Tipo de vehículo",
-                        )}
-                      </span>
+                    <div className="form-control">
+                      <label htmlFor="vehicleTypeFilter" className="label pb-1">
+                        <span className="label-text font-medium text-base-content/80 mb-2">
+                          {t(
+                            "create_rental.filter_vehicle_type",
+                            "Tipo de vehículo",
+                          )}
+                        </span>
+                      </label>
                       <select
+                        id="vehicleTypeFilter"
                         value={vehicleTypeFilter}
                         onChange={(e) => setVehicleTypeFilter(e.target.value)}
-                        className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                        className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
                       >
                         <option value="all">
                           {t("create_rental.filter_all", "Todos")}
@@ -913,7 +933,7 @@ export default function CreateRental() {
                           </option>
                         ))}
                       </select>
-                    </label>
+                    </div>
                   </div>
 
                   <div className="flex justify-end mt-4">
@@ -1107,7 +1127,11 @@ export default function CreateRental() {
       case 3:
         return (
           <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content">
+            <h2 
+              ref={stepTitleRef}
+              className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content focus:outline-none"
+              tabIndex={-1}
+            >
               {t("create_rental.pickup_data", "Datos de retiro")}
             </h2>
 
@@ -1137,16 +1161,17 @@ export default function CreateRental() {
                   </div>
 
                   <div className="form-control">
-                    <label className="label pb-1">
+                    <label htmlFor="retiroTipo" className="label pb-1">
                       <span className="label-text font-medium text-base-content/80">
                         {t("create_rental.pickup_type", "Lugar de envío")}
                       </span>
                     </label>
                     <select
+                      id="retiroTipo"
                       name="retiroTipo"
                       value={formData.retiroTipo}
                       onChange={handleInputChange}
-                      className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors relative z-50 cursor-pointer"
                     >
                       <option value="sucursal">
                         {t("create_rental.pickup_branch", "Retiro en sucursal")}
@@ -1163,7 +1188,7 @@ export default function CreateRental() {
                   {formData.retiroTipo === "otro" && (
                     <>
                       <div className="form-control mb-4">
-                        <label className="label pb-1">
+                        <label htmlFor="retiroProvincia" className="label pb-1">
                           <span className="label-text font-medium text-base-content/80">
                             {t(
                               "create_rental.pickup_province",
@@ -1172,10 +1197,11 @@ export default function CreateRental() {
                           </span>
                         </label>
                         <select
+                          id="retiroProvincia"
                           name="retiroProvincia"
                           value={formData.retiroProvincia}
                           onChange={handleInputChange}
-                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors relative z-50 cursor-pointer"
                         >
                           <option value="">
                             {t(
@@ -1192,7 +1218,7 @@ export default function CreateRental() {
                       </div>
 
                       <div className="form-control">
-                        <label className="label pb-1">
+                        <label htmlFor="retiroLugar" className="label pb-1">
                           <span className="label-text font-medium text-base-content/80">
                             {t(
                               "create_rental.pickup_location",
@@ -1201,11 +1227,12 @@ export default function CreateRental() {
                           </span>
                         </label>
                         <select
+                          id="retiroLugar"
                           name="retiroLugar"
                           value={formData.retiroLugar}
                           onChange={handleInputChange}
                           disabled={!formData.retiroProvincia}
-                          className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                          className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors relative z-50 cursor-pointer"
                         >
                           <option value="">
                             {t(
@@ -1229,16 +1256,17 @@ export default function CreateRental() {
                   <div className="divider my-0" />
 
                   <div className="form-control">
-                    <label className="label pb-1">
+                    <label htmlFor="requiereChofer" className="label pb-1">
                       <span className="label-text font-medium text-base-content/80">
                         {t("create_rental.driver_option", "¿Desea chofer?")}
                       </span>
                     </label>
                     <select
+                      id="requiereChofer"
                       name="requiereChofer"
                       value={formData.requiereChofer}
                       onChange={handleInputChange}
-                      className="select select-bordered w-full bg-base-100 focus:border-primary transition-colors focus:ring-1 focus:ring-primary/50"
+                      className="w-full p-3 rounded-lg border border-base-content/20 bg-base-100 text-base-content focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors relative z-50 cursor-pointer"
                     >
                       <option value="no">
                         {t("create_rental.driver_no", "No, solo el auto")}
@@ -1355,7 +1383,11 @@ export default function CreateRental() {
 
         return (
           <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content">
+            <h2 
+              ref={stepTitleRef}
+              className="text-3xl font-semibold text-center mb-8 mt-15 text-base-content focus:outline-none"
+              tabIndex={-1}
+            >
               {t("create_rental.client_data", "Datos del cliente y Pago")}
             </h2>
 

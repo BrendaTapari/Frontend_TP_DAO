@@ -7,7 +7,6 @@ import CarCarousel from "./components/CarCarousel";
 import PremiumFeatures from "./components/PremiumFeatures";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
-import { useVisibleFocus } from "./hooks/useVisibleFocus";
 import { useTranslation } from "react-i18next";
 import mockCars from "./data/mockCars.json";
 
@@ -38,10 +37,7 @@ function App() {
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
   const heroScale = useTransform(scrollY, [0, 500], [1, 0.95]);
 
-  useVisibleFocus(
-    appRef as React.RefObject<HTMLElement | null>,
-    "button, a, [role='listitem'], input",
-  );
+  // Eliminado useVisibleFocus para permitir la navegación nativa con TAB
 
   useEffect(() => {
     if (showWelcome && !hasPreloadedAssetsRef.current) {
@@ -360,23 +356,27 @@ function App() {
                 lineHeight: "1.2",
               }}
             >
-              <motion.h1
-                className="text-white drop-shadow-md"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+              <h1 
+                className="text-white drop-shadow-md flex flex-col gap-y-2 md:gap-y-0"
               >
-                {t("landing.hero_line1")}
-              </motion.h1>
+                <motion.span
+                  className="block"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                  {t("landing.hero_line1")}
+                </motion.span>
 
-              <motion.h1
-                className="text-white drop-shadow-md"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              >
-                {t("landing.hero_line2")}
-              </motion.h1>
+                <motion.span
+                  className="block"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                >
+                  {t("landing.hero_line2")}
+                </motion.span>
+              </h1>
             </div>
           </div>
 
@@ -441,18 +441,22 @@ function App() {
           <ScrollReveal>
             <div className="flex flex-col justify-center text-center lg:text-start space-y-8 sm:space-y-10 order-2 lg:order-1 mt-6 lg:mt-0 max-w-3xl mx-auto lg:mx-0">
               <div className="space-y-5 sm:space-y-6">
-                <motion.h2
+                <h2
                   id="fleet-heading"
                   className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white leading-tight drop-shadow-xl"
                   style={{ fontFamily: "'Playfair Display', serif" }}
-                  initial={{ opacity: 0, x: -40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8 }}
-                  viewport={{ once: true, margin: "-100px" }}
                 >
-                  {t("landing.fleet_heading")} <br />
                   <motion.span
-                    className="text-primary italic font-light"
+                    className="block"
+                    initial={{ opacity: 0, x: -40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                  >
+                    {t("landing.fleet_heading")}
+                  </motion.span>
+                  <motion.span
+                    className="text-primary italic font-light block"
                     initial={{ opacity: 0, x: -40 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
@@ -460,7 +464,7 @@ function App() {
                   >
                     {t("landing.fleet_location")}
                   </motion.span>
-                </motion.h2>
+                </h2>
 
                 <motion.p
                   className="text-base sm:text-lg lg:text-2xl text-gray-300 font-light leading-relaxed max-w-xl mx-auto lg:mx-0"
