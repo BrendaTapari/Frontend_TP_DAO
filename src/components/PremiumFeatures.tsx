@@ -2,6 +2,7 @@ import { MapPin, Bone, Baby, Clock, Zap, Shield, Wifi } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
+import { useLocation } from "wouter";
 
 export default function PremiumFeatures() {
   const { t } = useTranslation();
@@ -10,6 +11,12 @@ export default function PremiumFeatures() {
     target: sectionRef,
     offset: ["start 0.5", "center 0"],
   });
+
+  const [, setLocation] = useLocation();
+
+  const handleAlquilaYaButton = () => {
+    setLocation("/add-rental");
+  }
 
   const backgroundY = useTransform(scrollYProgress, [0, 1], [100, 0]);
 
@@ -335,6 +342,7 @@ export default function PremiumFeatures() {
             viewport={{ once: true, margin: "-100px" }}
             whileHover={{ scale: 1.08, y: -4 }}
             whileTap={{ scale: 0.95 }}
+            onClick={handleAlquilaYaButton}
           >
             {t("premium_features.reserve_now")}
           </motion.button>

@@ -177,6 +177,7 @@ export default function CreateRental() {
   const [isFetchingCars, setIsFetchingCars] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showBackConfirmModal, setShowBackConfirmModal] = useState(false);
   const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
@@ -709,12 +710,26 @@ export default function CreateRental() {
     }
   };
 
+  const volverAInicio = () => {
+    setLocation("/");
+  };
+
+  const handleBackClick = () => {
+    if (currentStep === 1) {
+      setShowBackConfirmModal(true);
+      return;
+    }
+
+    handlePrevStep();
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-6">
             <h2 className="text-3xl font-semibold text-center mt-15 mb-6">
+
               {t(
                 "create_rental.step1_title",
                 "Selecciona el periodo de alquiler",
@@ -1828,6 +1843,7 @@ export default function CreateRental() {
           | undefined;
         return (
           <div className="space-y-6">
+            
             <h2 className="text-2xl font-semibold text-center mb-6">
               {t("create_rental.confirm_details", "Confirma los detalles")}
             </h2>
@@ -2014,9 +2030,8 @@ export default function CreateRental() {
         <div className="flex justify-between max-w-3xl mx-auto mt-8">
           <button
             type="button"
-            onClick={handlePrevStep}
-            className="btn btn-ghost"
-            disabled={currentStep === 1}
+            onClick={handleBackClick}
+            className="btn btn-accent btn-outline btn-lg"
           >
             {t("create_rental.back", "Volver")}
           </button>
@@ -2024,7 +2039,7 @@ export default function CreateRental() {
             <button
               type="button"
               onClick={handleNextStep}
-              className="btn btn-primary"
+              className="btn btn-primary btn-lg"
             >
               {t("create_rental.next", "Siguiente")}
             </button>
@@ -2032,7 +2047,7 @@ export default function CreateRental() {
             <button
               type="button"
               onClick={handleFinalCreate}
-              className={`btn btn-success ${isLoading ? "loading" : ""}`}
+              className={`btn btn-success btn-lg ${isLoading ? "loading" : ""}`}
             >
               {t("create_rental.confirm", "Confirmar reserva")}
             </button>
@@ -2107,6 +2122,46 @@ export default function CreateRental() {
                 onClick={() => setLocation("/")}
               >
                 {t("create_rental.go_home_now", "Ir al inicio ahora")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBackConfirmModal && (
+        <div className="modal modal-open">
+          <div className="modal-box text-center relative">
+            <h3 className="font-bold text-2xl text-base-content mb-4">
+              {t(
+                "create_rental.confirm_back_title",
+                "¿Seguro que querés volver al inicio?",
+              )}
+            </h3>
+
+            <p className="py-2 text-base text-base-content/80">
+              {t(
+                "create_rental.confirm_back_message",
+                "Vas a salir del formulario actual y regresar a la página principal.",
+              )}
+            </p>
+
+            <div className="modal-action justify-center gap-3">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setShowBackConfirmModal(false)}
+              >
+                {t("common.cancel", "Cancelar")}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary px-8"
+                onClick={() => {
+                  setShowBackConfirmModal(false);
+                  volverAInicio();
+                }}
+              >
+                {t("create_rental.confirm_back_yes", "Sí, volver")}
               </button>
             </div>
           </div>
