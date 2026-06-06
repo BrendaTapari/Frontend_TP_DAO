@@ -88,8 +88,8 @@ export default function CarDetail() {
               <div className="flex  gap-x-4  items-center gap-y-2">
               <button
                 onClick={() => setLocation("/car-fleet")}
-                data-tip={t("fleet.back_to_fleet", "Volver a la flota")}
-                className="flex btn btn-circle border border-white/10 bg-black/20 tooltip tooltip-left  rtl:tooltip-left text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 items-center gap-3 text-white/50 hover:text-white transition-colors"
+                title={t("fleet.back_to_fleet", "Volver a la flota")}
+                className="flex btn btn-circle border border-white/10 bg-black/20   rtl:tooltip-left text-zinc-100 shadow-lg backdrop-blur-sm hover:border-white/20 hover:bg-white/10 items-center gap-3 text-white/50 hover:text-white transition-colors"
               >
                 <ArrowRight size={28} style={{ transform: "scaleX(-1)" }}   className="rtl:rotate-180 font-bold" />
               </button>
